@@ -103,6 +103,16 @@ enum Real {
         #expect(names.contains(QuietTheme.storeTitle) && !names.contains("QuietDeck Test Desktop"))
     }
 
+    @Test(.enabled(if: Real.step("restore"))) func restoreThemeWithoutPassword() async throws {
+        let r = Real.runner
+        let user = try await Real.user()
+        #expect(try await QuietTheme.restore(r, user: user, password: nil) == .afterReboot)
+        try await Task.sleep(for: .seconds(20))
+        #expect(try await Real.steam.running())
+        #expect(try await !QuietTheme.isInstalled(r))
+        print(try await Real.names())
+    }
+
     /// A prova definitiva: o Steam relançado precisa ter lido o arquivo, senão o perde ao sair de novo.
     @Test(.enabled(if: Real.step("survive"))) func shortcutsSurviveAnotherSteamCycle() async throws {
         try await Real.steam.restart()
