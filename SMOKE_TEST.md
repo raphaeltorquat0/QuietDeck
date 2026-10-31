@@ -150,11 +150,40 @@ Needs a collection on your network and a paired Deck. Nothing below has been run
 
 ## Quiet Glass
 
-Nothing below has been run on a real Deck yet.
+Nothing below has been run on a real Deck yet, except where marked.
 
-- [ ] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart.
-- [ ] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred. The top and bottom bars are glass too.
-- [ ] Open a game, then the quick access menu. It's opaque. Close the game and it's glass again.
+- [ ] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart. The Decky service restarts, so the Steam side menus reload.
+- [x] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred. The top and bottom bars are glass too. Checked with the theme copied by hand on an LCD Deck, SteamOS 3.9.5.
 - [ ] Turn on **Vidro sempre** in QuietTune. The menu stays glass in a game, and the choice survives a reboot.
 - [ ] Remove Quiet Glass. The theme and QuietTune are gone, and your other themes are as they were.
-- [ ] Measure FPS and battery draw in 3 games, with and without glass, and record them in DECISIONS.md #75.
+
+## Automatic glass switching
+
+Read the active patch from CSS Loader after each step, not from the screen. `gamescopectl screenshot` only captures the game's plane while a game runs.
+
+- [ ] Open a Steam game. The patch goes to `Opaco`. Close it and it's back to `Vidro`.
+- [ ] Repeat with a non-Steam shortcut (emulator or QuietDeck shortcut).
+- [ ] Open a game, suspend the Deck, resume. The patch stays `Opaco`, and goes back to `Vidro` when you close the game.
+- [ ] With a game open, run `sudo systemctl restart plugin_loader`. The patch is `Opaco` when Decky is back.
+- [ ] Kill the game process (`kill -9` on the `.exe`, not on `reaper`). Steam removes it from the running list and the patch returns to `Vidro`.
+
+## Performance defaults
+
+- [ ] In QuietTune set TDP to 8 W and a fixed GPU clock of 1000 MHz. `power1_cap` reads 8000000 and `pp_od_clk_voltage` reads 1000 Mhz twice.
+- [ ] Open a game. After a few seconds the profile is still there, even if Steam overwrote it.
+- [ ] Press **Restaurar padrão**. TDP is 15 W and the GPU level is `auto`.
+- [ ] Write an out-of-range value in `~/homebrew/settings/QuietTune/performance.json` and restart Decky. The plugin restores the defaults and deletes the file.
+- [ ] With a profile set, remove QuietTune from the app and again from the Decky store. Both restore the defaults.
+
+## Measuring FPS and power draw
+
+`scripts/perf/bench.mjs` runs this on battery, with no game open, and refuses to start otherwise. It needs the Deck's port 8080 forwarded to 127.0.0.1:9222, Quiet Glass present and `scripts/perf/sampler.py` copied to `/tmp/qd-sampler.py`. `scripts/perf/report.py` writes `docs/perf/quiet-glass.md`.
+
+1. Choose 3 games: one heavy, close to the GPU limit; one light, capped at 60 FPS; one emulator or non-Steam shortcut. Record any substitution.
+2. For each game, with MangoHud logging to a file (`mangohudctl set log_session 1`): 3 minutes with the quick access menu closed, 1 minute open in opaque mode, 1 minute open forcing glass. Run all of it twice.
+3. Measure the idle home for 5 minutes with glass and 5 with opaque, in two blocks in opposite order, with a game between them. Steam suspends after 15 idle minutes on battery, so a single 20-minute block wouldn't finish.
+4. Power is battery current times voltage, because the Deck has no `power_now`, so samples only count while discharging. Keep the charger out.
+5. Pass: glass on the home and menus outside games costs no more than 0.3 W at idle. With the menu open in a game, record the FPS drop that justifies opaque as the default.
+
+Without a controller on the Deck the games stay on their title screens. The menu is opened through Steam's own API and checked with `GetOpenSideMenu()` and gamescope's input focus, since screenshots don't show it. Look at the Deck once during a run to confirm the menu is on screen.
+
