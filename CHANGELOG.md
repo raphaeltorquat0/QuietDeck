@@ -4,7 +4,8 @@
 
 First release. Everything below has been tested against a simulated Deck. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has also been checked on a real one.
 
-- Pair with a Deck over SSH using a dedicated key, with Bonjour discovery and manual IP
+- Pair with a Deck through Valve's devkit service, with no keyboard and no Desktop Mode, or manually as a fallback
+- Set the `deck` password from the Mac when it has none
 - Overview with SteamOS version, battery, storage, temperature and session mode
 - Install, update and remove emulators as user Flatpaks, and set their ROM and BIOS paths
 - BIOS status per system, with import checked against known hashes
@@ -14,3 +15,5 @@ First release. Everything below has been tested against a simulated Deck. [SMOKE
 - GE-Proton and Proton-CachyOS
 - Save backup and restore
 - Quick actions, a persistent job queue and an optional menu bar extra
+- Quiet theme for Game Mode: a cleaner home, screensaver, boot video and sounds, with one-click restore
+- Command palette, cover grid, Liquid Glass and English and Brazilian Portuguese

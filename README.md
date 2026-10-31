@@ -11,10 +11,10 @@ Manage your Steam Deck from your Mac over the local network, without going into 
 </p>
 
 <p align="center">
-<img src="docs/screenshots/overview-dark.png" width="760" alt="Overview screen with SteamOS version, battery, storage and temperature">
+<img src="docs/media/demo.gif" width="720" alt="Tour of QuietDeck's screens and command palette">
 </p>
 
-QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's own `ssh` and `rsync`. After a one-time setup in Desktop Mode, everything happens from the Mac, over Wi-Fi or a dock cable.
+QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's own `ssh` and `rsync`. You pair it once from the Deck's Settings, with no keyboard and no Desktop Mode, and everything else happens from the Mac, over Wi-Fi or a dock cable.
 
 > Independent project. **Not affiliated with, endorsed by or supported by Valve.** "Steam" and "Steam Deck" are trademarks of Valve Corporation, used only to indicate compatibility.
 
@@ -32,16 +32,18 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 - **Compat tools:** install and remove GE-Proton and Proton-CachyOS
 - **Saves:** back up to and restore from a folder on your Mac
 - **Queue:** transfers and installs keep going in the background and survive closing the app
+- **Quiet theme:** a cleaner Game Mode home with a screensaver, boot video and sounds, and one click back to the Valve defaults
+- **Command palette:** ⌘K finds every action, game, emulator and plugin
 - **Menu bar:** optional status, battery and update count
-- Several Decks, light and dark mode, keyboard shortcuts
+- Several Decks, light and dark mode, English and Brazilian Portuguese
 
 QuietDeck never downloads ROMs, BIOS or firmware, and never turns off SteamOS's read-only system.
 
 | | |
 |---|---|
-| <img src="docs/screenshots/emulators-dark.png" alt="Emulators screen"> | <img src="docs/screenshots/library-dark.png" alt="Library screen"> |
+| <img src="docs/screenshots/overview-dark.png" alt="Overview screen"> | <img src="docs/screenshots/emulators-dark.png" alt="Emulators screen"> |
+| <img src="docs/screenshots/library-dark.png" alt="Library screen"> | <img src="docs/screenshots/onboarding-dark.png" alt="Pairing wizard"> |
 | <img src="docs/screenshots/decky-dark.png" alt="Decky screen"> | <img src="docs/screenshots/compatTools-dark.png" alt="Compat tools screen"> |
-| <img src="docs/screenshots/saves-dark.png" alt="Saves screen"> | <img src="docs/screenshots/onboarding-dark.png" alt="Onboarding"> |
 
 The screenshots use sample data, not a real library.
 
@@ -76,21 +78,25 @@ Requires Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
 ## Set up your Deck
 
-You only do this once. The app walks you through it:
+The app walks you through it once:
 
-1. On the Deck, switch to Desktop Mode and open **Konsole**.
-2. Set a password, if you don't have one, with `passwd`.
-3. Turn on SSH with `sudo systemctl enable --now sshd`.
-4. In QuietDeck, pick your Deck and enter the password.
+1. On the Deck, go to **Settings › System** and turn on **Enable Developer Mode**.
+2. Go to **Settings › Developer › Pair new host**.
+3. Approve the request from your Mac on the Deck's screen.
 
-QuietDeck then creates its own key at `~/.ssh/quietdeck_ed25519` and logs in with it. The password stays in your Keychain and is only used for actions that need `sudo`.
+The wizard moves on by itself at each step. Developer Mode exposes Steam's debug port on your local network, so turn it off if you don't trust the network.
+
+QuietDeck creates its own key at `~/.ssh/quietdeck_devkit_rsa` and logs in with it. It asks for the `deck` password only when an action needs `sudo`, like installing Decky, and offers to set one from the Mac if there isn't one yet. The password stays in your Keychain.
+
+If pairing doesn't work, the wizard shows a manual path through Desktop Mode.
 
 ## Where it writes on the Deck
 
-Everything goes in `/home/deck` or on the microSD, with two exceptions:
+Everything goes in `/home/deck` or on the microSD, with three exceptions:
 
 - The official Decky installer adds a service in `/etc/systemd/system`. The app tells you before it runs.
 - Saving shortcuts briefly masks `steam-launcher.service` in temporary runtime storage, so Steam can't restart mid-write. The mask disappears when it's done, or on reboot.
+- Developer Mode and pairing are done by Valve's own service, which turns on SSH.
 
 Actions that close the running game, like saving shortcuts or restarting Steam, always ask first.
 

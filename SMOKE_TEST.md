@@ -22,9 +22,16 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 | Both shortcuts survive another Steam restart | Passed |
 | Backup of `shortcuts.vdf` | Passed |
 | Switch to Game Mode | Passed |
-| Shortcut visible in the Game Mode library and launches | Not confirmed |
-| Pairing with a password, in the app | Not run: the password was unknown, so the key was installed by hand |
+| Shortcut visible in the Game Mode library | Passed |
+| Shortcut launches RetroArch in Game Mode | Passed: the running AppId matched the shortcut |
+| Devkit pairing, by request to `/register`, approved on the Deck | Passed |
+| `steam://store` opens the Store in Game Mode | Passed |
+| Quiet Clean rendered on the home by temporary injection | Passed |
+| Focus stays on the featured cover with the theme | Passed |
+| The pairing wizard in the app | Not run: the request was sent by hand |
+| Pairing with a password, and setting one from the Mac | Not run: this Deck has no password |
 | Anything with `sudo`: Decky install, plugins, reboot, shut down | Not run, same reason |
+| Applying and restoring the theme on the Deck | Not run |
 | microSD, OLED, BIOS import, artwork, CHD conversion on a real Deck | Not run |
 | App UI connected to a real Deck | Not run |
 
@@ -88,6 +95,19 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Install and remove a plugin
 - [ ] Install GE-Proton, and it appears in Steam's compatibility list after a restart
 - [ ] Back up saves and restore them
+
+## Quiet theme
+
+- [ ] Apply the theme from Decky, then restart: the home shows one row of covers
+- [ ] The **Loja** tile is in the row and opens the Store in Game Mode
+- [ ] The download indicator appears during an update, and only then
+- [ ] Text keeps its contrast over three light artworks: snow, sky and a white background
+- [ ] Full D-pad pass on the home, with no stuck or invisible focus: left and right along the row, up to the header, down, and the Steam and `...` buttons
+- [ ] D-pad pass on the Library tabs with TabMaster: L1 and R1 switch tabs
+- [ ] The boot video covers the whole boot, with no black screen after it
+- [ ] Move, confirm and back have distinct sounds at the native volume
+- [ ] The Quiet screensaver can be selected and runs on a pure black background
+- [ ] **Restore Valve Defaults** brings back your CSS Loader themes, TabMaster, sounds, boot, screensaver and removes the Loja shortcut
 
 ## Non-destructive automated run
 

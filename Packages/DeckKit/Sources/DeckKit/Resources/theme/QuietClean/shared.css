@@ -23,28 +23,32 @@
   animation: none !important;
 }
 
-/* Foco com dois sinais: escala e anel branco com contorno escuro. */
-.basicgamecarousel_BasicGameCarouselItemMediaContainer.gpfocus,
-.basicgamecarousel_BasicGameCarouselItemMediaContainer.gpfocuswithin {
+/* Foco com dois sinais: escala e anel branco com contorno escuro, no elemento que a Valve foca. */
+.appportrait_InRecentGames.gpfocus {
   transform: scale(1.08);
-  outline: 3px solid #fff;
-  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.85);
-  border-radius: 4px;
+  outline: 3px solid #fff !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.85) !important;
   z-index: 2;
 }
 
 /* Tipografia na família nativa. */
 .gamepadhomerecentgames_RecentGamesHeaderLabel { font-size: 16px !important; font-weight: 500 !important; }
+.appportrait_Message .marquee_Content { font-size: 22px !important; font-weight: 600 !important; line-height: 1.25 !important; }
+.basicgamecarousel_SubMessage { font-size: 16px !important; font-weight: 500 !important; color: rgba(255, 255, 255, 0.85) !important; }
 
-/* Topo: marca discreta; indicador de download, Wi-Fi, bateria e relógio são os nativos. */
-.header_Header::before {
+/* Topo: marca discreta na área livre à esquerda; o `::before` do header já é usado pela Valve.
+   Indicador de download, Wi-Fi, bateria e relógio são os nativos. */
+.searchbar_SearchAndTitleContainer::before {
   content: "Quiet";
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 18px;
   font-weight: 600;
   color: #fff;
-  align-self: center;
-  margin-left: 24px;
-  margin-right: auto;
+  pointer-events: none;
 }
 
 /* Rodapé: o nativo já mostra "Steam: menu"; falta tornar o menu rápido descobrível. */

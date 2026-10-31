@@ -18,9 +18,9 @@ import Testing
             return 1.05 / (l + 0.05)
         }
         let css = try QuietTheme.cleanCSS()
-        let top = try #require(css.split(separator: "\n").first { $0.contains("linear-gradient(to top") })
+        let top = String(try #require(css.split(separator: "\n").first { $0.contains("linear-gradient(to top") }))
         let alphas = try NSRegularExpression(pattern: #"rgba\(0, 0, 0, ([0-9.]+)\)"#)
-            .matches(in: String(top), range: NSRange(top.startIndex..., in: top))
+            .matches(in: top, range: NSRange(location: 0, length: top.utf16.count))
             .compactMap { Range($0.range(at: 1), in: top).flatMap { Double(top[$0]) } }
         #expect(alphas.count == 3)
         #expect(contrast(alpha: alphas.min()!) >= 4.5)

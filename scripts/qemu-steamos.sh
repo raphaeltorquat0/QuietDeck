@@ -39,7 +39,7 @@ sudo losetup -d "$LOOP"
 trap - EXIT
 
 cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
-qemu-system-x86_64 -enable-kvm -cpu host -smp 2 -m 4096 -nographic -serial file:qemu.log \
+qemu-system-x86_64 -enable-kvm -cpu host -smp 2 -m 4096 -serial file:qemu.log \
   -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
   -drive if=pflash,format=raw,file=vars.fd \
   -drive if=virtio,format=raw,file="$IMG" \
