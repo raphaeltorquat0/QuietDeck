@@ -19,7 +19,9 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-          test -w /dev/kvm
+          sudo udevadm settle
+          ls -la /dev/kvm
+          sudo chmod 666 /dev/kvm
       - name: Dependências
         run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 ovmf bzip2 rsync openssh-client
       - name: Sobe a imagem

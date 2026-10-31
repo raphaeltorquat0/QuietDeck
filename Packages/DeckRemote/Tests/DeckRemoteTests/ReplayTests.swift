@@ -25,6 +25,18 @@ import DeckKit
         #expect((s.batteryPercent ?? -1) >= 0)
     }
 
+    @Test func realDeckRecording() async throws {
+        let url = try #require(Self.fixtures.first { $0.lastPathComponent == "steamos-3.9.5-lcd-real.json" })
+        let r = try ReplayRunner(json: url)
+        let s = try await DeviceProbe.read(r)
+        #expect(s.osVersion == "3.9.5" && s.model == "Steam Deck LCD" && s.sdCard == nil)
+        #expect(s.internalStorage?.total == 239_674_396_672)
+        #expect(s.temperatures["CPU"] != nil && s.temperatures["GPU"] != nil)
+        #expect(s.mode == .desktop)
+        #expect(try await Flatpaks.installed(r).contains { $0.appID == "org.mozilla.firefox" && $0.installation == "system" })
+        #expect(try await Decky.plugins(r).contains { $0.name == "PowerTools" })
+    }
+
     @Test func demoFixtureValues() async throws {
         let url = try #require(Self.fixtures.first { $0.lastPathComponent == "steamos-3.9.4-demo.json" })
         let r = try ReplayRunner(json: url)

@@ -14,7 +14,7 @@ RUN useradd -m -u 1000 -s /bin/bash deck && echo 'deck:deck-password' | chpasswd
 COPY os-release /etc/os-release
 COPY steam /usr/bin/steam
 COPY systemctl /usr/bin/systemctl
-COPY gamescope-supervisor steamos-session-select deck-sim seed-shortcuts.py entrypoint.sh build-flatpak-repo.sh /usr/local/bin/
+COPY gamescope-supervisor systemd-run steamos-session-select deck-sim seed-shortcuts.py entrypoint.sh build-flatpak-repo.sh /usr/local/bin/
 RUN chmod +x /usr/bin/steam /usr/bin/systemctl /usr/local/bin/* \
  && ln -s steamos-session-select /usr/local/bin/steamosctl \
  && cp /usr/bin/sleep /usr/local/bin/plasmashell

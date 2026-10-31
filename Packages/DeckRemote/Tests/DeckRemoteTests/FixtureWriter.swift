@@ -25,7 +25,7 @@ import DeckKit
             (DeviceProbe.board, "Galileo\n"),
             (DeviceProbe.battery, "78\nDischarging\n"),
             (DeviceProbe.disks, "Filesystem Mounted on 1B-blocks Avail\n/dev/nvme0n1p8 /home 981000000000 412000000000\nFilesystem Mounted on 1B-blocks Avail\n/dev/mmcblk0p1 /run/media/deck/Games SD 1023000000000 655000000000\n"),
-            (DeviceProbe.temperatures, "amdgpu 48000\nacpitz 54000\nnvme 39850\nsteamdeck_hwmon 41000\n"),
+            (DeviceProbe.temperatures, "amdgpu 48000\nk10temp 54000\nacpitz 44000\nnvme 39850\nsteamdeck_hwmon 41000\n"),
             (DeviceProbe.session, "game\n"),
             (Flatpaks.list, flatpaks),
             (Flatpaks.updates, "net.pcsx2.PCSX2\tv2.2.1\n"),

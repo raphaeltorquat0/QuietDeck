@@ -8,6 +8,26 @@ Open the app with recording on, so the run also produces fixtures:
 open dist/QuietDeck.app --args --record "$PWD/recordings"
 ```
 
+## Last run
+
+Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDECK_REAL_DECK=<host> QUIETDECK_REAL_STEP=<step> swift test --filter RealDeck`.
+
+| Check | Result |
+|---|---|
+| Overview data: version, battery, storage, temperature, mode | Passed |
+| rsync upload from macOS with a space and an apostrophe, hash matches | Passed |
+| RetroArch installed as a user Flatpak, adding the user `flathub` remote | Passed |
+| Shortcut in Desktop Mode: Steam stops and comes back | Passed |
+| Shortcut in Game Mode: mask, stop, write, unmask, start | Passed |
+| Both shortcuts survive another Steam restart | Passed |
+| Backup of `shortcuts.vdf` | Passed |
+| Switch to Game Mode | Passed |
+| Shortcut visible in the Game Mode library and launches | Not confirmed |
+| Pairing with a password, in the app | Not run: the password was unknown, so the key was installed by hand |
+| Anything with `sudo`: Decky install, plugins, reboot, shut down | Not run, same reason |
+| microSD, OLED, BIOS import, artwork, CHD conversion on a real Deck | Not run |
+| App UI connected to a real Deck | Not run |
+
 ## Onboarding
 
 - [ ] With no Decks saved, the three-step onboarding appears
@@ -57,6 +77,10 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Install and remove a plugin
 - [ ] Install GE-Proton, and it appears in Steam's compatibility list after a restart
 - [ ] Back up saves and restore them
+
+## Non-destructive automated run
+
+`Integration` tests delete `~/Emulation`, so **never point them at a real Deck**. Use the `RealDeck` suite, one step at a time: `record`, `transfer`, `flatpak`, `desktop`, `switch`, `game`, `survive`.
 
 ## Record the fixtures
 

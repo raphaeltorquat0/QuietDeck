@@ -2,7 +2,7 @@
 
 ## 0.1.0
 
-First release. Everything below has been tested against a simulated Deck; see [SMOKE_TEST.md](SMOKE_TEST.md) for what still needs a real one.
+First release. Everything below has been tested against a simulated Deck. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has also been checked on a real one.
 
 - Pair with a Deck over SSH using a dedicated key, with Bonjour discovery and manual IP
 - Overview with SteamOS version, battery, storage, temperature and session mode

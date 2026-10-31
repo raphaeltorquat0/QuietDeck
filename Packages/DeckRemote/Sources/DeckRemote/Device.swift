@@ -75,7 +75,7 @@ public enum DeviceProbe {
     }
 
     public static func parseTemperatures(_ text: String, into status: inout DeviceStatus) {
-        let labels = ["acpitz": "CPU", "amdgpu": "GPU", "nvme": "SSD", "steamdeck_hwmon": "Board", "jupiter": "Board"]
+        let labels = ["k10temp": "CPU", "amdgpu": "GPU", "nvme": "SSD", "steamdeck_hwmon": "Board", "jupiter": "Board"]
         for line in text.split(whereSeparator: \.isNewline) {
             let f = line.split(separator: " ").map(String.init)
             guard f.count == 2, let label = labels[f[0]], let milli = Double(f[1]) else { continue }

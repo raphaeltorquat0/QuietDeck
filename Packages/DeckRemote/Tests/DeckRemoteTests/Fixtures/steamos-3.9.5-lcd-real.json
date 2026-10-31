@@ -1,0 +1,71 @@
+{
+  "commands" : [
+    {
+      "command" : "cat /sys/class/dmi/id/board_name 2>/dev/null",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "Jupiter\n"
+    },
+    {
+      "command" : "cat /sys/class/power_supply/BAT*/capacity /sys/class/power_supply/BAT*/status 2>/dev/null",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "65\nDischarging\n"
+    },
+    {
+      "command" : "cat /etc/os-release",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "NAME=\"SteamOS\"\nPRETTY_NAME=\"SteamOS\"\nVERSION_CODENAME=holo\nID=steamos\nID_LIKE=arch\nANSI_COLOR=\"1;35\"\nHOME_URL=\"https://www.steampowered.com/\"\nDOCUMENTATION_URL=\"https://support.steampowered.com/\"\nSUPPORT_URL=\"https://support.steampowered.com/\"\nBUG_REPORT_URL=\"https://support.steampowered.com/\"\nLOGO=steamos\nVARIANT_ID=steamdeck\nVERSION_ID=3.9.5\nBUILD_ID=20261023.100\nSTEAMOS_DEFAULT_UPDATE_BRANCH=stable\n"
+    },
+    {
+      "command" : "df -B1 --output=source,target,size,avail /home; df -B1 --output=source,target,size,avail 2>/dev/null | grep mmcblk",
+      "exitCode" : 1,
+      "stderr" : "",
+      "stdout" : "Filesystem     Mounted on    1B-blocks       Avail\n/dev/nvme0n1p8 /home      239674396672 52434923520\n"
+    },
+    {
+      "command" : "for d in /sys/class/hwmon/hwmon*; do printf '%s %s\\n' \"$(cat $d/name)\" \"$(cat $d/temp1_input 2>/dev/null)\"; done",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "ACAD \nacpitz 44000\nBAT1 \nsteamdeck_hwmon 32000\nnvme 43850\nk10temp 44625\namdgpu 44000\n"
+    },
+    {
+      "command" : "export XDG_RUNTIME_DIR=/run/user/$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus; if systemctl --user is-active --quiet gamescope-session.target; then echo game; elif pgrep -x plasmashell >/dev/null; then echo desktop; else echo unknown; fi",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "desktop\n"
+    },
+    {
+      "command" : "flatpak list --app --columns=application,version,branch,installation",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "dev.eden_emu.eden\t0.2.1\tstable\tsystem\norg.mozilla.firefox\t159.0\tstable\tsystem\n"
+    },
+    {
+      "command" : "flatpak remote-ls --user --updates --columns=application,version flathub 2>/dev/null",
+      "exitCode" : 1,
+      "stderr" : "",
+      "stdout" : ""
+    },
+    {
+      "command" : "test -x ~/homebrew/services/PluginLoader && echo installed; cat ~/homebrew/services/.loader.version 2>/dev/null; echo; systemctl is-active plugin_loader 2>/dev/null",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "installed\nv3.2.3\n\nactive\n"
+    },
+    {
+      "command" : "python3 -c 'import json,os,glob\nout=[]\nfor p in glob.glob(os.path.expanduser(\"~/homebrew/plugins/*/plugin.json\")):\n    d=os.path.dirname(p)\n    try:\n        n=json.load(open(p))[\"name\"]\n    except Exception:\n        continue\n    try:\n        v=json.load(open(d+\"/package.json\")).get(\"version\")\n    except Exception:\n        v=None\n    out.append({\"name\":n,\"version\":v,\"folder\":os.path.basename(d)})\nprint(json.dumps(out))'",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : "[{\"name\": \"SteamGridDB\", \"version\": \"1.7.1\", \"folder\": \"decky-steamgriddb\"}, {\"name\": \"EmuDecky\", \"version\": \"1.0.2-1\", \"folder\": \"EmuDecky\"}, {\"name\": \"Network Sentinel\", \"version\": \"1.0.4\", \"folder\": \"network-sentinel\"}, {\"name\": \"Free Loader\", \"version\": \"1.5.2\", \"folder\": \"free-loader\"}, {\"name\": \"PowerTools\", \"version\": \"2.0.3\", \"folder\": \"PowerTools\"}, {\"name\": \"Emuchievements\", \"version\": \"2.0.5\", \"folder\": \"Emuchievements\"}, {\"name\": \"CSS Loader\", \"version\": \"2.1.2\", \"folder\": \"SDH-CssLoader\"}, {\"name\": \"Decky LSFG-VK\", \"version\": \"0.12.2\", \"folder\": \"decky-lsfg-vk\"}]\n"
+    },
+    {
+      "command" : "ls -1 ~/.local/share/Steam/compatibilitytools.d 2>/dev/null",
+      "exitCode" : 0,
+      "stderr" : "",
+      "stdout" : ""
+    }
+  ],
+  "source" : "steamos-real"
+}

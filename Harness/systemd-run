@@ -1,0 +1,4 @@
+#!/bin/bash
+# systemd-run falso: solta o comando fora da sessão SSH, como uma unidade transitória.
+while [[ "$1" == --* ]]; do shift; done
+(setsid "$@" >/dev/null 2>&1 </dev/null &)

@@ -23,7 +23,8 @@ public struct SteamControl: Sendable {
     static let startUnit = DeviceProbe.userBus + "systemctl --user start \(unit)"
     static let restartUnit = DeviceProbe.userBus + "systemctl --user restart \(unit)"
     static let term = "pkill -TERM -x steam"
-    static let startDesktop = "DISPLAY=:0 setsid nohup steam -silent >/dev/null 2>&1 </dev/null &"
+    /// O ambiente gráfico (Wayland no 3.9, `XAUTHORITY` com nome aleatório) só existe no `systemd --user`.
+    static let startDesktop = DeviceProbe.userBus + "systemd-run --user --collect --quiet steam -silent"
 
     public static let userList = "ls -1t ~/.local/share/Steam/userdata 2>/dev/null"
 

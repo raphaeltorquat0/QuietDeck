@@ -18,7 +18,7 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 
 > Independent project. **Not affiliated with, endorsed by or supported by Valve.** "Steam" and "Steam Deck" are trademarks of Valve Corporation, used only to indicate compatibility.
 
-> **Early release.** QuietDeck 0.1.0 is tested against a simulated Deck in Docker. See [SMOKE_TEST.md](SMOKE_TEST.md) for the real-hardware checklist.
+> **Early release.** QuietDeck 0.1.0 is tested against a simulated Deck in Docker and, in part, on a Steam Deck LCD with SteamOS 3.9.5. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has been checked on real hardware and what hasn't.
 
 ## Features
 
