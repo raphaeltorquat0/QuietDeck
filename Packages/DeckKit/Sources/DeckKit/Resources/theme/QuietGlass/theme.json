@@ -1,0 +1,7 @@
+{
+  "name": "Quiet Glass",
+  "author": "QuietDeck",
+  "version": "v1.0",
+  "manifest_version": 9,
+  "inject": { "shared.css": ["quickaccess", "mainmenu"] }
+}

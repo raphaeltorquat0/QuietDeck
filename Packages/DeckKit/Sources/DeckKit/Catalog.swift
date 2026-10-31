@@ -76,6 +76,11 @@ public struct CompatToolSource: Codable, Hashable, Identifiable, Sendable {
     public var checksumSuffix: String
 }
 
+extension Bundle {
+    /// Pasta `Resources/` do pacote, para quem lê arquivos que não são catálogos.
+    public static var deckKitResources: URL? { Bundle.module.url(forResource: "Resources", withExtension: nil) }
+}
+
 /// Dados versionados em `Resources/`. Um `emulators.json` em `overrideDirectory` substitui o embutido.
 public struct Catalog: Sendable {
     public var systems: [GameSystem]

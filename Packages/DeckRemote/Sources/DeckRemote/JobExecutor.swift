@@ -81,6 +81,12 @@ public enum JobExecutor {
                 progress(100, "Done")
             case let .importBIOS(local, sd): try await importBIOS(local, sd, c, transfer)
             case let .quickAction(action): try await action.run(r, password: c.password)
+            case let .applyTheme(user, model):
+                let result = try await QuietTheme.apply(r, user: user, model: model, password: c.password)
+                progress(100, result == .live ? "Theme applied" : "Applied after the next reboot")
+            case let .restoreTheme(user):
+                let result = try await QuietTheme.restore(r, user: user, password: c.password)
+                progress(100, result == .live ? "Valve defaults restored" : "Applied after the next reboot")
             }
         } catch DeckError.sudoRejected {
             await c.onSudoRejected()

@@ -1,0 +1,8 @@
+/* Quiet Glass. Opcional e fora do instalador até medir FPS e bateria com o menu aberto em jogo. */
+.quickaccessmenu_Container, .mainmenu_Container {
+  background: rgba(14, 16, 20, 0.86) !important;
+  backdrop-filter: blur(18px);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; }
+}

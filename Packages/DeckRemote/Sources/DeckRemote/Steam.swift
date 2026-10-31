@@ -56,12 +56,51 @@ public struct SteamControl: Sendable {
         public var backup: String?
     }
 
+    public func hasShortcuts(user: String) async throws -> Bool {
+        let path = try await configDirectory(user: user) + "/shortcuts.vdf"
+        let root = try ShortcutsFile.parse(try await RemoteFiles(runner: runner).read(path) ?? Data())
+        return !ShortcutsFile.existing(in: root).isEmpty
+    }
+
     /// Lê antes de tudo: sem nada novo, não encosta no Steam nem fecha o jogo de ninguém.
     public func addShortcuts(_ shortcuts: [Shortcut], user: String) async throws -> WriteResult {
+        var added: [Shortcut] = []
+        let edited = try await edit(user: user) { root in
+            let merged = try ShortcutsFile.merge(shortcuts, into: root)
+            added = merged.added
+            return merged.added.isEmpty ? nil : merged.root
+        }
+        guard let edited else { return WriteResult(added: [], backup: nil) }
+        let names = try await currentNames(user: user)
+        guard added.allSatisfy({ names.contains($0.name) }) else {
+            throw DeckError.unexpectedState("Steam overwrote shortcuts.vdf while restarting. Restore %@ and try again.", edited.path ?? "the backup")
+        }
+        return WriteResult(added: added, backup: edited.path)
+    }
+
+    public func removeShortcuts(names: [String], user: String) async throws -> Bool {
+        try await edit(user: user) { root in
+            let result = ShortcutsFile.remove(names: names, from: root)
+            return result.removed == 0 ? nil : result.root
+        } != nil
+    }
+
+    private func currentNames(user: String) async throws -> Set<String> {
+        let path = try await configDirectory(user: user) + "/shortcuts.vdf"
+        guard let data = try await RemoteFiles(runner: runner).read(path) else {
+            throw DeckError.unexpectedState("shortcuts.vdf disappeared after restarting Steam.")
+        }
+        return Set(ShortcutsFile.existing(in: try VDF.parse(data)).map(\.name))
+    }
+
+    struct Edited { var path: String? }
+
+    /// Para o Steam, aplica `change` no arquivo já regravado por ele e sobe de novo.
+    /// `change` devolve `nil` quando não há o que fazer, e aí o Steam nem é tocado.
+    private func edit(user: String, change: (VDFValue) throws -> VDFValue?) async throws -> Edited? {
         let files = RemoteFiles(runner: runner)
         let path = try await configDirectory(user: user) + "/shortcuts.vdf"
-        let before = try ShortcutsFile.parse(try await files.read(path) ?? Data())
-        if try ShortcutsFile.merge(shortcuts, into: before).added.isEmpty { return WriteResult(added: [], backup: nil) }
+        guard try change(try ShortcutsFile.parse(try await files.read(path) ?? Data())) != nil else { return nil }
 
         let mode = try await sessionMode()
         let wasRunning = try await running()
@@ -74,29 +113,21 @@ public struct SteamControl: Sendable {
             }
             // Só agora o arquivo é definitivo: o Steam acabou de regravá-lo ao sair.
             let current = try await files.read(path)
-            let merged = try ShortcutsFile.merge(shortcuts, into: ShortcutsFile.parse(current ?? Data()))
+            let root = try ShortcutsFile.parse(current ?? Data())
+            let updated = try change(root) ?? root
             let backup = path + ".quietdeck-\(Int(Date().timeIntervalSince1970)).bak"
             if current != nil { try await runner.check("cp -p \(Shell.quote(path)) \(Shell.quote(backup)) && ls -1t \(Shell.quote(path)).quietdeck-*.bak | tail -n +11 | xargs -r -d '\\n' rm -f") }
-            let bytes = VDF.serialize(merged.root)
+            let bytes = VDF.serialize(updated)
             if try await running() { throw DeckError.unexpectedState("Steam came back before the write, so shortcuts.vdf was left untouched.") }
             try await files.write(bytes, to: path)
             guard try await files.read(path) == bytes else { throw DeckError.unexpectedState("shortcuts.vdf on the Deck doesn't match what was written.") }
             try await startAgain(mode: mode, wasRunning: wasRunning)
-            return try await verify(merged, path: path, backup: current == nil ? nil : backup, files: files)
+            return Edited(path: current == nil ? nil : backup)
         } catch {
             if mode == .game { _ = try? await runner.run(Self.unmask) }
             _ = try? await startAgain(mode: mode, wasRunning: wasRunning)
             throw error
         }
-    }
-
-    private func verify(_ merged: (root: VDFValue, added: [Shortcut]), path: String, backup: String?, files: RemoteFiles) async throws -> WriteResult {
-        guard let data = try await files.read(path) else { throw DeckError.unexpectedState("shortcuts.vdf disappeared after restarting Steam.") }
-        let names = Set(ShortcutsFile.existing(in: try VDF.parse(data)).map(\.name))
-        guard merged.added.allSatisfy({ names.contains($0.name) }) else {
-            throw DeckError.unexpectedState("Steam overwrote shortcuts.vdf while restarting. Restore %@ and try again.", backup ?? "the backup")
-        }
-        return WriteResult(added: merged.added, backup: backup)
     }
 
     func sessionMode() async throws -> SessionMode {

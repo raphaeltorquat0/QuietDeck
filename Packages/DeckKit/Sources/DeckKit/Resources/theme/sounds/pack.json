@@ -1,0 +1,10 @@
+{
+  "name": "Quiet",
+  "author": "QuietDeck",
+  "version": "v1.0",
+  "manifest_version": 2,
+  "music": false,
+  "description": "Minimal UI sounds",
+  "ignore": [],
+  "mappings": {}
+}

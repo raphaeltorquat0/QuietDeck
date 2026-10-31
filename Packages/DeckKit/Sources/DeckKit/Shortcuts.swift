@@ -95,6 +95,22 @@ public enum ShortcutsFile {
         return (.map(pairs), added)
     }
 
+    /// Tira pelo nome e renumera, como o Steam espera. Quem não bate fica intacto.
+    public static func remove(names: [String], from root: VDFValue) -> (root: VDFValue, removed: Int) {
+        guard case let .map(top) = root else { return (root, 0) }
+        var removed = 0
+        let pairs = top.map { pair -> (key: String, value: VDFValue) in
+            guard pair.key.caseInsensitiveCompare("shortcuts") == .orderedSame, case let .map(entries) = pair.value else { return pair }
+            let kept = entries.filter { entry in
+                guard case let .string(name)? = entry.value["AppName"], names.contains(name) else { return true }
+                removed += 1
+                return false
+            }
+            return (pair.key, .map(kept.enumerated().map { (String($0.offset), $0.element.value) }))
+        }
+        return (.map(pairs), removed)
+    }
+
     private static func key(_ name: String, _ exe: String) -> String { name.lowercased() + "\u{0}" + exe }
 }
 

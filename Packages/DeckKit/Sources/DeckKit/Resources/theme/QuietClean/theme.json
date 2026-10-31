@@ -1,0 +1,7 @@
+{
+  "name": "Quiet Clean",
+  "author": "QuietDeck",
+  "version": "v1.0",
+  "manifest_version": 9,
+  "inject": { "shared.css": ["bigpicture"] }
+}

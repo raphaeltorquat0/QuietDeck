@@ -171,6 +171,10 @@ final class AppModel {
         let config = Self.config(deck)
         let live = LiveDeck(profile: deck, runner: Launch.wrap(SSHRunner(config: config)), config: config, catalog: catalog)
         live.hasPassword = Keychain.password(for: deck.id.uuidString) != nil
+        live.onThemeDisabled = { [weak self] _ in
+            self?.toast = Toast(title: String(localized: "Quiet Theme turned off"),
+                                detail: String(localized: "The theme doesn't match this Steam client. Update QuietDeck, then apply it again."), isError: true)
+        }
         return live
     }
 
@@ -249,6 +253,10 @@ final class LiveDeck: Identifiable {
     var compatTools: [String] = []
     var steamUsers: [String] = []
     var hasPassword = false
+    var themeInstalled = false
+    var themeHealth: ThemeHealth?
+    /// Avisa quando o tema acaba de ser desligado por um cliente novo.
+    var onThemeDisabled: ((ThemeHealth) -> Void)?
     private var refreshing = false
 
     init(profile: DeckProfile, runner: any CommandRunner, config: SSHConfig, catalog: Catalog) {
@@ -285,6 +293,10 @@ final class LiveDeck: Identifiable {
         decky = try? await Decky.state(r)
         plugins = (try? await Decky.plugins(r)) ?? plugins
         compatTools = (try? await CompatTools.installed(r)) ?? compatTools
+        themeInstalled = (try? await QuietTheme.isInstalled(r)) ?? false
+        let wasHealthy = themeHealth?.isHealthy ?? true
+        themeHealth = try? await QuietTheme.disableIfBroken(r)
+        if wasHealthy, let health = themeHealth, !health.isHealthy { onThemeDisabled?(health) }
     }
 }
 

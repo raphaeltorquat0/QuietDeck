@@ -1,0 +1,58 @@
+/* Quiet Clean. Subtrativo: parte do layout nativo e só tira, escurece e reforça o foco.
+   Classes pelo nome do CSS Loader, que traduz para os hashes do cliente Steam instalado. */
+
+/* Novidades, Amigos e Recomendados ficam num único bloco. Sem ele, a home é uma linha de capas.
+   Esconder só uma aba deixaria o foco preso na aba escondida: Novidades é a selecionada ao abrir. */
+.gamepadhome_TabbedContent { display: none !important; }
+
+/* Scrim: mais escuro na base e à esquerda, onde há texto. Mínimo de 0.55 na faixa do texto (4.5:1 sobre branco). */
+.gamepadhomerecentgames_RecentGamesBackgroundContainer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.60) 45%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 60%);
+}
+
+/* Sem parallax nem zoom animado na arte de fundo. */
+.gamepadhomerecentgames_RecentGamesBackgroundImages {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Foco com dois sinais: escala e anel branco com contorno escuro. */
+.basicgamecarousel_BasicGameCarouselItemMediaContainer.gpfocus,
+.basicgamecarousel_BasicGameCarouselItemMediaContainer.gpfocuswithin {
+  transform: scale(1.08);
+  outline: 3px solid #fff;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
+  z-index: 2;
+}
+
+/* Tipografia na família nativa. */
+.gamepadhomerecentgames_RecentGamesHeaderLabel { font-size: 16px !important; font-weight: 500 !important; }
+
+/* Topo: marca discreta; indicador de download, Wi-Fi, bateria e relógio são os nativos. */
+.header_Header::before {
+  content: "Quiet";
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  align-self: center;
+  margin-left: 24px;
+  margin-right: auto;
+}
+
+/* Rodapé: o nativo já mostra "Steam: menu"; falta tornar o menu rápido descobrível. */
+.footer_Spacer::before {
+  content: "•••  Menu rápido";
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 20px;
+  white-space: nowrap;
+}

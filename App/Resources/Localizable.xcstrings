@@ -291,12 +291,42 @@
     }
    }
   },
+  "Applied after the next reboot": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vale depois do próximo reinício"
+     }
+    }
+   }
+  },
   "Apply %lld": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Aplicar %lld"
+     }
+    }
+   }
+  },
+  "Apply Again": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicar de novo"
+     }
+    }
+   }
+  },
+  "Apply Quiet Theme": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicar Tema Quiet"
      }
     }
    }
@@ -627,6 +657,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Conectando…"
+     }
+    }
+   }
+  },
+  "Continue": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Continuar"
      }
     }
    }
@@ -1131,6 +1171,16 @@
     }
    }
   },
+  "It turns off your other CSS Loader themes. Restore brings them back exactly as they were.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ele desliga seus outros temas do CSS Loader. Restaurar os devolve exatamente como estavam."
+     }
+    }
+   }
+  },
   "Library": {
    "localizations": {
     "pt-BR": {
@@ -1531,6 +1581,36 @@
     }
    }
   },
+  "Quiet Clean leaves the home with one row of covers. On the Deck, turn on Big Art Mode in Settings › Customization › Home Screen.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Quiet Clean deixa a home com uma linha de capas. No Deck, ligue o Big Art Mode em Configurações › Personalização › Tela inicial."
+     }
+    }
+   }
+  },
+  "Quiet Theme": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tema Quiet"
+     }
+    }
+   }
+  },
+  "Quiet Theme turned off": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tema Quiet desligado"
+     }
+    }
+   }
+  },
   "QuietDeck never downloads BIOS files. A file you import is checked against a table of known hashes before it's copied.": {
    "localizations": {
     "pt-BR": {
@@ -1641,12 +1721,32 @@
     }
    }
   },
+  "Restart Steam to change the theme?": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reiniciar o Steam para trocar o tema?"
+     }
+    }
+   }
+  },
   "Restore": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Restaurar"
+     }
+    }
+   }
+  },
+  "Restore Valve Defaults": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Restaurar padrão da Valve"
      }
     }
    }
@@ -2121,6 +2221,16 @@
     }
    }
   },
+  "The Loja shortcut changes, so Steam restarts and any running game will close.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O atalho da Loja muda, então o Steam reinicia e o jogo aberto vai fechar."
+     }
+    }
+   }
+  },
   "The deck user has no password yet, and installing needs one. Set it from here.": {
    "localizations": {
     "pt-BR": {
@@ -2157,6 +2267,46 @@
      "stringUnit": {
       "state": "translated",
       "value": "O instalador oficial roda com sudo. Além de ~/homebrew, ele adiciona um serviço em /etc/systemd/system, o único lugar fora de /home/deck em que o QuietDeck grava."
+     }
+    }
+   }
+  },
+  "The theme doesn't match this Steam client. Update QuietDeck, then apply it again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O tema não combina com este cliente Steam. Atualize o QuietDeck e aplique de novo."
+     }
+    }
+   }
+  },
+  "The theme doesn't match this Steam client: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O tema não combina com este cliente Steam: %@"
+     }
+    }
+   }
+  },
+  "The theme was turned off because this Steam client changed. Your Deck is back to the Valve look.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O tema foi desligado porque o cliente Steam mudou. Seu Deck voltou ao visual da Valve."
+     }
+    }
+   }
+  },
+  "Theme applied": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tema aplicado"
      }
     }
    }
@@ -2341,6 +2491,16 @@
     }
    }
   },
+  "Valve defaults restored": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Padrão da Valve restaurado"
+     }
+    }
+   }
+  },
   "Version": {
    "localizations": {
     "pt-BR": {
@@ -2367,6 +2527,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Aguardando o Deck"
+     }
+    }
+   }
+  },
+  "Without the deck password, the change takes effect after the next reboot.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem a senha do deck, a mudança vale depois do próximo reinício."
      }
     }
    }

@@ -8,6 +8,12 @@ struct DeckyView: View {
     @State private var store: [StorePlugin] = []
     @State private var query = ""
     @State private var failure: String?
+    @State private var confirm: ThemeChange?
+
+    private enum ThemeChange: Identifiable {
+        case apply(String), restore(String)
+        var id: String { switch self { case let .apply(u): "a" + u; case let .restore(u): "r" + u } }
+    }
 
     private var filtered: [StorePlugin] {
         query.isEmpty ? store : store.filter { $0.name.localizedCaseInsensitiveContains(query) || $0.description.localizedCaseInsensitiveContains(query) }
@@ -26,6 +32,25 @@ struct DeckyView: View {
                     model.enqueue(String(localized: "Install Decky"), .installDecky)
                 }
                 .disabled(!deck.hasPassword)
+            }
+            Card(title: "Quiet Theme", symbol: "paintbrush") {
+                if let health = deck.themeHealth, !health.isHealthy {
+                    InlineNote(text: "The theme was turned off because this Steam client changed. Your Deck is back to the Valve look.", symbol: "exclamationmark.triangle", tint: .orange)
+                }
+                InlineNote(text: "Quiet Clean leaves the home with one row of covers. On the Deck, turn on Big Art Mode in Settings › Customization › Home Screen.")
+                InlineNote(text: "It turns off your other CSS Loader themes. Restore brings them back exactly as they were.")
+                HStack {
+                    Button(deck.themeInstalled ? "Apply Again" : "Apply Quiet Theme") {
+                        if let user = deck.steamUsers.first { confirm = .apply(user) }
+                    }
+                    .disabled(deck.steamUsers.isEmpty || deck.decky?.installed != true)
+                    if deck.themeInstalled {
+                        Button("Restore Valve Defaults") {
+                            if let user = deck.steamUsers.first { confirm = .restore(user) }
+                        }
+                    }
+                }
+                if !deck.hasPassword { InlineNote(text: "Without the deck password, the change takes effect after the next reboot.") }
             }
             Card(title: "Installed Plugins", symbol: "checkmark.circle") {
                 if deck.plugins.isEmpty { Text("None").foregroundStyle(.secondary) }
@@ -65,6 +90,14 @@ struct DeckyView: View {
                 }
             }
         }
+        .confirmationDialog("Restart Steam to change the theme?", isPresented: Binding(get: { confirm != nil }, set: { if !$0 { confirm = nil } }), presenting: confirm) { change in
+            Button("Continue", role: .destructive) {
+                switch change {
+                case let .apply(user): model.enqueue(String(localized: "Apply Quiet Theme"), .applyTheme(user: user, model: deck.status.model))
+                case let .restore(user): model.enqueue(String(localized: "Restore Valve Defaults"), .restoreTheme(user: user))
+                }
+            }
+        } message: { _ in Text("The Loja shortcut changes, so Steam restarts and any running game will close.") }
         .task {
             guard store.isEmpty else { return }
             do { store = try await Decky.store() } catch { failure = model.describe(error) }

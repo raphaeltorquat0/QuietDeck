@@ -1,0 +1,8 @@
+html, body { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+#logo {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.7);
+  font: 600 44px "Motiva Sans", sans-serif;
+  letter-spacing: 0.04em;
+  transition: left 58s linear, top 58s linear;
+}
