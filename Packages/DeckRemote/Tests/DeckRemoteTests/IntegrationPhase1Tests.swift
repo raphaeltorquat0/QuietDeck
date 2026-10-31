@@ -37,7 +37,8 @@ extension IntegrationTests {
     @Test func sudoUsesStdinAndRefusesWrongPassword() async throws {
         let r = try await Sim.runner()
         #expect(try await r.check(.sudo("id -u", password: Sim.password)).trimmed == "0")
-        await #expect(throws: DeckError.sudoRejected) { try await r.check(.sudo("id -u", password: "wrong")) }
+        // O SteamOS real guarda a credencial por alguns minutos; sem isso, a senha errada passaria.
+        await #expect(throws: DeckError.sudoRejected) { try await r.check(.sudo("id -u", password: "wrong", forgetCached: true)) }
     }
 
     @Test func recordedSessionReplaysWithoutTheDeck() async throws {

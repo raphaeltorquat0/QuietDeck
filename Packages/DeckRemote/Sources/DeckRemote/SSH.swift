@@ -14,8 +14,8 @@ public struct RemoteCommand: Sendable, Equatable {
     }
 
     /// `sudo -S` lê a senha da entrada padrão; ela nunca aparece em argv nem no `ps` do Deck.
-    public static func sudo(_ script: String, password: String, timeout: TimeInterval = 120) -> RemoteCommand {
-        RemoteCommand("sudo -S -p '' sh -c \(Shell.quote(script))",
+    public static func sudo(_ script: String, password: String, timeout: TimeInterval = 120, forgetCached: Bool = false) -> RemoteCommand {
+        RemoteCommand("sudo -S \(forgetCached ? "-k " : "")-p '' sh -c \(Shell.quote(script))",
                       stdin: Data((password + "\n").utf8), timeout: timeout)
     }
 }
