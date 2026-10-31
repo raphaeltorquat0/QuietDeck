@@ -93,13 +93,15 @@ export function achievements(appid: number): string | null {
   }
 }
 
-/** O Steam só preenche os detalhes de quem pede: sem isto, após o início, a conquista não aparece. */
-export function requestDetails(appid: number) {
+/** Os detalhes só chegam enquanto há registro: cancelar logo depois de pedir descarta a resposta. */
+export function watchDetails(appid: number, changed: () => void): () => void {
   try {
-    appDetailsStore.RegisterForAppData?.(appid, () => {})?.unregister?.()
-    appDetailsStore.RequestAppDetails?.(appid)
-    appDetailsStore.RequestAchievements?.(appid)
-  } catch {}
+    const registration = appDetailsStore.RegisterForAppData(appid, changed)
+    appDetailsStore.GetAchievements?.(appid)
+    return () => registration?.unregister?.()
+  } catch {
+    return () => {}
+  }
 }
 
 /** Percentual do download ativo. `null` sem fila: o indicador só existe com fila ativa. */

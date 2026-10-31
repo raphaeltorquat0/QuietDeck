@@ -1,6 +1,6 @@
 import { Focusable, GamepadButton, Navigation } from '@decky/ui'
 import { useEffect, useRef, useState } from 'react'
-import { achievements, downloadPercent, Game, loadTabs, openStore, play, playedLine, requestDetails, Tab } from './steam'
+import { achievements, downloadPercent, Game, loadTabs, openStore, play, playedLine, Tab, watchDetails } from './steam'
 
 const styles = `
 .qh { position: absolute; inset: 0; background: #0b0d10; color: #fff; overflow: hidden; overflow: clip; display: flex; flex-direction: column; }
@@ -11,12 +11,12 @@ const styles = `
 .qh-title { font-size: 30px; font-weight: 600; line-height: 1.15; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 .qh-meta { font-size: 16px; font-weight: 500; line-height: 1.35; }
 .qh-play { display: inline-flex; margin-top: 12px; background: #fff; color: #0b0d10; border-radius: 8px; padding: 7px 20px; font-size: 16px; font-weight: 600; }
-.qh-play.gpfocus { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 7px rgba(0,0,0,.85); }
+.qh-play.gpfocus, .qh-play:focus { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 7px rgba(0,0,0,.85); }
 .qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; }
 .qh-row::-webkit-scrollbar { display: none; }
 .qh-row::after { content: ''; flex: none; width: 16px; }
 .qh-tile { flex: none; width: 86px; height: 129px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
-.qh-tile.gpfocus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
+.qh-tile.gpfocus, .qh-tile:focus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
 .qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; }
 .qh-hints { margin-left: auto; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.72); }
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
@@ -46,7 +46,7 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
 
     const attach = () => {
       if (header?.isConnected || !doc) return
-      header = [...doc.querySelectorAll<HTMLElement>('.GamepadMode.Panel.Focusable')].find((e) => {
+      header = [...doc.querySelectorAll<HTMLElement>('.GamepadMode')].find((e) => {
         const r = e.getBoundingClientRect()
         return r.y === 0 && r.height > 0 && r.height < 80 && doc.defaultView?.getComputedStyle(e).position === 'absolute'
       })
@@ -98,9 +98,7 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     if (fresh) setTabs(fresh)
   }, [tabIndex])
 
-  useEffect(() => {
-    if (focused) requestDetails(focused.appid)
-  }, [focused])
+  useEffect(() => (focused ? watchDetails(focused.appid, () => redraw((n) => n + 1)) : undefined), [focused])
 
   const change = (delta: number) => {
     const next = (tabIndex + delta + tabs.length) % tabs.length
