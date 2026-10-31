@@ -85,7 +85,7 @@ export function playedLine(g: Game, now = Date.now() / 1000): string {
 /** Conquistas, nunca "progresso". `null` quando o jogo não tem ou o Steam ainda não trouxe. */
 export function achievements(appid: number): string | null {
   try {
-    const a = appDetailsStore.GetAppDetails(appid)?.achievements
+    const a = appDetailsStore.GetAppDetails(appid)?.achievements ?? appDetailsStore.GetAchievements?.(appid)
     if (!a?.nTotal) return null
     return `${Math.round((a.nAchieved / a.nTotal) * 100)}% das conquistas`
   } catch {
@@ -93,9 +93,12 @@ export function achievements(appid: number): string | null {
   }
 }
 
+/** O Steam só preenche os detalhes de quem pede: sem isto, após o início, a conquista não aparece. */
 export function requestDetails(appid: number) {
   try {
+    appDetailsStore.RegisterForAppData?.(appid, () => {})?.unregister?.()
     appDetailsStore.RequestAppDetails?.(appid)
+    appDetailsStore.RequestAchievements?.(appid)
   } catch {}
 }
 

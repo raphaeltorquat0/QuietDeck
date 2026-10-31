@@ -37,42 +37,58 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
   const firstTile = useRef<any>(null)
   const root = useRef<HTMLDivElement>(null)
 
-  // A barra nativa (bateria, Wi-Fi, relógio) é acesa pela home nativa ao rolar; aqui ela fica sempre visível.
+  // A barra nativa é acesa pela home nativa ao rolar, e no início do Steam ela surge depois desta tela.
   useEffect(() => {
     const doc = root.current?.ownerDocument
-    const header = doc && [...doc.querySelectorAll<HTMLElement>('.GamepadMode.Panel.Focusable')].find((e) => {
-      const r = e.getBoundingClientRect()
-      return r.y === 0 && r.height < 80 && doc.defaultView?.getComputedStyle(e).position === 'absolute'
-    })
-    if (!header) return
-    const previous = header.style.opacity
-    const previousBackground = header.style.background
-    const show = () => {
-      header.style.opacity = '1'
-      header.style.background = 'transparent'
+    let header: HTMLElement | undefined
+    let brand: HTMLElement | undefined
+    let previous = { opacity: '', background: '' }
+
+    const attach = () => {
+      if (header?.isConnected || !doc) return
+      header = [...doc.querySelectorAll<HTMLElement>('.GamepadMode.Panel.Focusable')].find((e) => {
+        const r = e.getBoundingClientRect()
+        return r.y === 0 && r.height > 0 && r.height < 80 && doc.defaultView?.getComputedStyle(e).position === 'absolute'
+      })
+      if (!header) return
+      previous = { opacity: header.style.opacity, background: header.style.background }
+      brand = doc.createElement('div')
+      brand.textContent = 'Quiet'
+      brand.style.cssText = 'position:absolute;left:28px;top:10px;font-size:18px;font-weight:600;color:#fff;pointer-events:none'
+      header.appendChild(brand)
     }
-    show()
-    // A marca entra na própria barra: fora dela, a barra fica por cima.
-    const brand = doc.createElement('div')
-    brand.textContent = 'Quiet'
-    brand.style.cssText = 'position:absolute;left:28px;top:10px;font-size:18px;font-weight:600;color:#fff;pointer-events:none'
-    header.appendChild(brand)
+
+    const tick = () => {
+      attach()
+      if (header) {
+        header.style.opacity = '1'
+        header.style.background = 'transparent'
+      }
+    }
+
+    tick()
+    const fast = setInterval(tick, 300)
+    const stopFast = setTimeout(() => clearInterval(fast), 15000)
     const timer = setInterval(() => {
-      show()
+      tick()
       setDownload(downloadPercent())
       redraw((n) => n + 1)
     }, 2000)
     return () => {
+      clearInterval(fast)
+      clearTimeout(stopFast)
       clearInterval(timer)
-      brand.remove()
-      header.style.opacity = previous
-      header.style.background = previousBackground
+      brand?.remove()
+      if (header) {
+        header.style.opacity = previous.opacity
+        header.style.background = previous.background
+      }
     }
   }, [])
 
   useEffect(() => {
-    const timers = [150, 500, 1000, 2000].map((ms) => setTimeout(() => {
-      if (!root.current?.querySelector('.gpfocus')) firstTile.current?.TakeFocus?.()
+    const timers = [150, 500, 1000].map((ms) => setTimeout(() => {
+      if (!root.current?.querySelector('.qh-row .gpfocus')) firstTile.current?.TakeFocus?.()
     }, ms))
     return () => timers.forEach(clearTimeout)
   }, [tabIndex])
