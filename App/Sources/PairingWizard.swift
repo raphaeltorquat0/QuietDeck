@@ -99,11 +99,12 @@ struct PairingWizard: View {
                 ManualPairing(host: flow.host, back: { manual = false }, done: { dismiss() })
             } else {
                 progress
-                DeckIllustration(highlightSteam: flow.step == .pairNewHost || flow.step == .developerMode) {
-                    SteamScreen(step: flow.step)
+                Deck3DView(screenID: "\(flow.step)", pulseSteam: flow.step == .pairNewHost || flow.step == .developerMode) {
+                    SteamScreen(step: flow.step).scaleEffect(2.4).frame(width: 640, height: 400)
                 }
-                .frame(maxWidth: 480)
+                .frame(height: 210)
                 .frame(maxWidth: .infinity)
+                .accessibilityHidden(true)
                 instructions.animation(Motion.animation, value: flow.step)
                 Spacer(minLength: 0)
                 InlineNote(text: "Developer Mode exposes Steam's debug port on your local network. Turn it off in Settings if you don't trust this network.",

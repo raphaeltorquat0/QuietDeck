@@ -87,7 +87,7 @@ struct EmptyState: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            DeckIllustration { Color.accentColor.opacity(0.25) }.frame(width: 190).opacity(0.75)
+            Image(nsImage: DeckModel.still).resizable().scaledToFit().frame(width: 230).accessibilityHidden(true)
             Text(title).font(.title3.weight(.semibold))
             Text(message).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 340)
             if let action, let perform { Button(action, action: perform).buttonStyle(.borderedProminent) }

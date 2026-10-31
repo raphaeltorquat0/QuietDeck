@@ -15,19 +15,19 @@ struct OverviewView: View {
             if let failure = deck.connection.detail {
                 InlineNote(text: "\(failure)", symbol: "exclamationmark.triangle", tint: .orange)
             }
-            DeckIllustration {
+            Deck3DView(screenID: "\(deck.status.model ?? "")\(deck.status.osVersion ?? "")\(deck.status.mode.rawValue)") {
                 ZStack {
-                    LinearGradient(colors: [Color.accentColor.opacity(0.5), .black], startPoint: .top, endPoint: .bottom)
-                    VStack(spacing: 4) {
-                        Text(verbatim: deck.status.model ?? "Steam Deck").font(.headline).foregroundStyle(.white)
-                        Text("SteamOS \(deck.status.osVersion ?? "–")").font(.callout).foregroundStyle(.white.opacity(0.8))
-                        Text(deck.status.mode.label).font(.caption).foregroundStyle(.white.opacity(0.7))
+                    LinearGradient(colors: [Color.accentColor.opacity(0.55), .black], startPoint: .top, endPoint: .bottom)
+                    VStack(spacing: 8) {
+                        Text(verbatim: deck.status.model ?? "Steam Deck").font(.system(size: 42, weight: .semibold)).foregroundStyle(.white)
+                        Text("SteamOS \(deck.status.osVersion ?? "–")").font(.system(size: 28)).foregroundStyle(.white.opacity(0.85))
+                        Text(deck.status.mode.label).font(.system(size: 22)).foregroundStyle(.white.opacity(0.7))
                     }
                 }
             }
-            .frame(maxWidth: 620)
+            .frame(height: 248)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 6)
+            .accessibilityHidden(true)
 
             HStack(alignment: .top, spacing: 16) {
                 Gauge(title: "Battery", symbol: batterySymbol(deck.status.batteryPercent ?? 0, deck.status.batteryState), fraction: battery,
