@@ -1,0 +1,536 @@
+[
+ {
+  "id": "nes",
+  "name": "Nintendo Entertainment System",
+  "folder": "nes",
+  "aliases": [
+   "famicom"
+  ],
+  "extensions": [
+   "7z",
+   "fds",
+   "nes",
+   "unf",
+   "unif",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "fceumm"
+ },
+ {
+  "id": "snes",
+  "name": "Super Nintendo",
+  "folder": "snes",
+  "aliases": [
+   "sfc",
+   "snesna"
+  ],
+  "extensions": [
+   "7z",
+   "bs",
+   "fig",
+   "sfc",
+   "smc",
+   "swc",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "snes9x"
+ },
+ {
+  "id": "n64",
+  "name": "Nintendo 64",
+  "folder": "n64",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "n64",
+   "u1",
+   "v64",
+   "z64",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "mupen64plus_next"
+ },
+ {
+  "id": "gb",
+  "name": "Game Boy",
+  "folder": "gb",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "dmg",
+   "gb",
+   "sgb",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "gambatte"
+ },
+ {
+  "id": "gbc",
+  "name": "Game Boy Color",
+  "folder": "gbc",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "cgb",
+   "gbc",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "gambatte"
+ },
+ {
+  "id": "gba",
+  "name": "Game Boy Advance",
+  "folder": "gba",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "agb",
+   "gba",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "mgba"
+ },
+ {
+  "id": "nds",
+  "name": "Nintendo DS",
+  "folder": "nds",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "dsi",
+   "ids",
+   "nds",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "melonds"
+ },
+ {
+  "id": "n3ds",
+  "name": "Nintendo 3DS",
+  "folder": "n3ds",
+  "aliases": [
+   "3ds"
+  ],
+  "extensions": [
+   "3ds",
+   "3dsx",
+   "cci",
+   "cxi",
+   "z3dsx",
+   "zcci",
+   "zcxi"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "azahar"
+ },
+ {
+  "id": "gc",
+  "name": "GameCube",
+  "folder": "gc",
+  "aliases": [
+   "gamecube",
+   "ngc"
+  ],
+  "extensions": [
+   "ciso",
+   "dol",
+   "gcm",
+   "gcz",
+   "iso",
+   "rvz",
+   "tgc",
+   "wia"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "dolphin"
+ },
+ {
+  "id": "wii",
+  "name": "Wii",
+  "folder": "wii",
+  "aliases": [],
+  "extensions": [
+   "ciso",
+   "iso",
+   "rvz",
+   "wad",
+   "wbfs",
+   "wia"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "dolphin"
+ },
+ {
+  "id": "wiiu",
+  "name": "Wii U",
+  "folder": "wiiu/roms",
+  "aliases": [
+   "wiiu"
+  ],
+  "extensions": [
+   "rpx",
+   "tmd",
+   "wua",
+   "wud",
+   "wuhb",
+   "wux"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "cemu"
+ },
+ {
+  "id": "switch",
+  "name": "Nintendo Switch",
+  "folder": "switch",
+  "aliases": [
+   "ns"
+  ],
+  "extensions": [
+   "nca",
+   "nro",
+   "nso",
+   "nsp",
+   "xci"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "ryubing"
+ },
+ {
+  "id": "psx",
+  "name": "PlayStation",
+  "folder": "psx",
+  "aliases": [
+   "ps1",
+   "playstation",
+   "psone"
+  ],
+  "extensions": [
+   "bin",
+   "cbn",
+   "ccd",
+   "chd",
+   "cue",
+   "ecm",
+   "img",
+   "iso",
+   "m3u",
+   "mdf",
+   "pbp",
+   "toc"
+  ],
+  "readsArchives": false,
+  "chd": "cd",
+  "emulator": "retroarch",
+  "core": "swanstation"
+ },
+ {
+  "id": "ps2",
+  "name": "PlayStation 2",
+  "folder": "ps2",
+  "aliases": [
+   "playstation2"
+  ],
+  "extensions": [
+   "bin",
+   "chd",
+   "ciso",
+   "cso",
+   "gz",
+   "img",
+   "iso",
+   "m3u",
+   "mdf",
+   "nrg",
+   "zso"
+  ],
+  "readsArchives": false,
+  "chd": "auto",
+  "emulator": "pcsx2"
+ },
+ {
+  "id": "ps3",
+  "name": "PlayStation 3",
+  "folder": "ps3",
+  "aliases": [],
+  "extensions": [
+   "iso",
+   "ps3",
+   "ps3dir"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "rpcs3"
+ },
+ {
+  "id": "psp",
+  "name": "PlayStation Portable",
+  "folder": "psp",
+  "aliases": [],
+  "extensions": [
+   "chd",
+   "cso",
+   "iso",
+   "pbp"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "ppsspp"
+ },
+ {
+  "id": "genesis",
+  "name": "Sega Genesis / Mega Drive",
+  "folder": "genesis",
+  "aliases": [
+   "megadrive",
+   "md"
+  ],
+  "extensions": [
+   "68k",
+   "7z",
+   "bin",
+   "gen",
+   "md",
+   "smd",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "genesis_plus_gx"
+ },
+ {
+  "id": "mastersystem",
+  "name": "Sega Master System",
+  "folder": "mastersystem",
+  "aliases": [
+   "sms"
+  ],
+  "extensions": [
+   "7z",
+   "sms",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "genesis_plus_gx"
+ },
+ {
+  "id": "gamegear",
+  "name": "Sega Game Gear",
+  "folder": "gamegear",
+  "aliases": [
+   "gg"
+  ],
+  "extensions": [
+   "7z",
+   "gg",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "genesis_plus_gx"
+ },
+ {
+  "id": "sega32x",
+  "name": "Sega 32X",
+  "folder": "sega32x",
+  "aliases": [
+   "32x"
+  ],
+  "extensions": [
+   "32x",
+   "7z",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "picodrive"
+ },
+ {
+  "id": "segacd",
+  "name": "Sega CD / Mega-CD",
+  "folder": "segacd",
+  "aliases": [
+   "megacd"
+  ],
+  "extensions": [
+   "bin",
+   "chd",
+   "cue",
+   "iso",
+   "m3u"
+  ],
+  "readsArchives": false,
+  "chd": "cd",
+  "emulator": "retroarch",
+  "core": "genesis_plus_gx"
+ },
+ {
+  "id": "saturn",
+  "name": "Sega Saturn",
+  "folder": "saturn",
+  "aliases": [],
+  "extensions": [
+   "bin",
+   "ccd",
+   "chd",
+   "cue",
+   "iso",
+   "m3u",
+   "mds",
+   "toc"
+  ],
+  "readsArchives": false,
+  "chd": "cd",
+  "emulator": "retroarch",
+  "core": "mednafen_saturn"
+ },
+ {
+  "id": "dreamcast",
+  "name": "Sega Dreamcast",
+  "folder": "dreamcast",
+  "aliases": [
+   "dc"
+  ],
+  "extensions": [
+   "cdi",
+   "chd",
+   "cue",
+   "gdi",
+   "iso",
+   "lst",
+   "m3u"
+  ],
+  "readsArchives": false,
+  "chd": "cd",
+  "emulator": "flycast"
+ },
+ {
+  "id": "xbox",
+  "name": "Xbox",
+  "folder": "xbox",
+  "aliases": [],
+  "extensions": [
+   "iso",
+   "xiso"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "xemu"
+ },
+ {
+  "id": "pcengine",
+  "name": "PC Engine / TurboGrafx-16",
+  "folder": "pcengine",
+  "aliases": [
+   "tg16"
+  ],
+  "extensions": [
+   "7z",
+   "ccd",
+   "chd",
+   "cue",
+   "img",
+   "iso",
+   "m3u",
+   "pce",
+   "sgx",
+   "toc",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": "cd",
+  "emulator": "retroarch",
+  "core": "mednafen_pce_fast"
+ },
+ {
+  "id": "atari2600",
+  "name": "Atari 2600",
+  "folder": "atari2600",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "a26",
+   "bin",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "stella"
+ },
+ {
+  "id": "neogeo",
+  "name": "Neo Geo",
+  "folder": "neogeo",
+  "aliases": [],
+  "extensions": [
+   "7z",
+   "neo",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "fbneo"
+ },
+ {
+  "id": "arcade",
+  "name": "Arcade",
+  "folder": "arcade",
+  "aliases": [
+   "mame",
+   "fbneo",
+   "fba"
+  ],
+  "extensions": [
+   "7z",
+   "zip"
+  ],
+  "readsArchives": true,
+  "chd": null,
+  "emulator": "retroarch",
+  "core": "fbneo"
+ },
+ {
+  "id": "scummvm",
+  "name": "ScummVM",
+  "folder": "scummvm",
+  "aliases": [],
+  "extensions": [
+   "scummvm",
+   "svm"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "scummvm"
+ }
+]

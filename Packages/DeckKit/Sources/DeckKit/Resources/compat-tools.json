@@ -1,0 +1,16 @@
+[
+ {
+  "id": "ge-proton",
+  "name": "GE-Proton",
+  "repo": "GloriousEggroll/proton-ge-custom",
+  "assetSuffix": "-x86_64.tar.gz",
+  "checksumSuffix": ".sha512sum"
+ },
+ {
+  "id": "proton-cachyos",
+  "name": "Proton-CachyOS",
+  "repo": "CachyOS/proton-cachyos",
+  "assetSuffix": "-x86_64.tar.xz",
+  "checksumSuffix": ".sha512sum"
+ }
+]

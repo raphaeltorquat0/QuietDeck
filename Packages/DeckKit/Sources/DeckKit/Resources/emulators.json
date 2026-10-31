@@ -1,0 +1,253 @@
+[
+ {
+  "id": "retroarch",
+  "name": "RetroArch",
+  "flatpak": "org.libretro.RetroArch",
+  "systems": [
+   "many"
+  ],
+  "launch": "run org.libretro.RetroArch -L {core} {rom}",
+  "config": {
+   "path": ".var/app/org.libretro.RetroArch/config/retroarch/retroarch.cfg",
+   "format": "cfg",
+   "entries": [
+    {
+     "key": "system_directory",
+     "value": "{bios}"
+    },
+    {
+     "key": "rgui_browser_directory",
+     "value": "{roms}"
+    },
+    {
+     "key": "savefile_directory",
+     "value": "{saves}/retroarch/saves"
+    },
+    {
+     "key": "savestate_directory",
+     "value": "{saves}/retroarch/states"
+    }
+   ]
+  },
+  "saves": [
+   ".var/app/org.libretro.RetroArch/config/retroarch/saves",
+   ".var/app/org.libretro.RetroArch/config/retroarch/states"
+  ]
+ },
+ {
+  "id": "dolphin",
+  "name": "Dolphin",
+  "flatpak": "org.DolphinEmu.dolphin-emu",
+  "systems": [
+   "gc",
+   "wii"
+  ],
+  "launch": "run org.DolphinEmu.dolphin-emu -b -e {rom}",
+  "config": {
+   "path": ".var/app/org.DolphinEmu.dolphin-emu/config/dolphin-emu/Dolphin.ini",
+   "format": "ini",
+   "entries": [
+    {
+     "section": "General",
+     "key": "ISOPaths",
+     "value": "2"
+    },
+    {
+     "section": "General",
+     "key": "ISOPath0",
+     "value": "{roms}/gc"
+    },
+    {
+     "section": "General",
+     "key": "ISOPath1",
+     "value": "{roms}/wii"
+    }
+   ]
+  },
+  "saves": [
+   ".var/app/org.DolphinEmu.dolphin-emu/data/dolphin-emu/GC",
+   ".var/app/org.DolphinEmu.dolphin-emu/data/dolphin-emu/Wii"
+  ]
+ },
+ {
+  "id": "pcsx2",
+  "name": "PCSX2",
+  "flatpak": "net.pcsx2.PCSX2",
+  "systems": [
+   "ps2"
+  ],
+  "launch": "run net.pcsx2.PCSX2 -batch {rom}",
+  "config": {
+   "path": ".var/app/net.pcsx2.PCSX2/config/PCSX2/inis/PCSX2.ini",
+   "format": "ini",
+   "entries": [
+    {
+     "section": "Folders",
+     "key": "Bios",
+     "value": "{bios}"
+    },
+    {
+     "section": "GameList",
+     "key": "RecursivePaths",
+     "value": "{roms}/ps2"
+    }
+   ]
+  },
+  "saves": [
+   ".var/app/net.pcsx2.PCSX2/config/PCSX2/memcards",
+   ".var/app/net.pcsx2.PCSX2/config/PCSX2/sstates"
+  ]
+ },
+ {
+  "id": "ppsspp",
+  "name": "PPSSPP",
+  "flatpak": "org.ppsspp.PPSSPP",
+  "systems": [
+   "psp"
+  ],
+  "launch": "run org.ppsspp.PPSSPP {rom}",
+  "config": {
+   "path": ".var/app/org.ppsspp.PPSSPP/config/ppsspp/PSP/SYSTEM/ppsspp.ini",
+   "format": "ini",
+   "entries": [
+    {
+     "section": "General",
+     "key": "CurrentDirectory",
+     "value": "{roms}/psp"
+    }
+   ]
+  },
+  "saves": [
+   ".var/app/org.ppsspp.PPSSPP/config/ppsspp/PSP/SAVEDATA",
+   ".var/app/org.ppsspp.PPSSPP/config/ppsspp/PSP/PPSSPP_STATE"
+  ]
+ },
+ {
+  "id": "duckstation",
+  "name": "DuckStation",
+  "flatpak": "org.duckstation.DuckStation",
+  "systems": [
+   "psx"
+  ],
+  "available": false,
+  "note": "Removed from Flathub (end of life). PlayStation games use the SwanStation core in RetroArch."
+ },
+ {
+  "id": "cemu",
+  "name": "Cemu",
+  "flatpak": "info.cemu.Cemu",
+  "systems": [
+   "wiiu"
+  ],
+  "launch": "run info.cemu.Cemu -f -g {rom}",
+  "note": "Set the game path inside Cemu: QuietDeck doesn't write its config because the Flatpak path isn't documented."
+ },
+ {
+  "id": "xemu",
+  "name": "xemu",
+  "flatpak": "app.xemu.xemu",
+  "systems": [
+   "xbox"
+  ],
+  "launch": "run app.xemu.xemu -full-screen -dvd_path {rom}",
+  "config": {
+   "path": ".var/app/app.xemu.xemu/data/xemu/xemu/xemu.toml",
+   "format": "toml",
+   "entries": [
+    {
+     "section": "sys.files",
+     "key": "bootrom_path",
+     "value": "{bios}/mcpx_1.0.bin"
+    },
+    {
+     "section": "sys.files",
+     "key": "flashrom_path",
+     "value": "{bios}/Complex_4627.bin"
+    },
+    {
+     "section": "sys.files",
+     "key": "eeprom_path",
+     "value": "{storage}/xemu/eeprom.bin"
+    },
+    {
+     "section": "sys.files",
+     "key": "hdd_path",
+     "value": "{storage}/xemu/xbox_hdd.qcow2"
+    }
+   ]
+  }
+ },
+ {
+  "id": "primehack",
+  "name": "PrimeHack",
+  "flatpak": "io.github.shiiion.primehack",
+  "systems": [
+   "gc",
+   "wii"
+  ],
+  "launch": "run io.github.shiiion.primehack -b -e {rom}"
+ },
+ {
+  "id": "rpcs3",
+  "name": "RPCS3",
+  "flatpak": "net.rpcs3.RPCS3",
+  "systems": [
+   "ps3"
+  ],
+  "launch": "run net.rpcs3.RPCS3 --no-gui {rom}"
+ },
+ {
+  "id": "ryubing",
+  "name": "Ryubing (Ryujinx)",
+  "flatpak": "io.github.ryubing.Ryujinx",
+  "systems": [
+   "switch"
+  ],
+  "launch": "run io.github.ryubing.Ryujinx {rom}"
+ },
+ {
+  "id": "azahar",
+  "name": "Azahar",
+  "flatpak": "org.azahar_emu.Azahar",
+  "systems": [
+   "n3ds"
+  ],
+  "launch": "run org.azahar_emu.Azahar {rom}"
+ },
+ {
+  "id": "melonds",
+  "name": "melonDS",
+  "flatpak": "net.kuribo64.melonDS",
+  "systems": [
+   "nds"
+  ],
+  "launch": "run net.kuribo64.melonDS {rom}"
+ },
+ {
+  "id": "mgba",
+  "name": "mGBA",
+  "flatpak": "io.mgba.mGBA",
+  "systems": [
+   "gba"
+  ],
+  "launch": "run io.mgba.mGBA {rom}"
+ },
+ {
+  "id": "flycast",
+  "name": "Flycast",
+  "flatpak": "org.flycast.Flycast",
+  "systems": [
+   "dreamcast"
+  ],
+  "launch": "run org.flycast.Flycast {rom}"
+ },
+ {
+  "id": "scummvm",
+  "name": "ScummVM",
+  "flatpak": "org.scummvm.ScummVM",
+  "systems": [
+   "scummvm"
+  ],
+  "launch": "run org.scummvm.ScummVM {rom}"
+ }
+]
