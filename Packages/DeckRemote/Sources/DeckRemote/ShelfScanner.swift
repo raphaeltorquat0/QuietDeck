@@ -19,9 +19,7 @@ public enum ShelfScanner {
 
     public static func scanFolder(_ root: URL, systems: [GameSystem], cache: Cache) async throws -> [ScanRecord] {
         let known = knownFolders(systems)
-        let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey], options: [.skipsHiddenFiles])
-        var urls: [URL] = []
-        while let item = walker?.nextObject() as? URL { urls.append(item) }
+        let urls = walk(root)
         var records: [ScanRecord] = []
         for url in urls {
             guard let v = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey]), v.isRegularFile == true else { continue }
@@ -47,6 +45,19 @@ public enum ShelfScanner {
     private static func headerlessSHA1(_ path: String) async throws -> String? {
         let r = try await LocalProcess.run("/bin/sh", ["-c", "tail -c +17 \"$1\" | /usr/bin/shasum -a 1", "sh", path])
         return r.ok ? r.stdout.split(separator: " ").first.map(String.init) : nil
+    }
+
+    /// O `enumerator` do Foundation não vê nada num CIFS montado no Linux e não avisa quando desiste.
+    /// Pasta ilegível fica de fora sozinha; link para pasta não é seguido, para não entrar em laço.
+    private static func walk(_ root: URL) -> [URL] {
+        var pending = [root], files: [URL] = []
+        while let folder = pending.popLast() {
+            let entries = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])) ?? []
+            for entry in entries {
+                if (try? entry.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true { pending.append(entry) } else { files.append(entry) }
+            }
+        }
+        return files
     }
 
     static func crc32(_ url: URL) throws -> String {
