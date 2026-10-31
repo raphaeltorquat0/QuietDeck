@@ -81,6 +81,9 @@ public enum JobExecutor {
                 progress(100, "Done")
             case let .importBIOS(local, sd): try await importBIOS(local, sd, c, transfer)
             case let .quickAction(action): try await action.run(r, password: c.password)
+            case .installQuietHome:
+                let result = try await QuietHomePlugin.install(runner: r, password: c.requirePassword())
+                progress(100, result == .installed ? "Quiet Home installed" : "Already installed")
             case let .applyTheme(user, model):
                 let result = try await QuietTheme.apply(r, user: user, model: model, password: c.password)
                 progress(100, result == .live ? "Theme applied" : "Applied after the next reboot")

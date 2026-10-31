@@ -32,4 +32,13 @@ extension IntegrationTests {
         let s = try await Decky.state(r)
         #expect(s.installed && s.serviceActive && s.version?.hasPrefix("v") == true)
     }
+
+    @Test(.enabled(if: Sim.hasHarness)) func quietHomeInstallsFromBundledZip() async throws {
+        let r = try await Sim.runner()
+        try await r.check(.sudo("rm -rf /home/deck/homebrew/plugins /home/deck/.local/share/quietdeck/quiet-home.sha256; mkdir -p /home/deck/homebrew/plugins; chown deck /home/deck/homebrew/plugins", password: Sim.password))
+        #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .installed)
+        #expect(try await QuietHomePlugin.isInstalled(r))
+        #expect(try await r.run("test -s ~/homebrew/plugins/QuietHome/dist/index.js").ok)
+        #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .alreadyCurrent)
+    }
 }

@@ -178,3 +178,33 @@ extension Decky {
         return try JSONDecoder().decode([StorePlugin].self, from: Data(data.map { $0 < 0x20 ? 0x20 : $0 }))
     }
 }
+
+/// A home própria do QuietDeck. O zip vai embutido no app e entra pelo mesmo caminho dos plugins da loja.
+public enum QuietHomePlugin {
+    public static let name = "Quiet Home"
+    static let marker = ".local/share/quietdeck/quiet-home.sha256"
+
+    public static func isInstalled(_ runner: any CommandRunner) async throws -> Bool {
+        try await Decky.plugins(runner).contains { $0.name == name }
+    }
+
+    public enum Outcome: Equatable, Sendable { case installed, alreadyCurrent }
+
+    /// O hash do zip decide: o `version` do plugin não muda a cada ajuste.
+    public static func install(runner: any CommandRunner, password: String) async throws -> Outcome {
+        guard let url = Bundle.deckKitResources?.appendingPathComponent("plugin/QuietHome.zip") else { throw CocoaError(.fileNoSuchFile) }
+        let zip = try Data(contentsOf: url)
+        let files = RemoteFiles(runner: runner)
+        let home = try await files.home()
+        let remote = "\(home)/.cache/quietdeck/QuietHome.zip"
+        try await files.write(zip, to: remote)
+        let hash = String(try await runner.check("sha256sum \(Shell.quote(remote))").trimmed.prefix(64))
+        let current = try await files.read("\(home)/\(marker)").map { String(decoding: $0, as: UTF8.self) }
+        if try await isInstalled(runner), current == hash { return .alreadyCurrent }
+        let user = try await runner.check("id -un").trimmed
+        try await runner.check(.sudo(Decky.installScript(name: name, url: "file://\(remote)", hash: hash, pluginsDir: home + "/homebrew/plugins", user: user), password: password, timeout: 120))
+        try await runner.check(.sudo("systemctl restart plugin_loader", password: password))
+        try await files.write(Data(hash.utf8), to: "\(home)/\(marker)")
+        return .installed
+    }
+}

@@ -121,6 +121,16 @@
     }
    }
   },
+  "A quieter Game Mode home with one row of covers. To go back to the native home, remove the plugin below.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uma home mais calma para o Game Mode, com uma linha de capas. Para voltar à home nativa, remova o plugin abaixo."
+     }
+    }
+   }
+  },
   "API key": {
    "localizations": {
     "pt-BR": {
@@ -1111,6 +1121,16 @@
     }
    }
   },
+  "Install Quiet Home": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar Quiet Home"
+     }
+    }
+   }
+  },
   "Installed": {
    "localizations": {
     "pt-BR": {
@@ -1587,6 +1607,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "O Quiet Clean deixa a home com uma linha de capas. No Deck, ligue o Big Art Mode em Configurações › Personalização › Tela inicial."
+     }
+    }
+   }
+  },
+  "Quiet Home": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quiet Home"
+     }
+    }
+   }
+  },
+  "Quiet Home installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quiet Home instalado"
      }
     }
    }
@@ -2477,6 +2517,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Atualizar caminhos"
+     }
+    }
+   }
+  },
+  "Update Quiet Home": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar Quiet Home"
      }
     }
    }
