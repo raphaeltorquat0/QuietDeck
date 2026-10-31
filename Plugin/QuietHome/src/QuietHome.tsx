@@ -3,24 +3,25 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { achievements, downloadPercent, Game, loadTabs, openStore, play, playedLine, requestDetails, Tab } from './steam'
 
 const styles = `
-.qh { position: absolute; inset: 0; background: #0b0d10; color: #fff; overflow: hidden; display: flex; flex-direction: column; }
+.qh { position: absolute; inset: 0; background: #0b0d10; color: #fff; overflow: hidden; overflow: clip; display: flex; flex-direction: column; }
 .qh-art { position: absolute; inset: 0; background-size: cover; background-position: center; }
 .qh-scrim { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,.86) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.3) 100%), linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.45) 55%, rgba(0,0,0,.45) 100%); }
-.qh-body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 56px 28px 44px; min-height: 0; }
+.qh-body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 56px 28px 44px; min-height: 0; min-width: 0; overflow: hidden; }
 .qh-info { flex: 1; min-height: 0; }
 .qh-title { font-size: 30px; font-weight: 600; line-height: 1.15; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 .qh-meta { font-size: 16px; font-weight: 500; line-height: 1.35; }
 .qh-play { display: inline-flex; margin-top: 12px; background: #fff; color: #0b0d10; border-radius: 8px; padding: 7px 20px; font-size: 16px; font-weight: 600; }
 .qh-play.gpfocus { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 7px rgba(0,0,0,.85); }
-.qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 8px 4px; overflow: visible; }
+.qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; }
+.qh-row::-webkit-scrollbar { display: none; }
 .qh-tile { flex: none; width: 86px; height: 129px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
-.qh-tile.gpfocus { transform: scale(1.12); transform-origin: bottom left; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
+.qh-tile.gpfocus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
 .qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; }
 .qh-hints { margin-left: auto; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.72); }
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .qh-tab.on { color: #fff; font-weight: 600; border-bottom-color: #fff; }
 .qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(255,255,255,.14); border-radius: 6px; padding: 3px 9px; }
-.qh-brand { position: absolute; top: 10px; left: 28px; font-size: 18px; font-weight: 600; }
+.qh-brand { position: absolute; top: 10px; left: 28px; font-size: 18px; font-weight: 600; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .qh-tile { transition: none; } }
 `
 
@@ -45,7 +46,11 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     })
     if (!header) return
     const previous = header.style.opacity
-    const show = () => { header.style.opacity = '1' }
+    const previousBackground = header.style.background
+    const show = () => {
+      header.style.opacity = '1'
+      header.style.background = 'transparent'
+    }
     show()
     const timer = setInterval(() => {
       show()
@@ -55,12 +60,15 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     return () => {
       clearInterval(timer)
       header.style.opacity = previous
+      header.style.background = previousBackground
     }
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => firstTile.current?.TakeFocus?.(), 150)
-    return () => clearTimeout(timer)
+    const timers = [150, 500, 1000, 2000].map((ms) => setTimeout(() => {
+      if (!root.current?.querySelector('.gpfocus')) firstTile.current?.TakeFocus?.()
+    }, ms))
+    return () => timers.forEach(clearTimeout)
   }, [tabIndex])
 
   useEffect(() => {

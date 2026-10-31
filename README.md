@@ -18,7 +18,7 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 
 > Independent project. **Not affiliated with, endorsed by or supported by Valve.** "Steam" and "Steam Deck" are trademarks of Valve Corporation, used only to indicate compatibility.
 
-> **Early release.** QuietDeck 0.1.0 is tested against a simulated Deck in Docker and, in part, on a Steam Deck LCD with SteamOS 3.9.5, including pairing, shortcuts in Game Mode and the Quiet theme. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has been checked on real hardware and what hasn't.
+> **Early release.** QuietDeck 0.1.0 is tested against a simulated Deck in Docker and, in part, on a Steam Deck LCD with SteamOS 3.9.5, including pairing, shortcuts in Game Mode and Quiet Home. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has been checked on real hardware and what hasn't.
 
 ## Features
 
@@ -32,7 +32,7 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 - **Compat tools:** install and remove GE-Proton and Proton-CachyOS
 - **Saves:** back up to and restore from a folder on your Mac
 - **Queue:** transfers and installs keep going in the background and survive closing the app
-- **Quiet theme:** a cleaner Game Mode home with a screensaver, boot video and sounds, and one click back to the Valve defaults
+- **Quiet Home:** a calmer Game Mode home with one row of covers, playtime and achievements, installed as a Decky plugin
 - **Command palette:** ⌘K finds every action, game, emulator and plugin
 - **Menu bar:** optional status, battery and update count
 - Several Decks, light and dark mode, English and Brazilian Portuguese

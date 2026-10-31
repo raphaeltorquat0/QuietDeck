@@ -34,7 +34,8 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 | Applying Quiet Clean without a password, then rebooting | Passed: loaded by CSS Loader, including over a light artwork |
 | **Restore Valve Defaults** on the Deck | Not run: only on the simulated Deck |
 | TabMaster tabs and sounds | Not run: TabMaster and Audio Loader aren't installed, and installing them needs `sudo` |
-| Quiet Home in memory: real data, D-pad left, right, up and down, L1 and R1, initial focus | Passed |
+| Quiet Home after a real Steam restart: lands on the new home, real data, no error screen | Passed |
+| Quiet Home D-pad left, right, up and down, L1 and R1, row scrolling | Passed with simulated input; physical controller not confirmed |
 | Quiet Home download indicator and Play button | Not run |
 | Loja tile inside Quiet Home | Rendered; opening it not run |
 | Boot video and screensaver on screen | Not confirmed |
@@ -107,6 +108,8 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Install Quiet Home from Decky: the home shows the hero, one row of covers and the tabs
 - [ ] The **Loja** tile is the last item of the row and opens the Store in Game Mode
 - [ ] Removing the plugin brings the native home back
+- [ ] Restart Steam with the plugin installed: it lands on Quiet Home with no Decky error screen
+- [ ] Full pass with the physical controller, including Play, A on a cover and the Steam and `...` buttons
 - [ ] The download indicator appears during an update, and only then
 - [ ] Text keeps its contrast over three light artworks: snow, sky and a white background
 - [ ] Full D-pad pass on the home, with no stuck or invisible focus: left and right along the row, up to the header, down, and the Steam and `...` buttons

@@ -15,5 +15,5 @@ First release. Everything below has been tested against a simulated Deck. [SMOKE
 - GE-Proton and Proton-CachyOS
 - Save backup and restore
 - Quick actions, a persistent job queue and an optional menu bar extra
-- Quiet theme for Game Mode: a cleaner home, screensaver, boot video and sounds, with one-click restore
+- Quiet Home, a Decky plugin that gives Game Mode a calmer home with real playtime and achievements
 - Command palette, cover grid, Liquid Glass and English and Brazilian Portuguese
