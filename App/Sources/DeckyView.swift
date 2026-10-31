@@ -68,12 +68,14 @@ struct DeckyView: View {
             Card(title: "Quiet Glass", symbol: "circle.lefthalf.filled") {
                 Text("Glass on the top and bottom bars, the home tabs, and the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.")
                     .font(.callout).foregroundStyle(.secondary)
-                if deck.hasQuietGlass {
-                    Button("Remove Quiet Glass") { model.enqueue(String(localized: "Remove Quiet Glass"), .removeQuietGlass) }
-                        .disabled(!deck.hasPassword)
-                } else {
+                HStack {
+                    // Aplicar de novo é como o Deck recebe a versão que veio neste app.
                     Button("Apply Quiet Glass") { model.enqueue(String(localized: "Apply Quiet Glass"), .applyQuietGlass) }
                         .buttonStyle(.glassProminent).disabled(deck.decky?.installed != true || !deck.hasPassword)
+                    if deck.hasQuietGlass {
+                        Button("Remove Quiet Glass") { model.enqueue(String(localized: "Remove Quiet Glass"), .removeQuietGlass) }
+                            .disabled(!deck.hasPassword)
+                    }
                 }
             }
             Card(title: "Plugin Store", symbol: "bag") {

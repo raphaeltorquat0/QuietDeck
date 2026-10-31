@@ -1,11 +1,11 @@
 {
   "name": "QuietTune",
   "author": "Raphael Torquato",
-  "flags": [],
+  "flags": ["root"],
   "api_version": 1,
   "publish": {
     "tags": ["ui"],
-    "description": "Keeps Quiet Glass out of the way while a game runs.",
+    "description": "Keeps Quiet Glass out of the way while a game runs, and sets TDP and GPU clock within factory limits.",
     "image": "https://raw.githubusercontent.com/raphaeltorquat0/QuietDeck/main/docs/screenshots/overview-dark.png"
   }
 }

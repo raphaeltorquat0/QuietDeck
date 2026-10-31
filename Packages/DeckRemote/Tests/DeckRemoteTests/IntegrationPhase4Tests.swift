@@ -59,7 +59,10 @@ extension IntegrationTests {
         #expect(try await r.check("cat ~/homebrew/themes/Obsidian/config_USER.json").stdout.contains("true"))
         // Reaplicar não muda nada.
         try await QuietTheme.applyGlass(r, password: Sim.password)
+        // Fora de um Deck, `performance.py` não escreve em sysfs, mas o perfil tem de sair com o plugin.
+        try await r.check(.sudo("mkdir -p /home/deck/homebrew/settings/QuietTune; echo '{\"tdp\": 8, \"gpu\": \"auto\"}' > /home/deck/homebrew/settings/QuietTune/performance.json", password: Sim.password))
         try await QuietTheme.removeGlass(r, password: Sim.password)
+        #expect(try await !r.run("test -e ~/homebrew/settings/QuietTune/performance.json").ok)
         #expect(try await !QuietTheme.hasGlass(r))
         #expect(try await !BundledPlugin.quietTune.isInstalled(r))
         #expect(try await r.check("cat ~/homebrew/themes/Obsidian/config_USER.json").stdout.contains("true"))

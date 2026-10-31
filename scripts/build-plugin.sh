@@ -8,8 +8,9 @@ for NAME in QuietHome QuietTune; do
   ./node_modules/.bin/rollup -c
   STAGE=$(mktemp -d)
   mkdir -p "$STAGE/$NAME/dist"
-  cp plugin.json package.json "$STAGE/$NAME/"
-  if [ -f main.py ]; then cp main.py "$STAGE/$NAME/"; fi
+  cp plugin.json package.json main.py "$STAGE/$NAME/"
+  if [ -d py_modules ]; then cp -R py_modules "$STAGE/$NAME/"; fi
+  find "$STAGE" -name __pycache__ -prune -exec rm -rf {} +
   cp dist/index.js "$STAGE/$NAME/dist/"
   OUT="$ROOT/Packages/DeckKit/Sources/DeckKit/Resources/plugin/$NAME.zip"
   mkdir -p "$(dirname "$OUT")"

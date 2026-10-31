@@ -162,6 +162,7 @@ public enum Decky {
     public static func removePlugin(name: String, runner: any CommandRunner, password: String) async throws -> Outcome {
         guard try await plugins(runner).contains(where: { $0.name == name }) else { return .notInstalled }
         let home = try await RemoteFiles(runner: runner).home()
+        if name == BundledPlugin.quietTune.name { try await runner.check(.sudo(BundledPlugin.quietTuneUninstall(home: home), password: password)) }
         try await runner.check(.sudo(removeScript(name: name, pluginsDir: home + "/homebrew/plugins"), password: password))
         try await runner.check(.sudo("systemctl restart plugin_loader", password: password))
         return .done
@@ -188,6 +189,12 @@ public struct BundledPlugin: Sendable {
 
     public static let quietHome = BundledPlugin(name: "Quiet Home", folder: "QuietHome", marker: ".local/share/quietdeck/quiet-home.sha256")
     public static let quietTune = BundledPlugin(name: "QuietTune", folder: "QuietTune", marker: ".local/share/quietdeck/quiet-tune.sha256")
+
+    /// Apagar a pasta não dispara o `_uninstall` do Decky, então o perfil de desempenho sai antes.
+    static func quietTuneUninstall(home: String) -> String {
+        let script = Shell.quote("\(home)/homebrew/plugins/QuietTune/py_modules/performance.py")
+        return "if [ -e \(script) ]; then python3 \(script) uninstall \(Shell.quote("\(home)/homebrew/settings/QuietTune/performance.json")); fi"
+    }
 
     public func isInstalled(_ runner: any CommandRunner) async throws -> Bool {
         try await Decky.plugins(runner).contains { $0.name == name }
