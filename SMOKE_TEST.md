@@ -31,7 +31,11 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 | The pairing wizard in the app | Not run: the request was sent by hand |
 | Pairing with a password, and setting one from the Mac | Not run: this Deck has no password |
 | Anything with `sudo`: Decky install, plugins, reboot, shut down | Not run, same reason |
-| Applying and restoring the theme on the Deck | Not run |
+| Applying Quiet Clean without a password, then rebooting | Passed: loaded by CSS Loader, including over a light artwork |
+| **Restore Valve Defaults** on the Deck | Not run: only on the simulated Deck |
+| TabMaster tabs and sounds | Not run: TabMaster and Audio Loader aren't installed, and installing them needs `sudo` |
+| Loja tile as the last item of the home row | Not working: the native row only shows recent games, so the tile stays in the library |
+| Boot video and screensaver on screen | Not confirmed |
 | microSD, OLED, BIOS import, artwork, CHD conversion on a real Deck | Not run |
 | App UI connected to a real Deck | Not run |
 

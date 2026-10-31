@@ -87,6 +87,22 @@ enum Real {
         #expect(try await Real.names().contains(s.name))
     }
 
+    @Test(.enabled(if: Real.step("theme"))) func applyThemeWithoutPassword() async throws {
+        let r = Real.runner
+        let user = try await Real.user()
+        let health = try await QuietTheme.health(r)
+        print(health)
+        #expect(health.isHealthy)
+        let model = try await DeviceProbe.read(r).model
+        #expect(try await QuietTheme.apply(r, user: user, model: model, password: nil) == .afterReboot)
+        #expect(try await Real.steam.removeShortcuts(names: ["QuietDeck Test Desktop", "QuietDeck Test Game Mode"], user: user))
+        try await Task.sleep(for: .seconds(20))
+        #expect(try await Real.steam.running())
+        let names = try await Real.names()
+        print(names)
+        #expect(names.contains(QuietTheme.storeTitle) && !names.contains("QuietDeck Test Desktop"))
+    }
+
     /// A prova definitiva: o Steam relançado precisa ter lido o arquivo, senão o perde ao sair de novo.
     @Test(.enabled(if: Real.step("survive"))) func shortcutsSurviveAnotherSteamCycle() async throws {
         try await Real.steam.restart()

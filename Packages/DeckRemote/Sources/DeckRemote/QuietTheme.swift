@@ -50,7 +50,7 @@ public enum QuietTheme {
             print(json.dumps(names))
         """#
         return "python3 -c \(Shell.quote(python)) " + selectors.map(Shell.quote).joined(separator: " ")
-            + "; systemctl is-active plugin_loader; grep -h -m1 '\"version\"' ~/.steam/root/package/steam_client_*.manifest 2>/dev/null | tr -dc 0-9; echo"
+            + "; systemctl is-active plugin_loader; grep -h -m1 '\"version\"' ~/.steam/root/package/steam_client_*.manifest 2>/dev/null | head -1 | tr -dc 0-9; echo"
     }
 
     public static func parseHealth(_ text: String) -> ThemeHealth {
