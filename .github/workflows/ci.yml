@@ -16,7 +16,7 @@ jobs:
 
   # Runners macOS não têm Docker: a integração roda no Linux, com o mesmo código de transporte.
   integration:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: swift-actions/setup-swift@v2

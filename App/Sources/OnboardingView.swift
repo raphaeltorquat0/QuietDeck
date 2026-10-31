@@ -29,7 +29,7 @@ struct OnboardingView: View {
                     Button("Continue") { step += 1 }.keyboardShortcut(.defaultAction).disabled(host.isEmpty)
                 } else {
                     Button(testing ? "Testing…" : "Connect") { Task { await pair() } }
-                        .keyboardShortcut(.defaultAction).disabled(testing || password.isEmpty)
+                        .keyboardShortcut(.defaultAction).disabled(testing)
                 }
             }
         }
@@ -90,8 +90,12 @@ struct OnboardingView: View {
         if let existing = model.decks.first(where: { $0.host == host }) { deck = existing }
         do {
             try await Pairing.ensureKey(at: Paths.key)
-            try await Pairing.installKey(config: AppModel.config(deck), password: password)
-            Keychain.set(password, for: deck.id.uuidString)
+            // Se a chave já estiver no Deck, a senha só serve para o sudo e pode ficar para depois.
+            let config = AppModel.config(deck)
+            if (try? await SSHRunner(config: config).run("true").ok) != true {
+                try await Pairing.installKey(config: config, password: password)
+            }
+            if !password.isEmpty { Keychain.set(password, for: deck.id.uuidString) }
             model.add(deck)
             dismiss()
         } catch {
