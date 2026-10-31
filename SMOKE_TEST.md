@@ -133,7 +133,12 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 
 Needs a collection on your network and a paired Deck. Nothing below has been run on a real Deck yet.
 
-- [ ] Add a source in Settings › Shelf Sources (folder, SMB/NFS mount, SSH server or the service), then Scan. Your games show up with the right systems, and copies count as one.
+- [ ] Add a source in Settings › Shelf Sources, test the connection and scan. Repeat for each type you use: folder, SMB, NFS, SFTP/SSH, WebDAV, S3 (Backblaze B2, MinIO or Cloudflare R2), RomM and the service.
+- [ ] Turn off one server. Its status turns red in the sidebar, and a game it shares with another source installs from that other one.
+- [ ] Use a wrong password. The status says invalid credentials, not offline.
+- [ ] From outside your network, connect to a source by its Tailscale address.
+- [ ] Map a folder that doesn't follow the expected layout.
+- [ ] Scan. Your games show up with the right systems, and copies count as one.
 - [ ] Add ScreenScraper or IGDB credentials and scan again. Descriptions, covers and hero art show up.
 - [ ] With a DAT in the folder shown in the Stocking Guide, a matching game shows **Matches your DAT**.
 - [ ] Install 3 games from the collection, with **Add to Steam** on: one cartridge, one multi-track disc and one over the direct server → Deck path.

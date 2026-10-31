@@ -117,11 +117,6 @@ public enum ShelfScanner {
         return try r.stdout.split(whereSeparator: \.isNewline).map { try JSONDecoder().decode(ScanRecord.self, from: Data($0.utf8)) }
     }
 
-    /// Com o serviço, o índice já está pronto no servidor.
-    public static func scanService(_ url: String, token: String) async throws -> [ScanRecord] {
-        try await PublicAPI.get(url.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/index", headers: ["Authorization": "Bearer \(token)"])
-    }
-
     /// DATs fornecidos pelo usuário ficam em `~/Library/Application Support/QuietDeck/dats`.
     public static func loadDats(_ folder: URL) -> DatIndex {
         var index = DatIndex()

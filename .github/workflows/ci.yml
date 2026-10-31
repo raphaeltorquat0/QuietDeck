@@ -34,7 +34,7 @@ jobs:
         run: scripts/fetch-fixtures.sh
       - name: Servidor de acervo
         run: |
-          make shelf-harness
+          make source-servers romm-server
           mkdir -p /tmp/qd-smb
           for i in $(seq 1 20); do
             sudo mount -t cifs //127.0.0.1/acervo /tmp/qd-smb -o port=4445,username=acervo,password=acervo-password,ro,uid=$(id -u),gid=$(id -g) && break
@@ -45,7 +45,7 @@ jobs:
       - name: Testes de integração
         run: |
           QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
-          QUIETDECK_TEST_SHELF=1 QUIETDECK_TEST_SMB=/tmp/qd-smb \
+          QUIETDECK_TEST_SHELF=1 QUIETDECK_TEST_SMB=/tmp/qd-smb QUIETDECK_TEST_SOURCES=1 QUIETDECK_TEST_ROMM_TOKEN=$(cat /tmp/qd-romm-token) \
             swift test --filter Integration --no-parallel
       # O instalador oficial consulta github.com e a API do GitHub: pode falhar por limite de taxa do runner.
       - name: Instalador oficial do Decky

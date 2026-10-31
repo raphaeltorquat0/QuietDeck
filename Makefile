@@ -6,7 +6,7 @@ DEV_DD   := .build/xcode-debug
 HARNESS_BASE := $(if $(filter arm64 aarch64,$(shell uname -m)),menci/archlinuxarm:base,archlinux:latest)
 
 .DEFAULT_GOAL := help
-.PHONY: help install dev test harness shelf-harness shelf-mount integration release
+.PHONY: help install dev test harness shelf-harness source-servers romm-server shelf-mount integration release
 
 help: ## Lista os alvos
 	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-12s %s\n", $$1, $$2}'
@@ -40,13 +40,24 @@ shelf-harness: ## Sobe o servidor de acervo com SSH, SMB e o serviço da Estante
 	-docker network connect quietdeck-net quietdeck-sim
 	docker run -d --name quietdeck-shelf --network quietdeck-net -p 127.0.0.1:2223:22 -p 127.0.0.1:4445:445 -p 127.0.0.1:8766:8766 quietdeck-shelf
 
+source-servers: shelf-harness ## Sobe WebDAV e S3 sobre o mesmo acervo do servidor de testes (Docker)
+	-docker rm -f quietdeck-webdav quietdeck-s3
+	docker run -d --name quietdeck-webdav --volumes-from quietdeck-shelf -p 127.0.0.1:8767:8080 rclone/rclone \
+	  serve webdav /srv/acervo --addr :8080 --user acervo --pass acervo-password --read-only
+	docker run -d --name quietdeck-s3 --volumes-from quietdeck-shelf -p 127.0.0.1:8768:8080 rclone/rclone \
+	  serve s3 /srv --addr :8080 --auth-key acervo,acervo-password
+
+romm-server: shelf-harness ## Sobe um RomM real, com MariaDB, sobre o acervo de testes (Docker)
+	docker compose -f Harness/romm/compose.yaml up -d --wait
+	Harness/romm/seed.sh
+
 shelf-mount: ## Monta o compartilhamento SMB do servidor de acervo em /tmp/qd-smb
 	mkdir -p /tmp/qd-smb
 	-umount /tmp/qd-smb 2>/dev/null
 	@for i in $$(seq 1 20); do mount_smbfs '//acervo:acervo-password@127.0.0.1:4445/acervo' /tmp/qd-smb && exit 0; sleep 0.5; done; exit 1
 
-integration: harness shelf-harness shelf-mount ## Roda os testes de integração contra o Deck simulado
-	QUIETDECK_TEST_SMB=/tmp/qd-smb QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
+integration: harness source-servers romm-server shelf-mount ## Roda os testes de integração contra o Deck simulado
+	QUIETDECK_TEST_SOURCES=1 QUIETDECK_TEST_ROMM_TOKEN=$$(cat /tmp/qd-romm-token) QUIETDECK_TEST_SMB=/tmp/qd-smb QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
 	  QUIETDECK_TEST_CONTAINER=quietdeck-sim QUIETDECK_TEST_SHELF=1 swift test --filter Integration --no-parallel
 
 release: ## Build Release universal e .dmg ad-hoc em dist/

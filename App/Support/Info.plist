@@ -4,17 +4,17 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>pt-BR</string>
-	</array>
 	<key>CFBundleDisplayName</key>
 	<string>QuietDeck</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>pt-BR</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -31,10 +31,15 @@
 	<array>
 		<string>_ssh._tcp</string>
 		<string>_steamos-devkit._tcp</string>
+		<string>_smb._tcp</string>
+		<string>_nfs._tcp</string>
+		<string>_webdav._tcp</string>
+		<string>_webdavs._tcp</string>
+		<string>_sftp-ssh._tcp</string>
 	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>QuietDeck finds your Steam Deck on the local network and connects to it over SSH.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Independent project, not affiliated with Valve.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>QuietDeck finds your Steam Deck on the local network and connects to it over SSH.</string>
 </dict>
 </plist>

@@ -30,6 +30,8 @@ import SwiftUI
                 await shot(ShelfDetailPreview(deck: deck, game: game).environment(model), title: "Shelf", size: NSSize(width: 900, height: 560), appearance: appearance.1,
                            to: dir.appending(path: "shelf-detail-\(appearance.0).png"))
             }
+            await shot(SourceWizard().environment(model), title: "Add Source", size: NSSize(width: 520, height: 560), appearance: appearance.1,
+                       to: dir.appending(path: "source-wizard-\(appearance.0).png"))
             await shot(ScrollView { ShelfGuide().padding(20) }.environment(model), title: "Shelf", size: NSSize(width: 900, height: 700), appearance: appearance.1,
                        to: dir.appending(path: "shelf-guide-\(appearance.0).png"))
             model.showOnboarding = false

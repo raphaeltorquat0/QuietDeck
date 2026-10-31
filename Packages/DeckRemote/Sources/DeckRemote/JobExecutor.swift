@@ -7,24 +7,22 @@ public struct JobContext: Sendable {
     var catalog: Catalog
     var password: String?
     var workRoot: URL
-    /// Credenciais da Estante: chave do servidor SSH e token do serviço.
-    var shelfKey: String?
-    var shelfToken: String?
+    /// Cliente de cada fonte, com o segredo lido do Keychain só na hora do uso.
+    var shelfClient: (@Sendable (LibrarySource) -> SourceClient)?
     /// Endereço do serviço visto pelo Deck, quando difere do visto pelo Mac.
     var deckServiceURL: String?
     /// A senha do Keychain deixou de valer: o app apaga a cópia para pedir de novo.
     var onSudoRejected: @Sendable () async -> Void
 
     public init(runner: any CommandRunner, config: SSHConfig, catalog: Catalog, password: String?, workRoot: URL,
-                shelfKey: String? = nil, shelfToken: String? = nil, deckServiceURL: String? = nil,
+                shelfClient: (@Sendable (LibrarySource) -> SourceClient)? = nil, deckServiceURL: String? = nil,
                 onSudoRejected: @escaping @Sendable () async -> Void) {
         self.runner = runner
         self.config = config
         self.catalog = catalog
         self.password = password
         self.workRoot = workRoot
-        self.shelfKey = shelfKey
-        self.shelfToken = shelfToken
+        self.shelfClient = shelfClient
         self.deckServiceURL = deckServiceURL
         self.onSudoRejected = onSudoRejected
     }
@@ -126,7 +124,7 @@ public enum JobExecutor {
 
     private static func installer(_ c: JobContext) -> ShelfInstaller {
         ShelfInstaller(runner: c.runner, config: c.config, catalog: c.catalog, workRoot: c.workRoot,
-                       sshKey: c.shelfKey, token: c.shelfToken, deckServiceURL: c.deckServiceURL)
+                       client: c.shelfClient, deckServiceURL: c.deckServiceURL)
     }
 
     private static func note(_ outcome: Flatpaks.Outcome, _ progress: JobQueue.Progress) throws {

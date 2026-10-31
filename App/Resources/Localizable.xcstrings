@@ -41,6 +41,16 @@
     }
    }
   },
+  "%@ files fit more than one system.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ arquivos servem em mais de um sistema."
+     }
+    }
+   }
+  },
   "%@ files fit more than one system. Move them into a system folder.": {
    "localizations": {
     "pt-BR": {
@@ -81,6 +91,16 @@
     }
    }
   },
+  "%@ isn't available.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não está disponível."
+     }
+    }
+   }
+  },
   "%@ isn't in a ROM folder, so it wasn't deleted.": {
    "localizations": {
     "pt-BR": {
@@ -117,6 +137,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "%@ recusou suas credenciais."
+     }
+    }
+   }
+  },
+  "%lld files fit more than one system.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%lld arquivos servem em mais de um sistema."
      }
     }
    }
@@ -221,12 +251,32 @@
     }
    }
   },
+  "API token": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Token de API"
+     }
+    }
+   }
+  },
   "About": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Sobre"
+     }
+    }
+   }
+  },
+  "Access key": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chave de acesso"
      }
     }
    }
@@ -291,12 +341,32 @@
     }
    }
   },
+  "Add Source…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar fonte…"
+     }
+    }
+   }
+  },
   "Add a Source…": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Adicionar fonte…"
+     }
+    }
+   }
+  },
+  "Add this public key to the server's authorized_keys.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicione esta chave pública ao authorized_keys do servidor."
      }
     }
    }
@@ -357,6 +427,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Adicionado ao Steam"
+     }
+    }
+   }
+  },
+  "Address": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Endereço"
      }
     }
    }
@@ -607,6 +687,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Bateria em %lld por cento"
+     }
+    }
+   }
+  },
+  "Bucket": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bucket"
      }
     }
    }
@@ -881,6 +971,16 @@
     }
    }
   },
+  "Couldn't download %@.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível baixar %@."
+     }
+    }
+   }
+  },
   "Couldn't reach %@.": {
    "localizations": {
     "pt-BR": {
@@ -917,6 +1017,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Criar pastas de emulação"
+     }
+    }
+   }
+  },
+  "Create a read-only token in RomM with the roms.read and platforms.read scopes.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Crie no RomM um token só de leitura com os escopos roms.read e platforms.read."
      }
     }
    }
@@ -1161,6 +1271,16 @@
     }
    }
   },
+  "Endpoint": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Endpoint"
+     }
+    }
+   }
+  },
   "Enter the password of the deck user. It stays in your Keychain.": {
    "localizations": {
     "pt-BR": {
@@ -1187,6 +1307,36 @@
      "stringUnit": {
       "state": "translated",
       "value": "O Flatpak terminou, mas o estado do app não mudou: %@"
+     }
+    }
+   }
+  },
+  "Folder": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pasta"
+     }
+    }
+   }
+  },
+  "Folder or external disk": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pasta ou disco externo"
+     }
+    }
+   }
+  },
+  "Folders": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pastas"
      }
     }
    }
@@ -1221,6 +1371,16 @@
     }
    }
   },
+  "Found on Your Network": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Encontrados na sua rede"
+     }
+    }
+   }
+  },
   "Free Windows tool for reading discs to an image.": {
    "localizations": {
     "pt-BR": {
@@ -1237,6 +1397,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Grátis e legal"
+     }
+    }
+   }
+  },
+  "From %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "De %@"
      }
     }
    }
@@ -1551,6 +1721,16 @@
     }
    }
   },
+  "Invalid credentials": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Credenciais inválidas"
+     }
+    }
+   }
+  },
   "Invalid file name: %@": {
    "localizations": {
     "pt-BR": {
@@ -1641,6 +1821,16 @@
     }
    }
   },
+  "Map Folders…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mapear pastas…"
+     }
+    }
+   }
+  },
   "Matches your DAT": {
    "localizations": {
     "pt-BR": {
@@ -1657,6 +1847,36 @@
      "stringUnit": {
       "state": "translated",
       "value": "Faltando"
+     }
+    }
+   }
+  },
+  "Move down": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Descer"
+     }
+    }
+   }
+  },
+  "Move up": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Subir"
+     }
+    }
+   }
+  },
+  "NFS": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "NFS"
      }
     }
    }
@@ -1767,6 +1987,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Nenhum resultado"
+     }
+    }
+   }
+  },
+  "No source with this game is online.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma fonte com este jogo está online."
      }
     }
    }
@@ -1897,6 +2127,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "No Deck, aperte o botão STEAM, vá em Configurações › Sistema e ligue **Ativar Modo de Desenvolvedor**."
+     }
+    }
+   }
+  },
+  "Online": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Online"
      }
     }
    }
@@ -2041,6 +2281,16 @@
     }
    }
   },
+  "Password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Senha"
+     }
+    }
+   }
+  },
   "Password of the deck user": {
    "localizations": {
     "pt-BR": {
@@ -2107,6 +2357,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Aponte o QuietDeck para o seu acervo, neste Mac ou num servidor da sua rede."
+     }
+    }
+   }
+  },
+  "Prefix": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Prefixo"
      }
     }
    }
@@ -2251,6 +2511,16 @@
     }
    }
   },
+  "QuietDeck service": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Serviço do QuietDeck"
+     }
+    }
+   }
+  },
   "Read discs on a computer with an optical drive. Keep every track together with its .cue file.": {
    "localizations": {
     "pt-BR": {
@@ -2297,6 +2567,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Atualizar (⌘R)"
+     }
+    }
+   }
+  },
+  "Region": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Região"
      }
     }
    }
@@ -2441,12 +2721,52 @@
     }
    }
   },
+  "RomM server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Servidor RomM"
+     }
+    }
+   }
+  },
   "Running": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Em execução"
+     }
+    }
+   }
+  },
+  "S3-compatible bucket": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bucket compatível com S3"
+     }
+    }
+   }
+  },
+  "SFTP/SSH": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "SFTP/SSH"
+     }
+    }
+   }
+  },
+  "SMB": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "SMB"
      }
     }
    }
@@ -2621,6 +2941,16 @@
     }
    }
   },
+  "Secret key": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chave secreta"
+     }
+    }
+   }
+  },
   "Section": {
    "localizations": {
     "pt-BR": {
@@ -2711,6 +3041,16 @@
     }
    }
   },
+  "Server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Servidor"
+     }
+    }
+   }
+  },
   "Service": {
    "localizations": {
     "pt-BR": {
@@ -2791,6 +3131,16 @@
     }
    }
   },
+  "Share path": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Caminho do compartilhamento"
+     }
+    }
+   }
+  },
   "Shelf": {
    "localizations": {
     "pt-BR": {
@@ -2861,12 +3211,42 @@
     }
    }
   },
+  "Source": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fonte"
+     }
+    }
+   }
+  },
   "Source code": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Código-fonte"
+     }
+    }
+   }
+  },
+  "Sources": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fontes"
+     }
+    }
+   }
+  },
+  "Sources are always your own servers. Tailscale addresses work wherever a host is asked for, so you never need to expose a server to the internet.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fontes são sempre servidores seus. Endereços Tailscale funcionam em qualquer campo de servidor, então você nunca precisa expor um servidor à internet."
      }
     }
    }
@@ -3061,6 +3441,16 @@
     }
    }
   },
+  "Test Connection": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Testar conexão"
+     }
+    }
+   }
+  },
   "Testing…": {
    "localizations": {
     "pt-BR": {
@@ -3161,6 +3551,16 @@
     }
    }
   },
+  "The server must allow connections from unprivileged ports, which is the `insecure` export option on Linux.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O servidor precisa aceitar conexões de portas não privilegiadas, a opção de exportação `insecure` no Linux."
+     }
+    }
+   }
+  },
   "The theme doesn't match this Steam client. Update QuietDeck, then apply it again.": {
    "localizations": {
     "pt-BR": {
@@ -3257,6 +3657,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Para conferir seus arquivos, coloque nesta pasta DATs do No-Intro ou Redump obtidos por você e procure de novo:"
+     }
+    }
+   }
+  },
+  "Token": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Token"
      }
     }
    }
@@ -3441,6 +3851,16 @@
     }
    }
   },
+  "User": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuário"
+     }
+    }
+   }
+  },
   "Valve defaults restored": {
    "localizations": {
     "pt-BR": {
@@ -3477,6 +3897,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Aguardando o Deck"
+     }
+    }
+   }
+  },
+  "WebDAV": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "WebDAV"
+     }
+    }
+   }
+  },
+  "When a game is in several sources, QuietDeck installs from the highest one that's online.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quando um jogo está em várias fontes, o QuietDeck instala pela mais alta que estiver online."
      }
     }
    }

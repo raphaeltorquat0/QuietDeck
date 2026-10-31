@@ -10,7 +10,7 @@ cd Service/shelf
 ACERVO=/srv/games QUIET_SHELF_TOKEN=$(openssl rand -hex 32) docker compose up -d --build
 ```
 
-Keep the token: it goes in QuietDeck › Settings › Shelf Sources, with `http://<server>:8766`.
+Keep the token: choose **QuietDeck service** in Settings › Shelf Sources › Add Source, with `http://<server>:8766`.
 The collection is laid out as `<collection>/<system>/<files>`, and the first scan hashes everything,
 so it can take hours on a large collection. Games show up while it runs.
 

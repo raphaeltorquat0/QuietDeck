@@ -26,7 +26,13 @@ struct IntegrationShelfTests {
         SSHConfig(host: "127.0.0.1", port: 2223, user: "acervo", identityFile: Self.key,
                   knownHostsFile: Sim.dir.appendingPathComponent("known hosts").path)
     }
-    var source: ShelfSource { .ssh(host: "127.0.0.1", user: "acervo", port: 2223, path: Self.root) }
+    var source: LibrarySource { LibrarySource(name: "SSH", priority: 0, kind: .ssh(host: "127.0.0.1", user: "acervo", port: 2223, path: Self.root)) }
+    var service: LibrarySource { LibrarySource(name: "Serviço", priority: 0, kind: .service(url: Self.serviceURL)) }
+
+    func client(_ s: LibrarySource) -> SourceClient {
+        SourceClient(source: s, secret: SourceSecret(user: "acervo", password: "acervo-password", token: Self.token), sshKey: Self.key,
+                     knownHosts: Sim.dir.appendingPathComponent("known hosts").path)
+    }
 
     func catalog() throws -> Catalog { try Catalog.load() }
 
@@ -36,7 +42,7 @@ struct IntegrationShelfTests {
 
     func installer(_ r: SSHRunner, service: Bool = false) throws -> ShelfInstaller {
         ShelfInstaller(runner: r, config: Sim.config, catalog: try catalog(), workRoot: Sim.dir.appendingPathComponent("work"),
-                       sshKey: Self.key, token: service ? Self.token : nil, deckServiceURL: service ? "http://quietdeck-shelf:8766" : nil)
+                       client: { client($0) }, deckServiceURL: service ? "http://quietdeck-shelf:8766" : nil)
     }
 
     @Test func remoteScanIsIncrementalAndDeduplicates() async throws {
@@ -96,11 +102,11 @@ struct IntegrationShelfTests {
     @Test func serverSendsDirectlyToTheDeck() async throws {
         try await Self.seeded.value
         let deck = try await Sim.runner()
-        let records = try await ShelfScanner.scanService(Self.serviceURL, token: Self.token)
+        let records = try await client(service).scan(systems: try catalog().systems, cache: [:])
         let item = try #require(try items(records).first { $0.title == "Gamma" })
         #expect(ShelfInstaller.canGoDirect(item, system: try #require(try catalog().system("gb"))))
         let install = try installer(deck, service: true)
-        let files = try await install.install(item, from: .service(url: Self.serviceURL), paths: try await Emulation.paths(deck)) { _, _ in }
+        let files = try await install.install(item, from: service, paths: try await Emulation.paths(deck)) { _, _ in }
         #expect(try await deck.run("sha1sum \(Shell.quote(files[0]))").stdout.hasPrefix(item.id))
         #expect(try await deck.run("ls \(Shell.quote((files[0] as NSString).deletingLastPathComponent)) | grep -c quietdeck-part").trimmed == "0")
         // O token não pode aparecer na linha de comando do Deck.
@@ -139,7 +145,7 @@ struct IntegrationShelfTests {
         let records = try await ShelfScanner.scanFolder(URL(fileURLWithPath: mount), systems: systems, cache: [:])
         let item = try #require(try items(records).first { $0.title == "Alpha" }, "\(records.map(\.path))")
         let install = try installer(deck)
-        let files = try await install.install(item, from: .folder(path: mount), paths: try await Emulation.paths(deck)) { _, _ in }
+        let files = try await install.install(item, from: LibrarySource(name: "SMB", priority: 0, kind: .folder(path: mount)), paths: try await Emulation.paths(deck)) { _, _ in }
         #expect(try await deck.run("sha1sum \(Shell.quote(files[0]))").stdout.hasPrefix(item.id))
         try await install.remove(item, user: nil)
     }

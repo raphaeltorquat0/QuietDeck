@@ -15,6 +15,7 @@
 		399CF5F5FBA581D6649E35C6 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A0E044FD857F25E417E15 /* AppModel.swift */; };
 		3D84AF8A2E3773D1C800DE6C /* DeckyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9885AC6760F6296C91E1D4C /* DeckyView.swift */; };
 		5839941C038A2EAF791D431B /* PressKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E9D44754586A848839F1CA3 /* PressKit.swift */; };
+		62A591F7E81786B0C1C9EDD6 /* SourceWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0EA364A5185592462AE79B /* SourceWizard.swift */; };
 		62F64A63D6E297F4DBCE0486 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 58392D1F0F21495CB02ACB99 /* InfoPlist.xcstrings */; };
 		6B0CB748054D910BDD33902A /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5027EFFAC24532706AB4385A /* OverviewView.swift */; };
 		6FA9A1155FE146F14C4AB7C8 /* ShelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA98D57FF1D2391494747444 /* ShelfView.swift */; };
@@ -35,6 +36,7 @@
 /* Begin PBXFileReference section */
 		03F5D5F65D7F96FA583529F2 /* Covers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Covers.swift; sourceTree = "<group>"; };
 		04930C7F773D76CA474E60C7 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		0E0EA364A5185592462AE79B /* SourceWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceWizard.swift; sourceTree = "<group>"; };
 		13D77E290910009C3462E5D7 /* EmulatorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorsView.swift; sourceTree = "<group>"; };
 		1DC4C2BDF941EFBD008837F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1E068CA791EADBB729EEC4BF /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				931FDC56FC83F67AC0C9F159 /* QuietDeckApp.swift */,
 				F45CCE6B8D97DAE578506970 /* SettingsView.swift */,
 				DA98D57FF1D2391494747444 /* ShelfView.swift */,
+				0E0EA364A5185592462AE79B /* SourceWizard.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -237,6 +240,7 @@
 				80E50CC53D41757EE02152B0 /* QuietDeckApp.swift in Sources */,
 				DCBB7BFF8AF19AC129C5EA8E /* SettingsView.swift in Sources */,
 				6FA9A1155FE146F14C4AB7C8 /* ShelfView.swift in Sources */,
+				62A591F7E81786B0C1C9EDD6 /* SourceWizard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

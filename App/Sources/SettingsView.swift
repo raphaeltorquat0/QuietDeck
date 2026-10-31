@@ -8,12 +8,7 @@ struct SettingsView: View {
     @State private var apiKey = Keychain.password(for: AppModel.steamGridKeyAccount) ?? ""
     @State private var password = ""
     @State private var choosing = false
-    @State private var choosingShelf = false
-    @State private var sshHost = "192.168.0.50"
-    @State private var sshUser = ""
-    @State private var sshPath = ""
-    @State private var serviceURL = ""
-    @State private var serviceToken = Keychain.password(for: AppModel.shelfTokenAccount) ?? ""
+    @State private var addingSource = false
     @State private var scraper = Keychain.decoded(ScreenScraper.Credentials.self, for: AppModel.screenScraperAccount)
         ?? ScreenScraper.Credentials(devID: "", devPassword: "", user: "", password: "")
     @State private var igdb = Keychain.decoded(IGDB.Credentials.self, for: AppModel.igdbAccount) ?? IGDB.Credentials(clientID: "", secret: "")
@@ -41,32 +36,26 @@ struct SettingsView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Shelf Sources") {
-                ForEach(settings.shelfSources, id: \.self) { source in
+                ForEach(sorted) { source in
                     HStack {
-                        Text(verbatim: source.label).font(.callout.monospaced()).lineLimit(1).truncationMode(.middle)
+                        Image(systemName: "circle.fill").font(.system(size: 7)).foregroundStyle(model.shelf.states[source.id]?.color ?? .secondary)
+                        VStack(alignment: .leading) {
+                            Text(verbatim: source.name)
+                            Text(verbatim: source.kind.label).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                        }
                         Spacer()
-                        Button("Remove") { settings.shelfSources.removeAll { $0 == source } }
+                        Button { move(source, by: -1) } label: { Image(systemName: "chevron.up") }
+                            .buttonStyle(.borderless).accessibilityLabel("Move up").disabled(sorted.first == source)
+                        Button { move(source, by: 1) } label: { Image(systemName: "chevron.down") }
+                            .buttonStyle(.borderless).accessibilityLabel("Move down").disabled(sorted.last == source)
+                        Button("Remove") {
+                            ShelfStore.forget(source.id)
+                            settings.shelfSources.removeAll { $0.id == source.id }
+                        }
                     }
                 }
-                Button("Add Folder…") { choosingShelf = true }
-                Text("A folder on this Mac or a mounted SMB or NFS share, laid out as collection/system/files.")
-                    .font(.caption).foregroundStyle(.secondary)
-                TextField("SSH server", text: $sshHost)
-                TextField("SSH user", text: $sshUser)
-                TextField("Collection path on the server", text: $sshPath)
-                Button("Add SSH Server") {
-                    add(.ssh(host: sshHost, user: sshUser, port: 22, path: sshPath))
-                    sshPath = ""
-                }
-                .disabled(sshHost.isEmpty || sshUser.isEmpty || !sshPath.hasPrefix("/"))
-                TextField("Service address", text: $serviceURL, prompt: Text(verbatim: "http://192.168.0.50:8766"))
-                SecureField("Service token", text: $serviceToken)
-                    .onChange(of: serviceToken) { Keychain.set(serviceToken, for: AppModel.shelfTokenAccount) }
-                Button("Add Service") {
-                    add(.service(url: serviceURL))
-                    serviceURL = ""
-                }
-                .disabled(URL(string: serviceURL)?.host == nil)
+                Button("Add Source…") { addingSource = true }
+                Text("When a game is in several sources, QuietDeck installs from the highest one that's online.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Shelf Metadata") {
                 TextField("ScreenScraper developer ID", text: $scraper.devID)
@@ -111,16 +100,23 @@ struct SettingsView: View {
         .fileImporter(isPresented: $choosing, allowedContentTypes: [.folder]) { result in
             if let url = try? result.get(), !settings.syncFolders.contains(url.path) { settings.syncFolders.append(url.path) }
         }
-        .fileImporter(isPresented: $choosingShelf, allowedContentTypes: [.folder]) { result in
-            if let url = try? result.get() { add(.folder(path: url.path)) }
-        }
+        .sheet(isPresented: $addingSource) { SourceWizard() }
     }
 
     private func save(_ credentials: some Encodable, _ account: String) {
         if let data = try? JSONEncoder().encode(credentials) { Keychain.set(String(decoding: data, as: UTF8.self), for: account) }
     }
 
-    private func add(_ source: ShelfSource) {
-        if !model.settings.shelfSources.contains(source) { model.settings.shelfSources.append(source) }
+    private var sorted: [LibrarySource] { model.settings.shelfSources.sorted { $0.priority < $1.priority } }
+
+    private func move(_ source: LibrarySource, by offset: Int) {
+        var list = sorted
+        guard let i = list.firstIndex(of: source), list.indices.contains(i + offset) else { return }
+        list.swapAt(i, i + offset)
+        model.settings.shelfSources = list.enumerated().map { index, item in
+            var item = item
+            item.priority = index
+            return item
+        }
     }
 }

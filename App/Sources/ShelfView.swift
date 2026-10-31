@@ -7,16 +7,18 @@ import SwiftUI
 @MainActor @Observable
 final class ShelfStore {
     struct Snapshot: Codable {
-        var source: ShelfSource
+        var sourceID: UUID
         var records: [ScanRecord]
     }
 
     private(set) var snapshots: [Snapshot] = []
     private(set) var items: [ShelfItem] = []
-    private(set) var undecided = 0
+    private(set) var undecided: [ScanRecord] = []
+    private(set) var undecidedFolders: [(sourceID: UUID, folder: String)] = []
     private(set) var scanning = false
     private(set) var failure: String?
     private(set) var meta: [String: ShelfMeta] = [:]
+    private(set) var states: [UUID: SourceState] = [:]
     private(set) var lookingUp = false
     @ObservationIgnored private let file = Paths.support.appending(path: "shelf-index.json")
     @ObservationIgnored private let metaFile = Paths.support.appending(path: "shelf-meta.json")
@@ -27,16 +29,101 @@ final class ShelfStore {
         meta = (try? JSONDecoder().decode([String: ShelfMeta].self, from: Data(contentsOf: metaFile))) ?? [:]
     }
 
+    private nonisolated static func account(_ id: UUID) -> String { "source-\(id.uuidString)" }
+
+    static func store(_ secret: SourceSecret, for id: UUID) {
+        if let data = try? JSONEncoder().encode(secret) { Keychain.set(String(decoding: data, as: UTF8.self), for: account(id)) }
+    }
+
+    static func forget(_ id: UUID) { Keychain.remove(for: account(id)) }
+
+    /// O segredo só sai do Keychain na hora do uso.
+    nonisolated static func client(_ source: LibrarySource, secret: SourceSecret? = nil) -> SourceClient {
+        let stored = secret ?? Keychain.decoded(SourceSecret.self, for: account(source.id)) ?? SourceSecret()
+        return SourceClient(source: source, secret: stored, sshKey: Paths.key, knownHosts: Paths.knownHosts, mountPath: Mounts.folder(source.id).path)
+    }
+
+    private nonisolated static func mountURL(_ source: LibrarySource) -> String? {
+        switch source.kind {
+        case let .smb(url), let .nfs(url): url
+        default: nil
+        }
+    }
+
+    nonisolated func probe(_ source: LibrarySource, secret: SourceSecret? = nil) async -> SourceState {
+        let client = Self.client(source, secret: secret)
+        guard let url = Self.mountURL(source) else { return await client.probe() }
+        return await Task.detached { Mounts.mount(url, at: Mounts.folder(source.id), secret: client.secret) }.value
+    }
+
+    func refreshStates(_ sources: [LibrarySource]) async {
+        await withTaskGroup(of: (UUID, SourceState).self) { group in
+            for source in sources { group.addTask { [self] in (source.id, await probe(source)) } }
+            for await (id, state) in group { states[id] = state }
+        }
+    }
+
+    /// A de maior prioridade entre as que estão no ar.
+    func bestSource(of item: ShelfItem, in sources: [LibrarySource]) -> LibrarySource? {
+        item.origins.lazy.compactMap { origin in sources.first { $0.id == origin.sourceID && self.states[$0.id] == .online } }.first
+    }
+
+    /// Montagem refeita fora da tela: ler os DATs de novo não pode travar a grade.
+    func rebuild(_ sources: [LibrarySource], catalog: Catalog) async {
+        let pairs: [(source: LibrarySource, records: [ScanRecord])] = sources.compactMap { s in snapshots.first { $0.sourceID == s.id }.map { (s, $0.records) } }
+        let systems = catalog.systems, folder = Self.dats
+        let result = await Task.detached { [pairs] in ShelfIndex.build(pairs, systems: systems, dats: ShelfScanner.loadDats(folder)) }.value
+        items = result.items
+        undecided = result.undecided
+        var folders: [(sourceID: UUID, folder: String)] = []
+        for pair in pairs {
+            let paths = Set(pair.records.map(\.path))
+            for dir in Set(result.undecided.filter { paths.contains($0.path) }.map { ($0.path as NSString).deletingLastPathComponent }).sorted() {
+                folders.append((pair.source.id, dir.trimmingCharacters(in: CharacterSet(charactersIn: "/"))))
+            }
+        }
+        undecidedFolders = folders
+        for item in items { if let own = item.meta { meta[item.id] = own } }
+    }
+
+    func scan(_ sources: [LibrarySource], catalog: Catalog, describe: (Error) -> String) async {
+        guard !scanning else { return }
+        scanning = true
+        failure = nil
+        defer { scanning = false }
+        await refreshStates(sources)
+        var fresh: [Snapshot] = []
+        for source in sources {
+            let old = snapshots.first { $0.sourceID == source.id }
+            let client = Self.client(source)
+            do {
+                guard states[source.id] == .online else { throw DeckError.unexpectedState("Couldn't reach %@.", source.name) }
+                fresh.append(Snapshot(sourceID: source.id, records: try await client.scan(systems: catalog.systems, cache: ShelfScanner.cache(old?.records ?? []))))
+            } catch {
+                // Servidor fora do ar não apaga o que já se conhece dele.
+                failure = describe(error)
+                if let old { fresh.append(old) }
+            }
+        }
+        snapshots = fresh
+        try? JSONEncoder().encode(fresh).write(to: file)
+        await rebuild(sources, catalog: catalog)
+    }
+
     /// Consulta só o que falta. Jogo sem resultado fica registrado: repetir gastaria a cota diária.
     func lookUp(_ wanted: [ShelfItem], covers: CoverStore, describe: (Error) -> String, retry: Bool = false) async {
         guard !lookingUp else { return }
         let screenScraper = Keychain.decoded(ScreenScraper.Credentials.self, for: AppModel.screenScraperAccount).map(ScreenScraper.init)
         let igdb = Keychain.decoded(IGDB.Credentials.self, for: AppModel.igdbAccount).map(IGDB.init)
-        guard screenScraper != nil || igdb != nil else { return }
         lookingUp = true
         defer { lookingUp = false }
-        for item in wanted where meta[item.id] == nil || (retry && meta[item.id]?.title == nil) {
+        for item in wanted {
+            // A capa do RomM dispensa credencial e chega junto com o jogo.
+            if let cover = item.cover, let url = URL(string: cover) { await covers.store(url, title: item.deckTitle, kind: .portrait) }
+        }
+        for item in wanted where item.meta == nil && (meta[item.id] == nil || (retry && meta[item.id]?.title == nil)) {
             do {
+                guard screenScraper != nil || igdb != nil else { continue }
                 var found = try await screenScraper?.lookup(item)
                 if found == nil { found = try await igdb?.lookup(title: item.deckTitle, systemID: item.systemID) }
                 meta[item.id] = found?.meta ?? ShelfMeta()
@@ -52,47 +139,6 @@ final class ShelfStore {
         }
     }
 
-    /// Montagem refeita fora da tela: ler os DATs de novo não pode travar a grade.
-    func rebuild(catalog: Catalog) async {
-        let records = snapshots.flatMap(\.records), systems = catalog.systems, folder = Self.dats
-        let result = await Task.detached { ShelfIndex.build(records, systems: systems, dats: ShelfScanner.loadDats(folder)) }.value
-        items = result.items
-        undecided = result.undecided.count
-    }
-
-    func scan(_ sources: [ShelfSource], catalog: Catalog, describe: (Error) -> String) async {
-        guard !scanning else { return }
-        scanning = true
-        failure = nil
-        defer { scanning = false }
-        var fresh: [Snapshot] = []
-        for source in sources {
-            let cache = ShelfScanner.cache(snapshots.first { $0.source == source }?.records ?? [])
-            do {
-                fresh.append(Snapshot(source: source, records: try await Self.records(source, catalog: catalog, cache: cache)))
-            } catch {
-                // Servidor fora do ar não apaga o que já se conhece dele.
-                failure = describe(error)
-                if let old = snapshots.first(where: { $0.source == source }) { fresh.append(old) }
-            }
-        }
-        snapshots = fresh
-        try? JSONEncoder().encode(fresh).write(to: file)
-        await rebuild(catalog: catalog)
-    }
-
-    private nonisolated static func records(_ source: ShelfSource, catalog: Catalog, cache: ShelfScanner.Cache) async throws -> [ScanRecord] {
-        switch source {
-        case let .folder(path):
-            return try await ShelfScanner.scanFolder(URL(fileURLWithPath: path), systems: catalog.systems, cache: cache)
-        case let .ssh(host, user, port, path):
-            let config = SSHConfig(host: host, port: port, user: user, identityFile: Paths.key, knownHostsFile: Paths.knownHosts)
-            return try await ShelfScanner.scanRemote(SSHRunner(config: config), root: path, systems: catalog.systems, cache: cache)
-        case let .service(url):
-            return try await ShelfScanner.scanService(url, token: Keychain.password(for: AppModel.shelfTokenAccount) ?? "")
-        }
-    }
-
     /// Capturas do press kit: só homebrew do catálogo, nunca jogo comercial.
     func showDemo(_ catalog: Catalog) {
         items = catalog.free.map(\.item)
@@ -103,16 +149,11 @@ final class ShelfStore {
             meta[game.item.id] = demo
         }
     }
-
-    func source(of item: ShelfItem) -> ShelfSource? {
-        snapshots.first { $0.records.contains { $0.path == item.entry } }?.source
-    }
 }
 
 /// Estante: a loja sobre o acervo do próprio usuário.
 struct ShelfView: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openSettings) private var openSettings
     var deck: LiveDeck
     @State private var tab = Tab.shelf
     @State private var search = ""
@@ -122,6 +163,8 @@ struct ShelfView: View {
     @State private var selected: ShelfItem?
     @State private var genre: String?
     @State private var year: Int?
+    @State private var adding = false
+    @State private var mapping = false
     @Namespace private var cover
 
     enum Tab: Hashable { case shelf, free, guide }
@@ -169,8 +212,12 @@ struct ShelfView: View {
                 }
             }
         }
+        .sheet(isPresented: $adding) { SourceWizard() }
+        .sheet(isPresented: $mapping) { FolderMapSheet() }
         .task {
-            if model.shelf.items.isEmpty { await model.shelf.rebuild(catalog: model.catalog) }
+            let sources = model.settings.shelfSources
+            if model.shelf.items.isEmpty { await model.shelf.rebuild(sources, catalog: model.catalog) }
+            await model.shelf.refreshStates(sources)
         }
     }
 
@@ -186,7 +233,7 @@ struct ShelfView: View {
 
     @ViewBuilder private var collection: some View {
         if model.settings.shelfSources.isEmpty && model.shelf.items.isEmpty {
-            EmptyState(title: "Your shelf is empty", message: "Point QuietDeck at your own collection, on this Mac or on a server on your network.", action: "Add a Source…") { openSettings() }
+            EmptyState(title: "Your shelf is empty", message: "Point QuietDeck at your own collection, on this Mac or on a server on your network.", action: "Add a Source…") { adding = true }
         } else {
             HStack {
                 TextField("Search", text: $search).textFieldStyle(.roundedBorder).frame(maxWidth: 240)
@@ -227,8 +274,11 @@ struct ShelfView: View {
             if let failure = model.shelf.failure {
                 Label { Text(verbatim: failure) } icon: { Image(systemName: "exclamationmark.triangle") }.font(.callout).foregroundStyle(.orange)
             }
-            if model.shelf.undecided > 0 {
-                InlineNote(text: "\(model.shelf.undecided) files fit more than one system. Move them into a system folder.", symbol: "questionmark.folder")
+            if !model.shelf.undecided.isEmpty {
+                HStack {
+                    InlineNote(text: "\(model.shelf.undecided.count) files fit more than one system.", symbol: "questionmark.folder")
+                    Button("Map Folders…") { mapping = true }
+                }
             }
             SystemChips(ids: Array(Set(model.shelf.items.map(\.systemID))).sorted(), selection: $system)
             if shown.isEmpty {
@@ -298,6 +348,7 @@ struct ShelfDetail: View {
     @State private var confirmRemove = false
 
     private var entry: ShelfManifestEntry? { deck.shelfInstalled[item.id] }
+    private var source: LibrarySource? { model.shelf.bestSource(of: item, in: model.settings.shelfSources) }
     private var meta: ShelfMeta? { model.shelf.meta[item.id] }
     private var volume: Volume? { useSD ? deck.status.sdCard : deck.status.internalStorage }
     private var place: String { useSD ? "microSD" : String(localized: "internal storage") }
@@ -382,7 +433,12 @@ struct ShelfDetail: View {
                 }
             }
             Button("Install on Deck") { addToSteam ? (confirmInstall = true) : install() }
-                .buttonStyle(.glassProminent).disabled(!fits)
+                .buttonStyle(.glassProminent).disabled(!fits || (free == nil && source == nil))
+            if free == nil && source == nil {
+                InlineNote(text: "No source with this game is online.", symbol: "wifi.slash", tint: .orange)
+            } else if let source, free == nil {
+                Text("From \(source.name)").font(.caption).foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -390,7 +446,7 @@ struct ShelfDetail: View {
         let sd = useSD ? deck.sdMount : nil
         if let free {
             model.enqueue(String(localized: "Install \(item.title)"), .freeInstall(game: free, sdMount: sd))
-        } else if let source = model.shelf.source(of: item) {
+        } else if let source {
             model.enqueue(String(localized: "Install \(item.title)"), .shelfInstall(item: item, source: source, sdMount: sd))
         } else { return }
         guard addToSteam, let user = deck.steamUsers.first, let system = model.catalog.system(item.systemID) else { return }

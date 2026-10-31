@@ -10,7 +10,7 @@
 ### Added
 
 - **Quiet Glass** for Game Mode: glass on the home tabs and the Steam and quick access menus. The new QuietTune plugin makes the menus opaque while a game runs, unless you force glass.
-- **Shelf**: a storefront over your own collection, from a folder, an SMB/NFS share, an SSH server or an optional container service. Incremental hashing, your own No-Intro/Redump DATs, deduplication, filters, details and one-click install and remove.
+- **Shelf**: a storefront over your own collection, from any mix of folders, SMB, NFS, SFTP/SSH, WebDAV, S3-compatible buckets, RomM servers or an optional container service, with priorities, status in the sidebar and network discovery. Incremental hashing, your own No-Intro/Redump DATs, deduplication, filters, details and one-click install and remove.
 - Direct server → Deck transfers when there's nothing to process on the Mac.
 - Descriptions and artwork from ScreenScraper and IGDB with your own credentials. QuietDeck never downloads game files from them.
 - **Free and Legal**: a catalog of homebrew with verified licenses, downloaded from official sources and checked by SHA-256 (see `CATALOG.md`).

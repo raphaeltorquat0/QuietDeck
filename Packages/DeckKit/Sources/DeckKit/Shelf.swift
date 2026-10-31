@@ -3,18 +3,74 @@ import Foundation
 import FoundationXML
 #endif
 
-/// Onde mora o acervo. Compartilhamentos SMB/NFS entram como `folder`, já montados pelo macOS.
+/// Onde mora o acervo. Sempre um servidor do próprio usuário: não existe lista remota de fontes.
 public enum ShelfSource: Codable, Hashable, Sendable {
     case folder(path: String)
+    /// Montados pelo macOS em `mounts/<id>`, e daí em diante são uma pasta.
+    case smb(url: String)
+    case nfs(url: String)
     case ssh(host: String, user: String, port: Int, path: String)
+    case webdav(url: String)
+    case s3(endpoint: String, region: String, bucket: String, prefix: String, accessKey: String)
+    case romm(url: String)
     case service(url: String)
 
     public var label: String {
         switch self {
         case let .folder(path): path
+        case let .smb(url), let .nfs(url), let .webdav(url), let .romm(url), let .service(url): url
         case let .ssh(host, user, _, path): "\(user)@\(host):\(path)"
-        case let .service(url): url
+        case let .s3(endpoint, _, bucket, prefix, _): "\(endpoint)/\(bucket)/\(prefix)"
         }
+    }
+}
+
+/// Fonte cadastrada. O segredo fica no Keychain, nunca aqui.
+public struct LibrarySource: Codable, Hashable, Identifiable, Sendable {
+    public var id: UUID
+    public var name: String
+    /// Menor vem primeiro.
+    public var priority: Int
+    public var kind: ShelfSource
+    /// Pasta do usuário → sistema, para acervos fora do formato `<fonte>/<sistema>/<arquivos>`.
+    public var folderMap: [String: String]
+
+    public init(id: UUID = UUID(), name: String, priority: Int, kind: ShelfSource, folderMap: [String: String] = [:]) {
+        self.id = id
+        self.name = name
+        self.priority = priority
+        self.kind = kind
+        self.folderMap = folderMap
+    }
+}
+
+public enum SourceState: String, Codable, Sendable {
+    case online, offline, badCredentials
+}
+
+/// Arquivo de um jogo no RomM: cada faixa tem o próprio id de download.
+public struct RemoteFile: Codable, Hashable, Sendable {
+    public var id: Int
+    public var name: String
+
+    public init(id: Int, name: String) {
+        self.id = id
+        self.name = name
+    }
+}
+
+/// Onde o jogo pode ser buscado.
+public struct ShelfOrigin: Codable, Hashable, Sendable {
+    public var sourceID: UUID
+    public var entry: String
+    public var members: [String]
+    public var files: [RemoteFile]
+
+    public init(sourceID: UUID, entry: String, members: [String], files: [RemoteFile] = []) {
+        self.sourceID = sourceID
+        self.entry = entry
+        self.members = members
+        self.files = files
     }
 }
 
@@ -31,6 +87,12 @@ public struct ScanRecord: Codable, Hashable, Sendable {
     public var text: String?
     /// SHA1 sem os 16 bytes do cabeçalho iNES: há DATs de NES que só listam a ROM crua.
     public var headerless: String?
+    /// Só RomM: o servidor já organizou e identificou o jogo.
+    public var systemID: String?
+    public var title: String?
+    public var meta: ShelfMeta?
+    public var cover: String?
+    public var files: [RemoteFile]?
 
     public init(path: String, size: Int64, mtime: Int64, crc: String, sha1: String, head: String? = nil, text: String? = nil, headerless: String? = nil) {
         self.path = path
@@ -56,6 +118,11 @@ public struct ShelfItem: Codable, Hashable, Identifiable, Sendable {
     /// Achado num DAT do usuário.
     public var verified: Bool
     public var duplicates: [String]
+    /// Em ordem de prioridade; a primeira é `entry`.
+    public var origins: [ShelfOrigin] = []
+    public var cover: String?
+    /// Metadados que a própria fonte já traz.
+    public var meta: ShelfMeta?
 
     /// Nome que a Biblioteca e o atalho usam: vem do arquivo no Deck, não do DAT.
     public var deckTitle: String { ROMPlan.displayName((entry as NSString).lastPathComponent) }
@@ -82,7 +149,7 @@ public struct FreeGame: Codable, Hashable, Identifiable, Sendable {
 
     /// Instalar e remover seguem o caminho da Estante. O prefixo evita colidir com um hash do acervo.
     public var item: ShelfItem {
-        ShelfItem(id: "free:" + id, title: title, systemID: system, entry: inner ?? fileName, members: [], size: size, crc: "", verified: true, duplicates: [])
+        ShelfItem(id: "free:" + id, title: title, systemID: system, entry: inner ?? fileName, members: [], size: size, crc: "", verified: true, duplicates: [], origins: [])
     }
 }
 
@@ -166,46 +233,74 @@ private final class LogiqxDelegate: NSObject, XMLParserDelegate {
 public enum ShelfIndex {
     private static func stem(_ path: String) -> String { ((path as NSString).lastPathComponent as NSString).deletingPathExtension }
 
-    /// Junta faixas ao índice, detecta o sistema e funde cópias. Devolve à parte o que serve em mais de um sistema.
-    public static func build(_ records: [ScanRecord], systems: [GameSystem], dats: DatIndex) -> (items: [ShelfItem], undecided: [ScanRecord]) {
-        let detector = ROMDetector(systems: systems)
-        let byPath = Dictionary(records.map { ($0.path, $0) }, uniquingKeysWith: { a, _ in a })
-        var memberOf: [String: String] = [:]
-        for r in records where ["cue", "gdi"].contains((r.path as NSString).pathExtension.lowercased()) {
-            let dir = (r.path as NSString).deletingLastPathComponent
-            for name in ROMPlan.referencedFiles(cueSheet: r.text ?? "", extension: (r.path as NSString).pathExtension) {
-                memberOf[(dir as NSString).appendingPathComponent(name)] = r.path
-            }
-        }
+    /// Só WebDAV e S3 ficam sem hash: calcular exigiria baixar o acervo inteiro. Identidade por nome e tamanho.
+    private static func weakKey(_ path: String, _ size: Int64) -> String {
+        "name:\((path as NSString).lastPathComponent.lowercased()):\(size)"
+    }
 
+    /// Fontes em ordem de prioridade: a primeira que tem o jogo vira o `entry`, as outras viram alternativas.
+    public static func build(_ sources: [(source: LibrarySource, records: [ScanRecord])], systems: [GameSystem], dats: DatIndex) -> (items: [ShelfItem], undecided: [ScanRecord]) {
+        let detector = ROMDetector(systems: systems)
         var items: [String: ShelfItem] = [:]
+        var weak: [String: String] = [:]
         var undecided: [ScanRecord] = []
-        for r in records.sorted(by: { $0.path < $1.path }) where memberOf[r.path] == nil {
-            let members = memberOf.filter { $0.value == r.path }.keys.sorted()
-            let parts = ([r] + members.compactMap { byPath[$0] })
-            let main = parts.max { $0.size < $1.size } ?? r
-            let head = main.head.flatMap { Data(base64Encoded: $0) } ?? Data()
-            let systemID: String
-            switch detector.detect(path: r.path, prefix: head, size: main.size) {
-            case let .system(id): systemID = id
-            case .ambiguous:
-                undecided.append(r)
-                continue
-            case .unknown: continue // Capa, manual, readme: não é jogo.
+        for (source, records) in sources.sorted(by: { $0.source.priority < $1.source.priority }) {
+            let byPath = Dictionary(records.map { ($0.path, $0) }, uniquingKeysWith: { a, _ in a })
+            var memberOf: [String: String] = [:]
+            for r in records where ["cue", "gdi"].contains((r.path as NSString).pathExtension.lowercased()) {
+                let dir = (r.path as NSString).deletingLastPathComponent
+                for name in ROMPlan.referencedFiles(cueSheet: r.text ?? "", extension: (r.path as NSString).pathExtension) {
+                    memberOf[(dir as NSString).appendingPathComponent(name)] = r.path
+                }
             }
-            let match = dats.game(sha1: main.sha1, crc: main.crc, size: main.size)
-                ?? main.headerless.flatMap { dats.game(sha1: $0, crc: "", size: main.size - 16) }
-            let key = main.sha1
-            if var existing = items[key] {
-                existing.duplicates.append(r.path)
-                items[key] = existing
-                continue
+            for r in records.sorted(by: { $0.path < $1.path }) where memberOf[r.path] == nil {
+                let members = memberOf.filter { $0.value == r.path }.keys.sorted()
+                let parts = [r] + members.compactMap { byPath[$0] }
+                let main = parts.max { $0.size < $1.size } ?? r
+                let head = main.head.flatMap { Data(base64Encoded: $0) } ?? Data()
+                let systemID: String
+                let mapped = source.folderMap.first { r.path.contains("/\($0.key)/") || r.path.hasPrefix("\($0.key)/") }?.value
+                switch r.systemID ?? mapped {
+                case let id?: systemID = id
+                case nil:
+                    switch detector.detect(path: r.path, prefix: head, size: main.size) {
+                    case let .system(id): systemID = id
+                    case .ambiguous:
+                        undecided.append(r)
+                        continue
+                    case .unknown: continue // Capa, manual, readme: não é jogo.
+                    }
+                }
+                let match = dats.game(sha1: main.sha1, crc: main.crc, size: main.size)
+                    ?? main.headerless.flatMap { dats.game(sha1: $0, crc: "", size: main.size - 16) }
+                let origin = ShelfOrigin(sourceID: source.id, entry: r.path, members: members, files: r.files ?? [])
+                let name = weakKey(main.path, main.size)
+                let key = main.sha1.isEmpty ? (weak[name] ?? name) : main.sha1
+                if let same = items[key] ?? weak[name].flatMap({ items[$0] }) {
+                    var existing = same
+                    if existing.origins.contains(where: { $0.sourceID == source.id }) {
+                        existing.duplicates.append(r.path)
+                    } else {
+                        existing.origins.append(origin)
+                    }
+                    items[existing.id] = existing
+                    continue
+                }
+                var item = ShelfItem(id: key, title: r.title ?? match ?? ROMPlan.displayName((r.path as NSString).lastPathComponent), systemID: systemID,
+                                     entry: r.path, members: members, size: parts.reduce(0) { $0 + $1.size }, crc: main.crc,
+                                     verified: match != nil, duplicates: [], origins: [origin])
+                item.cover = r.cover
+                item.meta = r.meta
+                items[key] = item
+                weak[name] = key
             }
-            items[key] = ShelfItem(id: key, title: match ?? ROMPlan.displayName((r.path as NSString).lastPathComponent), systemID: systemID,
-                                   entry: r.path, members: members, size: parts.reduce(0) { $0 + $1.size }, crc: main.crc,
-                                   verified: match != nil, duplicates: [])
         }
         return (items.values.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }, undecided)
+    }
+
+    /// Fonte única sem configuração.
+    public static func build(_ records: [ScanRecord], systems: [GameSystem], dats: DatIndex) -> (items: [ShelfItem], undecided: [ScanRecord]) {
+        build([(LibrarySource(name: "", priority: 0, kind: .folder(path: "")), records)], systems: systems, dats: dats)
     }
 }
 

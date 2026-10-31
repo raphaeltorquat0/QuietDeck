@@ -51,7 +51,8 @@ public struct ScreenScraper: Sendable {
     }
 
     public func lookup(_ item: ShelfItem) async throws -> MetadataResult? {
-        guard let url = Self.url(credentials, item: item, sha1: item.id) else { return nil }
+        // Sem hash, a identificação fica por conta do nome e do tamanho.
+        guard let url = Self.url(credentials, item: item, sha1: item.id.hasPrefix("name:") ? "" : item.id) else { return nil }
         // O erro nunca cita a URL: ela leva as senhas.
         guard let (data, response) = try? await URLSession.shared.data(from: url), let http = response as? HTTPURLResponse else {
             throw DeckError.unexpectedState("Couldn't reach %@.", "ScreenScraper")

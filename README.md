@@ -49,14 +49,14 @@ The screenshots use sample data, not a real library.
 
 ### Shelf
 
-A storefront for the collection you already own, kept in a folder, on an SMB/NFS share, on an SSH server or behind an [optional container service](Service/shelf/README.md).
+A storefront for the collection you already own. Add as many sources as you like, each with its own priority: a folder or external disk, SMB, NFS, SFTP/SSH, WebDAV, an S3-compatible bucket (Backblaze B2, MinIO, Cloudflare R2), a RomM server or an [optional container service](Service/shelf/README.md). Tailscale addresses work too.
 
 - Browse by cover, filter and search, and check your files against the No-Intro or Redump DATs you supply.
 - Install or remove in one click, with the Steam shortcut and artwork. Direct server → Deck transfers skip the Mac when nothing needs processing.
 - Get descriptions and artwork from ScreenScraper or IGDB with your own credentials.
 - Try **Free and Legal**, a catalog of homebrew with verified licenses ([rules](CATALOG.md)), and read the Stocking Guide.
 
-QuietDeck never searches for, indexes or downloads commercial games from the internet.
+Sources are always your own servers. QuietDeck never searches for, indexes or downloads commercial games from the internet, and it has no repositories, remote catalogs, suggested servers or collection sharing.
 
 ## Install
 

@@ -7,5 +7,6 @@ COPY smb.conf /etc/samba/smb.conf
 COPY entrypoint.sh /usr/local/bin/
 COPY --from=service shelf-service.py folders.txt /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
+VOLUME /srv/acervo
 EXPOSE 22 445 8766
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

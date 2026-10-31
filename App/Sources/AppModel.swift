@@ -70,7 +70,7 @@ final class AppSettings {
     var savesFolder: String? { didSet { d.set(savesFolder, forKey: "savesFolder") } }
     var onboarded: Bool { didSet { d.set(onboarded, forKey: "onboarded") } }
     var completionSound: Bool { didSet { d.set(completionSound, forKey: "completionSound") } }
-    var shelfSources: [ShelfSource] { didSet { d.set(try? JSONEncoder().encode(shelfSources), forKey: "shelfSources") } }
+    var shelfSources: [LibrarySource] { didSet { d.set(try? JSONEncoder().encode(shelfSources), forKey: "shelfSources") } }
 
     init() {
         d.register(defaults: ["showMenuBarExtra": true])
@@ -79,7 +79,7 @@ final class AppSettings {
         savesFolder = d.string(forKey: "savesFolder")
         onboarded = d.bool(forKey: "onboarded")
         completionSound = d.bool(forKey: "completionSound")
-        shelfSources = d.data(forKey: "shelfSources").flatMap { try? JSONDecoder().decode([ShelfSource].self, from: $0) } ?? []
+        shelfSources = d.data(forKey: "shelfSources").flatMap { try? JSONDecoder().decode([LibrarySource].self, from: $0) } ?? []
     }
 }
 
@@ -87,7 +87,6 @@ final class AppSettings {
 @MainActor @Observable
 final class AppModel {
     static let steamGridKeyAccount = "steamgriddb"
-    static let shelfTokenAccount = "shelf-service"
     static let screenScraperAccount = "screenscraper"
     static let igdbAccount = "igdb"
 
@@ -234,7 +233,7 @@ final class AppModel {
     private func context(_ id: UUID) -> JobContext? {
         guard let deck = live[id] else { return nil }
         return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),
-                          workRoot: Paths.work, shelfKey: Paths.key, shelfToken: Keychain.password(for: Self.shelfTokenAccount)) {
+                          workRoot: Paths.work, shelfClient: { ShelfStore.client($0) }) {
             Keychain.remove(for: id.uuidString)
         }
     }

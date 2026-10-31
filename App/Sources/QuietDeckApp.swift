@@ -67,7 +67,12 @@ struct RootView: View {
                 Label { Text(section.title) } icon: { Image(systemName: section.symbol) }.tag(section)
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 230)
-            .safeAreaInset(edge: .bottom, spacing: 0) { QueueFooter() }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 0) {
+                    SourceStatusList()
+                    QueueFooter()
+                }
+            }
             .toolbar {
                 if model.decks.count > 1 {
                     ToolbarItem {

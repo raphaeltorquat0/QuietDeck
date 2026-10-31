@@ -1,0 +1,44 @@
+# RomM real para os testes, sem chaves de scraper. Só para a máquina local e o CI.
+name: quietdeck-romm
+services:
+  romm:
+    image: rommapp/romm:5.4.1-slim
+    environment:
+      DB_HOST: romm-db
+      DB_NAME: romm
+      DB_USER: romm-user
+      DB_PASSWD: romm-pass
+      ROMM_AUTH_SECRET_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+    volumes:
+      - library:/romm/library
+      - resources:/romm/resources
+      - config:/romm/config
+      - assets:/romm/assets
+    ports:
+      - "127.0.0.1:8769:8080"
+    depends_on:
+      romm-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/heartbeat >/dev/null || curl -fs http://127.0.0.1:8080/api/heartbeat >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+  romm-db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root-pass
+      MARIADB_DATABASE: romm
+      MARIADB_USER: romm-user
+      MARIADB_PASSWORD: romm-pass
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  library:
+  resources:
+  config:
+  assets:
