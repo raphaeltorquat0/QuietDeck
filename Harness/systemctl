@@ -1,0 +1,27 @@
+#!/bin/bash
+# systemd falso: só as unidades que o QuietDeck usa, com a semântica do `steam-launcher.service` real.
+S=/run/deck-sim
+echo "$*" >> $S/systemctl.log
+say() { [ -n "$quiet" ] || echo "$1"; }
+args=(); for a in "$@"; do case "$a" in --quiet) quiet=1 ;; --user|--runtime|--now) ;; *) args+=("$a") ;; esac; done
+verb=${args[0]}; unit=${args[1]}
+launch() { pgrep -x steam >/dev/null || (setsid steam >/dev/null 2>&1 </dev/null &); }
+wait_gone() { for _ in $(seq 1 200); do pgrep -x steam >/dev/null || return 0; sleep 0.05; done; return 1; }
+case "$verb $unit" in
+  "is-active gamescope-session.target")
+    [ "$(cat $S/session)" = game ] && { say active; exit 0; } || { say inactive; exit 3; } ;;
+  "is-active plugin_loader") [ -e $S/loader ] && { say active; exit 0; } || { say inactive; exit 3; } ;;
+  "mask steam-launcher.service") touch $S/masked ;;
+  "unmask steam-launcher.service") rm -f $S/masked ;;
+  "stop steam-launcher.service") pkill -TERM -x steam; wait_gone ;;
+  "start steam-launcher.service")
+    [ -e $S/masked ] && { echo "Failed to start: unit is masked" >&2; exit 1; }
+    launch ;;
+  "restart steam-launcher.service")
+    [ -e $S/masked ] && { echo "Failed to restart: unit is masked" >&2; exit 1; }
+    pkill -TERM -x steam; wait_gone; launch ;;
+  "restart plugin_loader"|"start plugin_loader"|"enable plugin_loader") touch $S/loader ;;
+  "stop plugin_loader"|"disable plugin_loader") rm -f $S/loader ;;
+  daemon-reload*) ;;
+  *) echo "systemctl falso: $*" >&2; exit 1 ;;
+esac

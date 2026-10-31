@@ -1,0 +1,11 @@
+.build/
+.swiftpm/
+dist/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+__pycache__/
+
+# Gravações brutas têm nomes de jogos e de rede; só as fixtures sanitizadas são versionadas
+recordings/

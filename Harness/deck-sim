@@ -1,0 +1,6 @@
+#!/bin/bash
+# Controle usado pelos testes para pôr o Deck simulado num estado conhecido.
+case "$1" in
+  desktop) echo desktop > /run/deck-sim/session; (setsid plasmashell 100000 >/dev/null 2>&1 </dev/null &) ;;
+  game) pkill -x plasmashell; echo game > /run/deck-sim/session ;;
+esac

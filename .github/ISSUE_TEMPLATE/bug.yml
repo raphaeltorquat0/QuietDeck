@@ -1,0 +1,23 @@
+name: Bug report / Relatar um bug
+description: Something doesn't work as expected. / Algo não funciona como deveria.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / O que aconteceu?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Como reproduzir
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: QuietDeck, macOS and SteamOS versions / Versões do QuietDeck, do macOS e do SteamOS
+      placeholder: QuietDeck 0.1.0, macOS 26.1, SteamOS 3.7.17
+    validations:
+      required: true

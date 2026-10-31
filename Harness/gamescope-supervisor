@@ -1,0 +1,9 @@
+#!/bin/bash
+# Simula `Upholds=steam-launcher.service`: no Game Mode, sem máscara, o Steam volta sem atraso.
+while :; do
+  if [ "$(cat /run/deck-sim/session 2>/dev/null)" = game ] && [ ! -e /run/deck-sim/masked ] && ! pgrep -x steam >/dev/null; then
+    setsid steam >/dev/null 2>&1 </dev/null &
+    sleep 0.1
+  fi
+  sleep 0.02
+done

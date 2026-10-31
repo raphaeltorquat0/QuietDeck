@@ -1,0 +1,18 @@
+#!/bin/bash
+# Steam falso. Carrega shortcuts.vdf na memória ao abrir e, como o real, regrava essa cópia ao sair.
+# A demora antes de gravar expõe quem escreve sem esperar o processo morrer.
+MEM=$(mktemp -d)
+for f in /home/deck/.local/share/Steam/userdata/*/config/shortcuts.vdf; do
+  [ -f "$f" ] || continue
+  mkdir -p "$MEM$(dirname "$f")" && cp "$f" "$MEM$f"
+done
+echo "$(date +%s%N) start" >> /run/deck-sim/steam.log
+flush() {
+  sleep 0.4
+  (cd "$MEM" && find . -name shortcuts.vdf | while read -r f; do cp "$MEM/${f#./}" "/${f#./}"; done)
+  rm -rf "$MEM"
+  echo "$(date +%s%N) exit" >> /run/deck-sim/steam.log
+  exit 0
+}
+trap flush TERM
+while :; do sleep 0.1 & wait $!; done

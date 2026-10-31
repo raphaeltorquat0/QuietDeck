@@ -1,0 +1,8 @@
+NAME="SteamOS"
+PRETTY_NAME="SteamOS (simulated)"
+ID=steamos
+ID_LIKE=arch
+VERSION_CODENAME=holo
+VARIANT_ID=steamdeck
+VERSION_ID=3.9.4
+BUILD_ID=20261021.100
