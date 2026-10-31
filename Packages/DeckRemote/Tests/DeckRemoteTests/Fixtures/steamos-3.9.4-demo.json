@@ -28,7 +28,7 @@
       "command" : "for d in /sys/class/hwmon/hwmon*; do printf '%s %s\\n' \"$(cat $d/name)\" \"$(cat $d/temp1_input 2>/dev/null)\"; done",
       "exitCode" : 0,
       "stderr" : "",
-      "stdout" : "amdgpu 48000\nacpitz 54000\nnvme 39850\nsteamdeck_hwmon 41000\n"
+      "stdout" : "amdgpu 48000\nk10temp 54000\nacpitz 44000\nnvme 39850\nsteamdeck_hwmon 41000\n"
     },
     {
       "command" : "export XDG_RUNTIME_DIR=/run/user/$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus; if systemctl --user is-active --quiet gamescope-session.target; then echo game; elif pgrep -x plasmashell >/dev/null; then echo desktop; else echo unknown; fi",
