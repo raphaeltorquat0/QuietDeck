@@ -20,7 +20,7 @@ enum PublicAPI {
 }
 
 public struct SteamGridDB: Sendable {
-    public struct Game: Codable, Equatable, Identifiable, Sendable {
+    public struct Game: Codable, Hashable, Identifiable, Sendable {
         public var id: Int
         public var name: String
     }

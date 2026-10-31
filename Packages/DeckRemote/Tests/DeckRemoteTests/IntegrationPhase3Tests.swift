@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-import DeckKit
+@testable import DeckKit
 @testable import DeckRemote
 
 extension IntegrationTests {
@@ -194,5 +194,27 @@ extension IntegrationTests {
                      BIOSEntry(system: "nds", file: "firmware.bin", size: 4, md5: "", sha1: String(repeating: "1", count: 40))]
         let output = try await r.check(BIOS.scan(paths: paths)).stdout
         #expect(BIOS.status(scanOutput: output, table: table) == ["gba": .ok, "psx": .invalid, "nds": .missing])
+    }
+
+    // MARK: Ponta a ponta
+
+    @MainActor @Test(.enabled(if: Sim.hasHarness)) func queueSendsGameThenAddsItToSteam() async throws {
+        let r = try await Sim.runner()
+        try await r.check("deck-sim game; rm -rf ~/Emulation ~/.local/share/quietdeck")
+        try await Sim.waitForSteam(r)
+        var catalog = try Catalog.load()
+        // Mesmo fluxo do app, com o emulador que existe no flatpak local do Deck simulado.
+        catalog.emulators = [Emulator(id: "hello", name: "Hello", flatpak: Sim.flatpak, systems: ["gba"], launch: "run \(Sim.flatpak) {rom}")]
+        catalog.systems = catalog.systems.filter { $0.id == "gba" }.map { var s = $0; s.emulator = "hello"; s.core = nil; return s }
+        let context = JobContext(runner: r, config: Sim.config, catalog: catalog, password: Sim.password, workRoot: Sim.dir.appendingPathComponent("work")) {}
+        let queue = JobQueue(storeURL: nil) { job, progress in try await JobExecutor.run(job, context: context, progress: progress) }
+        let rom = try Sim.tempFile("Queue Game.gba", bytes: 4096)
+        let deck = UUID()
+        queue.enqueue(Job(deckID: deck, title: "send", action: .importROM(localPath: rom.path, systemID: "gba", sdMount: nil)))
+        queue.enqueue(Job(deckID: deck, title: "steam", action: .addToSteam(user: Sim.user, games: [GameRef(systemID: "gba", title: "Queue Game")], sdMount: nil)))
+        await queue.waitUntilIdle()
+        #expect(queue.jobs.map(\.state) == [.succeeded, .succeeded])
+        try await Sim.cycleSteam(r)
+        #expect(try await Sim.shortcutNames(r).contains("Queue Game"))
     }
 }

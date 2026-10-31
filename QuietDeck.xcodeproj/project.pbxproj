@@ -1,0 +1,431 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12DC004B7B18DBA0B9B42048 /* EmulatorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D77E290910009C3462E5D7 /* EmulatorsView.swift */; };
+		399CF5F5FBA581D6649E35C6 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A0E044FD857F25E417E15 /* AppModel.swift */; };
+		3D84AF8A2E3773D1C800DE6C /* DeckyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9885AC6760F6296C91E1D4C /* DeckyView.swift */; };
+		5839941C038A2EAF791D431B /* PressKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E9D44754586A848839F1CA3 /* PressKit.swift */; };
+		6B0CB748054D910BDD33902A /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5027EFFAC24532706AB4385A /* OverviewView.swift */; };
+		7584525BE5F6F928D3C1E23B /* DeckKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1ADE0525B0161B4E69B40325 /* DeckKit */; };
+		80E50CC53D41757EE02152B0 /* QuietDeckApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931FDC56FC83F67AC0C9F159 /* QuietDeckApp.swift */; };
+		9A8AD762995A5CB9F4EC93FD /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E068CA791EADBB729EEC4BF /* LibraryView.swift */; };
+		9CEA3FDEDCD2E24FF4424A4D /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CE7A39D67A4F9FE9FA0D9A /* Components.swift */; };
+		9E2AAB0A54C744A6AE6EF71C /* MenuBarPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ABCA6C31944536D5CA3EB70 /* MenuBarPanel.swift */; };
+		BFDAFCF34B9829B16D66D841 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DC4C2BDF941EFBD008837F1 /* Assets.xcassets */; };
+		D186C3910F4B51B23B757703 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F37E01C291E5E397BEE3AF13 /* OnboardingView.swift */; };
+		D35AD09B572BAC820750989C /* DeckRemote in Frameworks */ = {isa = PBXBuildFile; productRef = FF7009FF2A0A6AF060FBF871 /* DeckRemote */; };
+		DCBB7BFF8AF19AC129C5EA8E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45CCE6B8D97DAE578506970 /* SettingsView.swift */; };
+		DF4E24DE28DD1D0ACDA28282 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04930C7F773D76CA474E60C7 /* Keychain.swift */; };
+		E715E80B340E4236EAFF098D /* Discovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A6F5A19B66EA8BA50B91B /* Discovery.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		04930C7F773D76CA474E60C7 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		13D77E290910009C3462E5D7 /* EmulatorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorsView.swift; sourceTree = "<group>"; };
+		14CE7A39D67A4F9FE9FA0D9A /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		1DC4C2BDF941EFBD008837F1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1E068CA791EADBB729EEC4BF /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		2E9D44754586A848839F1CA3 /* PressKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressKit.swift; sourceTree = "<group>"; };
+		382D8A14BD44E21FCF1E5165 /* QuietDeck */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QuietDeck; path = .; sourceTree = SOURCE_ROOT; };
+		4ABCA6C31944536D5CA3EB70 /* MenuBarPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPanel.swift; sourceTree = "<group>"; };
+		5027EFFAC24532706AB4385A /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		749A6F5A19B66EA8BA50B91B /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
+		931FDC56FC83F67AC0C9F159 /* QuietDeckApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuietDeckApp.swift; sourceTree = "<group>"; };
+		9B88F4AAD80435CBFC825433 /* QuietDeck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuietDeck.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9885AC6760F6296C91E1D4C /* DeckyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckyView.swift; sourceTree = "<group>"; };
+		D96A0E044FD857F25E417E15 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F37E01C291E5E397BEE3AF13 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		F45CCE6B8D97DAE578506970 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8EB2ACA195BF457CB824CF29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7584525BE5F6F928D3C1E23B /* DeckKit in Frameworks */,
+				D35AD09B572BAC820750989C /* DeckRemote in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08293BFCFAE0D06DD62DD145 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B88F4AAD80435CBFC825433 /* QuietDeck.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		77F02EF82D2E94E4F083DE13 = {
+			isa = PBXGroup;
+			children = (
+				DB79444B586AAE0C60AF6559 /* App */,
+				AE29A2B5859FD2A22E0ACCF5 /* Packages */,
+				08293BFCFAE0D06DD62DD145 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AE29A2B5859FD2A22E0ACCF5 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				382D8A14BD44E21FCF1E5165 /* QuietDeck */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		D5A4B8A509ADFD0FCE9A7553 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1DC4C2BDF941EFBD008837F1 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		DB79444B586AAE0C60AF6559 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D5A4B8A509ADFD0FCE9A7553 /* Resources */,
+				F581077EA76BE2BE3CEF9D6C /* Sources */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F581077EA76BE2BE3CEF9D6C /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				D96A0E044FD857F25E417E15 /* AppModel.swift */,
+				14CE7A39D67A4F9FE9FA0D9A /* Components.swift */,
+				A9885AC6760F6296C91E1D4C /* DeckyView.swift */,
+				749A6F5A19B66EA8BA50B91B /* Discovery.swift */,
+				13D77E290910009C3462E5D7 /* EmulatorsView.swift */,
+				04930C7F773D76CA474E60C7 /* Keychain.swift */,
+				1E068CA791EADBB729EEC4BF /* LibraryView.swift */,
+				4ABCA6C31944536D5CA3EB70 /* MenuBarPanel.swift */,
+				F37E01C291E5E397BEE3AF13 /* OnboardingView.swift */,
+				5027EFFAC24532706AB4385A /* OverviewView.swift */,
+				2E9D44754586A848839F1CA3 /* PressKit.swift */,
+				931FDC56FC83F67AC0C9F159 /* QuietDeckApp.swift */,
+				F45CCE6B8D97DAE578506970 /* SettingsView.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		99A65C3C1DDF56539762FBDD /* QuietDeck */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D24D613E4CD8622CC1FBBA2 /* Build configuration list for PBXNativeTarget "QuietDeck" */;
+			buildPhases = (
+				CAB5518F3D1305136FA8BB7A /* Sources */,
+				69648BBDDF2B5EADF6DB0C14 /* Resources */,
+				8EB2ACA195BF457CB824CF29 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QuietDeck;
+			packageProductDependencies = (
+				1ADE0525B0161B4E69B40325 /* DeckKit */,
+				FF7009FF2A0A6AF060FBF871 /* DeckRemote */,
+			);
+			productName = QuietDeck;
+			productReference = 9B88F4AAD80435CBFC825433 /* QuietDeck.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B7890F3FEE5DF5A2FC87AC84 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					99A65C3C1DDF56539762FBDD = {
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 1E88228C1417E0EAF4806E51 /* Build configuration list for PBXProject "QuietDeck" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 77F02EF82D2E94E4F083DE13;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A332792B9357676B32B33137 /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 54;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				99A65C3C1DDF56539762FBDD /* QuietDeck */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		69648BBDDF2B5EADF6DB0C14 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFDAFCF34B9829B16D66D841 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CAB5518F3D1305136FA8BB7A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				399CF5F5FBA581D6649E35C6 /* AppModel.swift in Sources */,
+				9CEA3FDEDCD2E24FF4424A4D /* Components.swift in Sources */,
+				3D84AF8A2E3773D1C800DE6C /* DeckyView.swift in Sources */,
+				E715E80B340E4236EAFF098D /* Discovery.swift in Sources */,
+				12DC004B7B18DBA0B9B42048 /* EmulatorsView.swift in Sources */,
+				DF4E24DE28DD1D0ACDA28282 /* Keychain.swift in Sources */,
+				9A8AD762995A5CB9F4EC93FD /* LibraryView.swift in Sources */,
+				9E2AAB0A54C744A6AE6EF71C /* MenuBarPanel.swift in Sources */,
+				D186C3910F4B51B23B757703 /* OnboardingView.swift in Sources */,
+				6B0CB748054D910BDD33902A /* OverviewView.swift in Sources */,
+				5839941C038A2EAF791D431B /* PressKit.swift in Sources */,
+				80E50CC53D41757EE02152B0 /* QuietDeckApp.swift in Sources */,
+				DCBB7BFF8AF19AC129C5EA8E /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		066B373AA49B53D4A8AA35B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "arm64 x86_64";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Support/QuietDeck.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.raphaeltorquat0.QuietDeck;
+				PRODUCT_NAME = QuietDeck;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		74B99AFF16E54C75E82F7139 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Support/QuietDeck.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.raphaeltorquat0.QuietDeck;
+				PRODUCT_NAME = QuietDeck;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DCFA04C83AE27F3FE2112BA1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		FF4D862B9EB376F1C7BABBAE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E88228C1417E0EAF4806E51 /* Build configuration list for PBXProject "QuietDeck" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCFA04C83AE27F3FE2112BA1 /* Debug */,
+				FF4D862B9EB376F1C7BABBAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8D24D613E4CD8622CC1FBBA2 /* Build configuration list for PBXNativeTarget "QuietDeck" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				74B99AFF16E54C75E82F7139 /* Debug */,
+				066B373AA49B53D4A8AA35B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A332792B9357676B32B33137 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1ADE0525B0161B4E69B40325 /* DeckKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DeckKit;
+		};
+		FF7009FF2A0A6AF060FBF871 /* DeckRemote */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DeckRemote;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B7890F3FEE5DF5A2FC87AC84 /* Project object */;
+}

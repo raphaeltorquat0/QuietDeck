@@ -79,6 +79,28 @@ public enum ROMScanner {
     }
 }
 
+extension ROMScanner {
+    /// Separa o que é BIOS conhecida pelo hash; o tamanho evita ler jogos inteiros à toa.
+    public static func biosFiles(_ urls: [URL], table: [BIOSEntry]) async -> [String] {
+        let sizes = Set(table.map { Int64($0.size) })
+        var files: [URL] = []
+        for url in urls {
+            if let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) {
+                while let item = walker.nextObject() as? URL { files.append(item) }
+            } else {
+                files.append(url)
+            }
+        }
+        var found: [String] = []
+        for file in files {
+            let size = (try? FileManager.default.attributesOfItem(atPath: file.path)[.size] as? Int64) ?? -1
+            guard sizes.contains(size), let sha1 = try? await LocalHash.compute(file.path, algorithm: 1) else { continue }
+            if BIOS.match(sha1: sha1, table: table) != nil { found.append(file.path) }
+        }
+        return found
+    }
+}
+
 public struct ROMImportResult: Equatable, Sendable {
     public var remotePath: String
     public var skippedAsDuplicate: Bool
@@ -260,6 +282,12 @@ public enum Library {
                   system.extensions.contains((name as NSString).pathExtension.lowercased()) else { return nil }
             return Game(systemID: system.id, name: name, path: "\(paths.roms)/\(relative)", size: size)
         }
+    }
+
+    /// O `.m3u` representa o conjunto de discos; sem ele, o primeiro arquivo do título.
+    public static func pick(_ ref: GameRef, in games: [Game]) -> Game? {
+        let matches = games.filter { $0.systemID == ref.systemID && ROMPlan.displayName($0.name) == ref.title }
+        return matches.first { $0.name.lowercased().hasSuffix(".m3u") } ?? matches.sorted { $0.name < $1.name }.first
     }
 
     /// Exe, diretório e argumentos do atalho. Steam interpreta aspas duplas em `LaunchOptions`.

@@ -1,0 +1,34 @@
+name: SteamOS em QEMU
+
+# Manual: baixa a imagem de recovery oficial (3 GB) e roda as fases 1 e 2 contra SteamOS de verdade.
+# O Game Mode não sobe em VM, então os testes do Steam ficam de fora (DECISIONS.md #15).
+on:
+  workflow_dispatch:
+
+jobs:
+  steamos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1"
+      - name: Habilita KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -w /dev/kvm
+      - name: Dependências
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 ovmf bzip2 rsync openssh-client
+      - name: Sobe a imagem
+        run: scripts/qemu-steamos.sh
+      - name: Testes das fases 1 e 2
+        run: |
+          QUIETDECK_TEST_REAL_OS=1 QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=quietdeck \
+          QUIETDECK_TEST_FLATPAK=com.snes9x.Snes9x \
+            swift test --filter 'Integration' --no-parallel
+      - name: Log do boot
+        if: failure()
+        run: tail -n 200 qemu.log || true

@@ -3,13 +3,25 @@ import DeckKit
 import Observation
 
 /// O que a fila sabe fazer. É `Codable` para sobreviver ao fechamento do app e poder repetir depois.
+/// Jogo por sistema e título. O caminho é procurado no Deck quando o trabalho roda, não na hora do pedido.
+public struct GameRef: Codable, Hashable, Sendable {
+    public var systemID: String
+    public var title: String
+
+    public init(systemID: String, title: String) {
+        self.systemID = systemID
+        self.title = title
+    }
+}
+
 public enum JobAction: Codable, Hashable, Sendable {
     case upload(localPath: String, remoteDirectory: String)
     case installEmulator(appID: String)
     case updateEmulator(appID: String)
     case removeEmulator(appID: String)
     case prepareEmulation(sdMount: String?)
-    case applyShortcuts(user: String, shortcuts: [Shortcut])
+    case configureEmulator(id: String, overwrite: Bool, sdMount: String?)
+    case addToSteam(user: String, games: [GameRef], sdMount: String?)
     case applyArt(user: String, appID: UInt32, kind: ArtKind, url: String)
     case installDecky
     case installPlugin(name: String, version: StorePlugin.Version)

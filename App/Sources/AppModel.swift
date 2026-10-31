@@ -1,0 +1,238 @@
+import DeckKit
+import DeckRemote
+import Foundation
+import Observation
+
+struct DeckProfile: Codable, Hashable, Identifiable {
+    var id = UUID()
+    var name: String
+    var host: String
+    var port = 22
+    var user = "deck"
+}
+
+enum AppSection: String, CaseIterable, Identifiable {
+    case overview, emulators, library, decky, compatTools, saves
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .overview: "Overview"
+        case .emulators: "Emulators"
+        case .library: "Library"
+        case .decky: "Decky"
+        case .compatTools: "Compat Tools"
+        case .saves: "Saves"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .overview: "gauge.with.dots.needle.33percent"
+        case .emulators: "gamecontroller"
+        case .library: "square.stack.3d.up"
+        case .decky: "puzzlepiece.extension"
+        case .compatTools: "wineglass"
+        case .saves: "externaldrive.badge.timemachine"
+        }
+    }
+}
+
+enum Paths {
+    static let support: URL = {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "QuietDeck")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+    static let key = NSHomeDirectory() + "/.ssh/quietdeck_ed25519"
+    static var knownHosts: String { support.appending(path: "known_hosts").path }
+    static var work: URL { support.appending(path: "rom-work") }
+}
+
+/// Preferências locais do app (não ficam no Deck).
+@MainActor @Observable
+final class AppSettings {
+    @ObservationIgnored private let d = UserDefaults.standard
+    var showMenuBarExtra: Bool { didSet { d.set(showMenuBarExtra, forKey: "showMenuBarExtra") } }
+    var syncFolders: [String] { didSet { d.set(syncFolders, forKey: "syncFolders") } }
+    var savesFolder: String? { didSet { d.set(savesFolder, forKey: "savesFolder") } }
+    var onboarded: Bool { didSet { d.set(onboarded, forKey: "onboarded") } }
+
+    init() {
+        d.register(defaults: ["showMenuBarExtra": true])
+        showMenuBarExtra = d.bool(forKey: "showMenuBarExtra")
+        syncFolders = d.stringArray(forKey: "syncFolders") ?? []
+        savesFolder = d.string(forKey: "savesFolder")
+        onboarded = d.bool(forKey: "onboarded")
+    }
+}
+
+/// Estado e ações do app. Tudo que fala com o Deck é assíncrono: a UI só observa.
+@MainActor @Observable
+final class AppModel {
+    static let steamGridKeyAccount = "steamgriddb"
+
+    let settings = AppSettings()
+    let catalog: Catalog
+    private(set) var decks: [DeckProfile]
+    var selectedDeckID: UUID? { didSet { UserDefaults.standard.set(selectedDeckID?.uuidString, forKey: "selectedDeck") } }
+    var section: AppSection? = .overview
+    var showOnboarding = false
+    private(set) var live: [UUID: LiveDeck] = [:]
+    @ObservationIgnored private var queueStore = Paths.support.appending(path: "queue.json")
+    @ObservationIgnored private(set) lazy var queue = JobQueue(storeURL: queueStore) { [weak self] job, progress in
+        guard let context = await self?.context(job.deckID) else { throw DeckError.unreachable("This Deck isn't connected.") }
+        try await JobExecutor.run(job, context: context, progress: progress)
+        await self?.live[job.deckID]?.refresh()
+    }
+
+    init(catalog: Catalog) {
+        self.catalog = catalog
+        decks = (UserDefaults.standard.data(forKey: "decks")).flatMap { try? JSONDecoder().decode([DeckProfile].self, from: $0) } ?? []
+        selectedDeckID = UserDefaults.standard.string(forKey: "selectedDeck").flatMap(UUID.init) ?? decks.first?.id
+        for deck in decks { live[deck.id] = makeLive(deck) }
+        showOnboarding = !settings.onboarded
+    }
+
+    /// `--replay`/PressKit: um Deck que responde pelas fixtures.
+    init(demo runner: any CommandRunner, catalog: Catalog, queueStore: URL) {
+        self.catalog = catalog
+        self.queueStore = queueStore
+        let deck = DeckProfile(name: "Steam Deck", host: "steamdeck.local")
+        decks = [deck]
+        selectedDeckID = deck.id
+        live[deck.id] = LiveDeck(profile: deck, runner: runner, config: Self.config(deck), catalog: catalog)
+    }
+
+    static func config(_ deck: DeckProfile) -> SSHConfig {
+        SSHConfig(host: deck.host, port: deck.port, user: deck.user, identityFile: Paths.key, knownHostsFile: Paths.knownHosts)
+    }
+
+    private func makeLive(_ deck: DeckProfile) -> LiveDeck {
+        let config = Self.config(deck)
+        return LiveDeck(profile: deck, runner: Launch.wrap(SSHRunner(config: config)), config: config, catalog: catalog)
+    }
+
+    var current: LiveDeck? { selectedDeckID.flatMap { live[$0] } }
+
+    func add(_ deck: DeckProfile) {
+        decks.removeAll { $0.host == deck.host && $0.port == deck.port }
+        decks.append(deck)
+        save()
+        live[deck.id] = makeLive(deck)
+        selectedDeckID = deck.id
+        settings.onboarded = true
+        Task { await live[deck.id]?.refresh() }
+    }
+
+    func remove(_ deck: DeckProfile) {
+        decks.removeAll { $0.id == deck.id }
+        live[deck.id] = nil
+        Keychain.remove(for: deck.id.uuidString)
+        if selectedDeckID == deck.id { selectedDeckID = decks.first?.id }
+        save()
+    }
+
+    private func save() { UserDefaults.standard.set(try? JSONEncoder().encode(decks), forKey: "decks") }
+
+    func start() {
+        Task {
+            while !Task.isCancelled {
+                for deck in live.values { await deck.refresh() }
+                for id in live.keys where live[id]?.connection == .online { queue.resume(deckID: id) }
+                try? await Task.sleep(for: .seconds(30))
+            }
+        }
+    }
+
+    func enqueue(_ title: String, _ action: JobAction) {
+        guard let id = selectedDeckID else { return }
+        queue.enqueue(Job(deckID: id, title: title, action: action))
+    }
+
+    /// Arquivos soltos que batem com a tabela de BIOS vão direto para `bios/`; o resto segue como ROM.
+    func importBIOS(_ files: [String]) {
+        for path in files { enqueue("Import \((path as NSString).lastPathComponent)", .importBIOS(localPath: path, sdMount: nil)) }
+    }
+
+    private func context(_ id: UUID) -> JobContext? {
+        guard let deck = live[id] else { return nil }
+        return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),
+                          workRoot: Paths.work) { Keychain.remove(for: id.uuidString) }
+    }
+}
+
+/// Espelho de um Deck. `refresh` lê tudo de novo: nada aqui decide uma operação, só alimenta a tela.
+@MainActor @Observable
+final class LiveDeck: Identifiable {
+    enum Connection: Equatable { case connecting, online, failed(String) }
+
+    let profile: DeckProfile
+    let runner: any CommandRunner
+    let config: SSHConfig
+    let catalog: Catalog
+    nonisolated var id: UUID { profile.id }
+
+    var connection = Connection.connecting
+    var status = DeviceStatus()
+    var flatpaks: [InstalledFlatpak] = []
+    var updates: [String: String] = [:]
+    var paths: EmulationPaths?
+    var bios: [String: BIOSStatus] = [:]
+    var games: [Library.Game] = []
+    var decky: DeckyState?
+    var plugins: [InstalledPlugin] = []
+    var compatTools: [String] = []
+    var steamUsers: [String] = []
+    private var refreshing = false
+
+    init(profile: DeckProfile, runner: any CommandRunner, config: SSHConfig, catalog: Catalog) {
+        self.profile = profile
+        self.runner = runner
+        self.config = config
+        self.catalog = catalog
+    }
+
+    var updateCount: Int { updates.keys.filter { id in flatpaks.contains { $0.appID == id } }.count }
+    var sdMount: String? { status.sdCard?.mountPoint }
+
+    func refresh() async {
+        guard !refreshing else { return }
+        refreshing = true
+        defer { refreshing = false }
+        do {
+            status = try await DeviceProbe.read(runner)
+            connection = .online
+        } catch {
+            connection = .failed(String(describing: error))
+            return
+        }
+        let r = runner
+        flatpaks = (try? await Flatpaks.installed(r)) ?? flatpaks
+        updates = Flatpaks.parseUpdates((try? await r.run(Flatpaks.updates).stdout) ?? "")
+        steamUsers = (try? await SteamControl(runner: r).users()) ?? steamUsers
+        if let p = try? await Emulation.paths(r) {
+            paths = p
+            let scan = (try? await r.run(BIOS.scan(paths: p)).stdout) ?? ""
+            bios = DeckRemote.BIOS.status(scanOutput: scan, table: catalog.bios.entries)
+            games = Library.parse((try? await r.run(Library.listing(paths: p)).stdout) ?? "", systems: catalog.systems, paths: p)
+        }
+        decky = try? await Decky.state(r)
+        plugins = (try? await Decky.plugins(r)) ?? plugins
+        compatTools = (try? await CompatTools.installed(r)) ?? compatTools
+    }
+}
+
+/// Flags de linha de comando. `--record <pasta>` grava os comandos num Deck real em fixtures JSON.
+enum Launch {
+    static func value(after flag: String) -> String? {
+        CommandLine.arguments.firstIndex(of: flag).flatMap { CommandLine.arguments.dropFirst($0 + 1).first }
+    }
+
+    static func wrap(_ runner: any CommandRunner) -> any CommandRunner {
+        guard let dir = value(after: "--record") else { return runner }
+        let stamp = Int(Date().timeIntervalSince1970)
+        let url = URL(fileURLWithPath: dir).appending(path: "recording-\(stamp)-\(UUID().uuidString.prefix(4)).json")
+        return RecordingRunner(base: runner, recorder: CommandRecorder(url: url, source: "steamos-real"))
+    }
+}

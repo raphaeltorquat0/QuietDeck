@@ -103,12 +103,31 @@ import Testing
         #expect(StorePlugin.artifactURL(p[0].versions[0]) == "https://cdn.tzatzikiweeb.moe/file/steam-deck-homebrew/versions/h.zip")
     }
 
+    @Test func discSetIsAddedThroughItsPlaylist() {
+        func g(_ n: String) -> Library.Game { Library.Game(systemID: "psx", name: n, path: "/r/" + n, size: 1) }
+        let games = [g("FF (Disc 1).chd"), g("FF (Disc 2).chd"), g("FF.m3u"), g("Other.chd")]
+        #expect(Library.pick(GameRef(systemID: "psx", title: "FF"), in: games)?.name == "FF.m3u")
+        #expect(Library.pick(GameRef(systemID: "psx", title: "Other"), in: games)?.name == "Other.chd")
+        #expect(Library.pick(GameRef(systemID: "gba", title: "FF"), in: games) == nil)
+    }
+
     @Test func steamUsersSkipAnonymous() {
         #expect(SteamControl.parseUsers("0\n12345\nanonymous\n") == ["12345"])
     }
 }
 
 @Suite struct ScannerTests {
+    @Test func biosIsRecognizedByHashNotByName() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let bios = dir.appendingPathComponent("renamed.dat"), other = dir.appendingPathComponent("same-size.bin")
+        try Data("good".utf8).write(to: bios)
+        try Data("nope".utf8).write(to: other)
+        let sha1 = try await LocalHash.compute(bios.path, algorithm: 1)
+        let table = [BIOSEntry(system: "gba", file: "gba_bios.bin", size: 4, md5: "", sha1: sha1)]
+        #expect(await ROMScanner.biosFiles([dir], table: table).map { URL(fileURLWithPath: $0).lastPathComponent } == ["renamed.dat"])
+    }
+
     @Test func cueTracksStayWithTheirIndexAndDetectionUsesFolderAndHeader() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let ps1 = root.appendingPathComponent("ps1"), other = root.appendingPathComponent("misc")
