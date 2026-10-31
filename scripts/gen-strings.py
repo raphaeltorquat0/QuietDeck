@@ -4,6 +4,12 @@ A exportação do Xcode não enxerga Button, Label nem chaves do pacote, então 
 import glob, json, re, sys
 
 PT = {
+"Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": "Vidro nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos.",
+"Quiet Glass": "Quiet Glass",
+"Apply Quiet Glass": "Aplicar Quiet Glass",
+"Remove Quiet Glass": "Remover Quiet Glass",
+"Quiet Glass applied": "Quiet Glass aplicado",
+"Quiet Glass removed": "Quiet Glass removido",
 "psx/Game (Track 1).bin": "psx/Game (Track 1).bin",
 "internal storage": "armazenamento interno",
 "%@ files fit more than one system. Move them into a system folder.": "%@ arquivos servem em mais de um sistema. Mova-os para uma pasta de sistema.",

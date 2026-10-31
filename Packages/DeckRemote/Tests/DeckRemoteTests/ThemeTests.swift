@@ -4,6 +4,23 @@ import Testing
 @testable import DeckRemote
 
 @Suite struct ThemeUnitTests {
+    /// Os dois patches precisam cobrir as mesmas abas, ou um estado deixaria um menu sem tema.
+    @Test func glassPatchesCoverTheSameMenusAndOpaqueHasNoFilter() throws {
+        let manifest = try #require(QuietTheme.resource("QuietGlass/theme.json"))
+        let json = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: manifest)) as? [String: Any])
+        let patches = try #require(json["patches"] as? [String: Any])
+        let menus = try #require(patches["Menus"] as? [String: Any])
+        let values = try #require(menus["values"] as? [String: [String: [String]]])
+        #expect(menus["default"] as? String == "Vidro")
+        // A chave é sensível a maiúsculas: `quickaccess` não casa com janela nenhuma e o tema não aparece.
+        #expect(values["Vidro"]?["glass.css"] == ["bigpictureoverlay"])
+        #expect(values["Opaco"]?["opaque.css"] == ["bigpictureoverlay"])
+        let opaque = try String(contentsOf: try #require(QuietTheme.resource("QuietGlass/opaque.css")), encoding: .utf8)
+        #expect(!opaque.replacingOccurrences(of: "/*", with: "\n").split(separator: "\n").last!.contains("backdrop-filter"))
+        let glass = try String(contentsOf: try #require(QuietTheme.resource("QuietGlass/glass.css")), encoding: .utf8)
+        #expect(glass.contains("@supports not (backdrop-filter") && glass.contains("prefers-reduced-transparency"))
+    }
+
     @Test func selectorsComeFromTheBundledThemeAndSkipComments() throws {
         let names = QuietTheme.selectors(css: "/* .fake_Comment */ .a_B::after, .c_D-e.gpfocus {} .plain {}")
         #expect(names == ["a_B", "c_D-e"])

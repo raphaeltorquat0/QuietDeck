@@ -180,15 +180,20 @@ extension Decky {
 }
 
 /// A home própria do QuietDeck. O zip vai embutido no app e entra pelo mesmo caminho dos plugins da loja.
-public enum QuietHomePlugin {
-    public static let name = "Quiet Home"
-    static let marker = ".local/share/quietdeck/quiet-home.sha256"
+/// Plugin que vem dentro do app, em `Resources/plugin`.
+public struct BundledPlugin: Sendable {
+    public let name: String
+    let folder: String
+    let marker: String
 
-    public static func isInstalled(_ runner: any CommandRunner) async throws -> Bool {
+    public static let quietHome = BundledPlugin(name: "Quiet Home", folder: "QuietHome", marker: ".local/share/quietdeck/quiet-home.sha256")
+    public static let quietTune = BundledPlugin(name: "QuietTune", folder: "QuietTune", marker: ".local/share/quietdeck/quiet-tune.sha256")
+
+    public func isInstalled(_ runner: any CommandRunner) async throws -> Bool {
         try await Decky.plugins(runner).contains { $0.name == name }
     }
 
-    static func enableScript(settings: String) -> String {
+    func enableScript(settings: String) -> String {
         let python = #"""
         import json, os, sys
         p, name = sys.argv[1:3]
@@ -204,12 +209,12 @@ public enum QuietHomePlugin {
     public enum Outcome: Equatable, Sendable { case installed, alreadyCurrent }
 
     /// O hash do zip decide: o `version` do plugin não muda a cada ajuste.
-    public static func install(runner: any CommandRunner, password: String) async throws -> Outcome {
-        guard let url = Bundle.deckKitResources?.appendingPathComponent("plugin/QuietHome.zip") else { throw CocoaError(.fileNoSuchFile) }
+    public func install(runner: any CommandRunner, password: String) async throws -> Outcome {
+        guard let url = Bundle.deckKitResources?.appendingPathComponent("plugin/\(folder).zip") else { throw CocoaError(.fileNoSuchFile) }
         let zip = try Data(contentsOf: url)
         let files = RemoteFiles(runner: runner)
         let home = try await files.home()
-        let remote = "\(home)/.cache/quietdeck/QuietHome.zip"
+        let remote = "\(home)/.cache/quietdeck/\(folder).zip"
         try await files.write(zip, to: remote)
         let hash = String(try await runner.check("sha256sum \(Shell.quote(remote))").trimmed.prefix(64))
         let current = try await files.read("\(home)/\(marker)").map { String(decoding: $0, as: UTF8.self) }

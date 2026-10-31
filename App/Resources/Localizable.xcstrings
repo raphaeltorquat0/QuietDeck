@@ -441,6 +441,16 @@
     }
    }
   },
+  "Apply Quiet Glass": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicar Quiet Glass"
+     }
+    }
+   }
+  },
   "Apply Quiet Theme": {
    "localizations": {
     "pt-BR": {
@@ -1301,6 +1311,16 @@
     }
    }
   },
+  "Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vidro nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos."
+     }
+    }
+   }
+  },
   "Go to Settings › Developer › **Pair new host**. This screen moves on by itself.": {
    "localizations": {
     "pt-BR": {
@@ -2151,6 +2171,36 @@
     }
    }
   },
+  "Quiet Glass": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quiet Glass"
+     }
+    }
+   }
+  },
+  "Quiet Glass applied": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quiet Glass aplicado"
+     }
+    }
+   }
+  },
+  "Quiet Glass removed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Quiet Glass removido"
+     }
+    }
+   }
+  },
   "Quiet Home": {
    "localizations": {
     "pt-BR": {
@@ -2267,6 +2317,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Remover %@"
+     }
+    }
+   }
+  },
+  "Remove Quiet Glass": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover Quiet Glass"
      }
     }
    }

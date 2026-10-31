@@ -142,3 +142,14 @@ Needs a collection on your network and a paired Deck. Nothing below has been run
 - [ ] Try a game larger than the free space. The warning names what to remove, and Install stays off.
 - [ ] Install one item from **Free and Legal**. The license and official page links open.
 - [ ] Service only: stop the Mac, restart the container and confirm that a Deck install started before still finished, and that `/index` answers 401 without the token.
+
+## Quiet Glass
+
+Nothing below has been run on a real Deck yet.
+
+- [ ] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart.
+- [ ] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred.
+- [ ] Open a game, then the quick access menu. It's opaque. Close the game and it's glass again.
+- [ ] Turn on **Vidro sempre** in QuietTune. The menu stays glass in a game, and the choice survives a reboot.
+- [ ] Remove Quiet Glass. The theme and QuietTune are gone, and your other themes are as they were.
+- [ ] Measure FPS and battery draw in 3 games, with and without glass, and record them in DECISIONS.md #75.

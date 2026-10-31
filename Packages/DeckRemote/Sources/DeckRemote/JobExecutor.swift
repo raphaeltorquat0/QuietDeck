@@ -102,8 +102,14 @@ public enum JobExecutor {
                 _ = try await installer(c).installFree(game, paths: paths, progress: progress)
             case let .shelfRemove(item, user):
                 try await installer(c).remove(item, user: user)
+            case .applyQuietGlass:
+                try await QuietTheme.applyGlass(r, password: c.requirePassword())
+                progress(100, "Quiet Glass applied")
+            case .removeQuietGlass:
+                try await QuietTheme.removeGlass(r, password: c.requirePassword())
+                progress(100, "Quiet Glass removed")
             case .installQuietHome:
-                let result = try await QuietHomePlugin.install(runner: r, password: c.requirePassword())
+                let result = try await BundledPlugin.quietHome.install(runner: r, password: c.requirePassword())
                 progress(100, result == .installed ? "Quiet Home installed" : "Already installed")
             case let .applyTheme(user, model):
                 let result = try await QuietTheme.apply(r, user: user, model: model, password: c.password)

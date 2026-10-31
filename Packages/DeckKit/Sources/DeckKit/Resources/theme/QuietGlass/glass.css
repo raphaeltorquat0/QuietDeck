@@ -1,0 +1,11 @@
+/* Quiet Glass: menus fora de jogo. Em jogo o QuietTune troca para opaque.css, salvo se o usuário forçar o vidro. */
+.quickaccessmenu_Container, .mainmenu_Container {
+  background: rgba(14, 16, 20, 0.72) !important;
+  backdrop-filter: blur(18px) saturate(140%);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; backdrop-filter: none; }
+}

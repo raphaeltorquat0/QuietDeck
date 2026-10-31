@@ -267,6 +267,7 @@ final class LiveDeck: Identifiable {
     var steamUsers: [String] = []
     var hasPassword = false
     var themeInstalled = false
+    var hasQuietGlass = false
     var themeHealth: ThemeHealth?
     /// Avisa quando o tema acaba de ser desligado por um cliente novo.
     var onThemeDisabled: ((ThemeHealth) -> Void)?
@@ -309,6 +310,7 @@ final class LiveDeck: Identifiable {
         plugins = (try? await Decky.plugins(r)) ?? plugins
         compatTools = (try? await CompatTools.installed(r)) ?? compatTools
         themeInstalled = (try? await QuietTheme.isInstalled(r)) ?? false
+        hasQuietGlass = (try? await QuietTheme.hasGlass(r)) ?? false
         let wasHealthy = themeHealth?.isHealthy ?? true
         themeHealth = try? await QuietTheme.disableIfBroken(r)
         if wasHealthy, let health = themeHealth, !health.isHealthy { onThemeDisabled?(health) }

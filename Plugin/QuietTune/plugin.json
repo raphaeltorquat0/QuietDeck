@@ -1,0 +1,11 @@
+{
+  "name": "QuietTune",
+  "author": "Raphael Torquato",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["ui"],
+    "description": "Keeps Quiet Glass out of the way while a game runs.",
+    "image": "https://raw.githubusercontent.com/raphaeltorquat0/QuietDeck/main/docs/screenshots/overview-dark.png"
+  }
+}

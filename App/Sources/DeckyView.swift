@@ -35,7 +35,7 @@ struct DeckyView: View {
             }
             Card(title: "Quiet Home", symbol: "house") {
                 InlineNote(text: "A quieter Game Mode home with one row of covers. To go back to the native home, remove the plugin below.")
-                Button(deck.plugins.contains { $0.name == QuietHomePlugin.name } ? "Update Quiet Home" : "Install Quiet Home") {
+                Button(deck.plugins.contains { $0.name == BundledPlugin.quietHome.name } ? "Update Quiet Home" : "Install Quiet Home") {
                     model.enqueue(String(localized: "Install Quiet Home"), .installQuietHome)
                 }
                 .disabled(!deck.hasPassword || deck.decky?.installed != true)
@@ -63,6 +63,17 @@ struct DeckyView: View {
                         }
                         .disabled(!deck.hasPassword)
                     }
+                }
+            }
+            Card(title: "Quiet Glass", symbol: "circle.lefthalf.filled") {
+                Text("Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.")
+                    .font(.callout).foregroundStyle(.secondary)
+                if deck.hasQuietGlass {
+                    Button("Remove Quiet Glass") { model.enqueue(String(localized: "Remove Quiet Glass"), .removeQuietGlass) }
+                        .disabled(!deck.hasPassword)
+                } else {
+                    Button("Apply Quiet Glass") { model.enqueue(String(localized: "Apply Quiet Glass"), .applyQuietGlass) }
+                        .buttonStyle(.glassProminent).disabled(deck.decky?.installed != true || !deck.hasPassword)
                 }
             }
             Card(title: "Plugin Store", symbol: "bag") {

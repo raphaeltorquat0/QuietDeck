@@ -1,0 +1,2 @@
+/* Sem filtro: durante o jogo o menu não gasta GPU com o vidro. */
+.quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; }

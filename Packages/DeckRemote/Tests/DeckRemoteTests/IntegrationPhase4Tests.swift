@@ -36,12 +36,32 @@ extension IntegrationTests {
     @Test(.enabled(if: Sim.hasHarness)) func quietHomeInstallsFromBundledZip() async throws {
         let r = try await Sim.runner()
         try await r.check(.sudo("rm -rf /home/deck/homebrew/plugins /home/deck/.local/share/quietdeck/quiet-home.sha256; mkdir -p /home/deck/homebrew/plugins /home/deck/homebrew/settings; chown deck /home/deck/homebrew/plugins; echo '{\"disabled_plugins\": [\"Quiet Home\", \"Other\"]}' > /home/deck/homebrew/settings/loader.json", password: Sim.password))
-        #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .installed)
-        #expect(try await QuietHomePlugin.isInstalled(r))
+        #expect(try await BundledPlugin.quietHome.install(runner: r, password: Sim.password) == .installed)
+        #expect(try await BundledPlugin.quietHome.isInstalled(r))
         #expect(try await r.run("test -s ~/homebrew/plugins/QuietHome/dist/index.js").ok)
         let settings = try await r.check("cat ~/homebrew/settings/loader.json").stdout
         #expect(!settings.contains("Quiet Home") && settings.contains("Other"))
         #expect(try await r.run("systemctl is-active plugin_loader").ok)
-        #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .alreadyCurrent)
+        #expect(try await BundledPlugin.quietHome.install(runner: r, password: Sim.password) == .alreadyCurrent)
+    }
+
+    /// Liga ao lado dos temas do usuário, sem desligar nenhum, e sai sem deixar rastro.
+    @Test(.enabled(if: Sim.hasHarness)) func quietGlassKeepsOtherThemesAndRemovesCleanly() async throws {
+        let r = try await Sim.runner()
+        try await r.check("mkdir -p ~/homebrew/themes/Obsidian ~/homebrew/plugins; echo '{\"active\":true}' > ~/homebrew/themes/Obsidian/config_USER.json; rm -f ~/.local/share/quietdeck/quiet-tune.sha256")
+        let translations = try await r.run("cat ~/homebrew/themes/css_translations.json 2>/dev/null").stdout
+        defer { Task { [translations] in try? await RemoteFiles(runner: r).write(Data(translations.utf8), to: "/home/deck/homebrew/themes/css_translations.json") } }
+        try await RemoteFiles(runner: r).write(Data(#"{"a": ["quickaccessmenu_Container", "mainmenu_Container"]}"#.utf8), to: "/home/deck/homebrew/themes/css_translations.json")
+        try await QuietTheme.applyGlass(r, password: Sim.password)
+        #expect(try await QuietTheme.hasGlass(r))
+        #expect(try await BundledPlugin.quietTune.isInstalled(r))
+        #expect(try await r.check("cat ~/homebrew/themes/'Quiet Glass'/config_USER.json").stdout.contains("true"))
+        #expect(try await r.check("cat ~/homebrew/themes/Obsidian/config_USER.json").stdout.contains("true"))
+        // Reaplicar não muda nada.
+        try await QuietTheme.applyGlass(r, password: Sim.password)
+        try await QuietTheme.removeGlass(r, password: Sim.password)
+        #expect(try await !QuietTheme.hasGlass(r))
+        #expect(try await !BundledPlugin.quietTune.isInstalled(r))
+        #expect(try await r.check("cat ~/homebrew/themes/Obsidian/config_USER.json").stdout.contains("true"))
     }
 }

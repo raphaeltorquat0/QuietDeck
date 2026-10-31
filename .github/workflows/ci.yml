@@ -13,6 +13,8 @@ jobs:
         run: scripts/fetch-fixtures.sh
       - name: Testes
         run: make test
+      - name: QuietTune
+        run: python3 -I -c "import sys; sys.path.insert(0, 'Plugin/QuietTune'); import test_main"
       - name: Build
         run: brew install xcodegen && scripts/build-app.sh
 

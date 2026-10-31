@@ -1,7 +1,16 @@
 {
   "name": "Quiet Glass",
   "author": "QuietDeck",
-  "version": "v1.0",
+  "version": "v2.0",
   "manifest_version": 9,
-  "inject": { "shared.css": ["quickaccess", "mainmenu"] }
+  "patches": {
+    "Menus": {
+      "default": "Vidro",
+      "type": "dropdown",
+      "values": {
+        "Vidro": { "glass.css": ["bigpictureoverlay"] },
+        "Opaco": { "opaque.css": ["bigpictureoverlay"] }
+      }
+    }
+  }
 }

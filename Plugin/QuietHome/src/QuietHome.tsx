@@ -17,11 +17,13 @@ const styles = `
 .qh-row::after { content: ''; flex: none; width: 16px; }
 .qh-tile { flex: none; width: 86px; height: 129px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
 .qh-tile.gpfocus, .qh-tile:focus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
-.qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; }
+.qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; padding: 6px 14px; border-radius: 12px; background: rgba(14,16,20,.55); backdrop-filter: blur(18px) saturate(140%); }
 .qh-hints { margin-left: auto; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.72); }
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .qh-tab.on { color: #fff; font-weight: 600; border-bottom-color: #fff; }
-.qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(255,255,255,.14); border-radius: 6px; padding: 3px 9px; }
+.qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(14,16,20,.55); backdrop-filter: blur(18px) saturate(140%); border-radius: 6px; padding: 3px 9px; }
+@supports not (backdrop-filter: blur(1px)) { .qh-tabs, .qh-download { background: #0e1014; } }
+@media (prefers-reduced-transparency: reduce) { .qh-tabs, .qh-download { background: #0e1014; backdrop-filter: none; } }
 @media (prefers-reduced-motion: reduce) { .qh-tile { transition: none; } }
 `
 

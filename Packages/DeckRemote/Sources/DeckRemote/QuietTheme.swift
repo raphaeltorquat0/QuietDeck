@@ -184,6 +184,48 @@ public enum QuietTheme {
         return try await reload(runner, password: password)
     }
 
+    public static let glassName = "Quiet Glass"
+    static let glassFiles = ["theme.json", "glass.css", "opaque.css"]
+
+    /// Fica ao lado dos temas do usuário, sem desligar nenhum, e não reinicia o Steam.
+    public static func applyGlass(_ runner: any CommandRunner, password: String) async throws {
+        var css = ""
+        for name in glassFiles where name.hasSuffix(".css") {
+            guard let url = resource("QuietGlass/\(name)") else { throw CocoaError(.fileNoSuchFile) }
+            css += try String(contentsOf: url, encoding: .utf8)
+        }
+        let health = parseHealth(try await runner.run(healthScript(selectors: selectors(css: css))).stdout)
+        guard health.isHealthy else {
+            throw DeckError.unexpectedState("The theme doesn't match this Steam client: %@", health.missingSelectors.joined(separator: ", "))
+        }
+        let files = RemoteFiles(runner: runner)
+        let home = try await files.home()
+        for name in glassFiles {
+            guard let url = resource("QuietGlass/\(name)") else { throw CocoaError(.fileNoSuchFile) }
+            try await files.write(try Data(contentsOf: url), to: "\(home)/\(themes)/\(glassName)/\(name)")
+        }
+        try await runner.check(setStates([glassName: true]))
+        _ = try await BundledPlugin.quietTune.install(runner: runner, password: password)
+        try await runner.check(reloadCSSLoader)
+    }
+
+    public static func removeGlass(_ runner: any CommandRunner, password: String) async throws {
+        let home = try await RemoteFiles(runner: runner).home()
+        try await runner.check(setStates([glassName: false]))
+        try await runner.check("rm -rf \(Shell.quote("\(home)/\(themes)/\(glassName)"))")
+        if try await BundledPlugin.quietTune.isInstalled(runner) {
+            _ = try await Decky.removePlugin(name: BundledPlugin.quietTune.name, runner: runner, password: password)
+        }
+        try await runner.check(reloadCSSLoader)
+    }
+
+    /// CSS Loader desligado não é erro: ele lê os temas quando subir.
+    static let reloadCSSLoader = "curl -s -m 10 -X POST -H 'Content-Type: application/json' -d '{\"method\":\"reset\",\"args\":{}}' http://127.0.0.1:35821/req >/dev/null || true"
+
+    public static func hasGlass(_ runner: any CommandRunner) async throws -> Bool {
+        try await runner.run("test -e ~/\(Shell.quote("\(themes)/\(glassName)/glass.css"))").ok
+    }
+
     /// Último item da linha: abre a Loja, já que ela sai da home.
     public static let storeShortcut = Shortcut(name: storeTitle, exe: "/usr/bin/steam", startDir: "/usr/bin", launchOptions: "steam://store", tags: ["Quiet"])
 
