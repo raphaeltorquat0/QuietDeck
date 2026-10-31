@@ -1,5 +1,5 @@
 import { Focusable, GamepadButton, Navigation } from '@decky/ui'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { achievements, downloadPercent, Game, loadTabs, openStore, play, playedLine, requestDetails, Tab } from './steam'
 
 const styles = `
@@ -14,6 +14,7 @@ const styles = `
 .qh-play.gpfocus { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 7px rgba(0,0,0,.85); }
 .qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; }
 .qh-row::-webkit-scrollbar { display: none; }
+.qh-row::after { content: ''; flex: none; width: 16px; }
 .qh-tile { flex: none; width: 86px; height: 129px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
 .qh-tile.gpfocus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
 .qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; }
@@ -21,7 +22,6 @@ const styles = `
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .qh-tab.on { color: #fff; font-weight: 600; border-bottom-color: #fff; }
 .qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(255,255,255,.14); border-radius: 6px; padding: 3px 9px; }
-.qh-brand { position: absolute; top: 10px; left: 28px; font-size: 18px; font-weight: 600; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .qh-tile { transition: none; } }
 `
 
@@ -52,6 +52,11 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
       header.style.background = 'transparent'
     }
     show()
+    // A marca entra na própria barra: fora dela, a barra fica por cima.
+    const brand = doc.createElement('div')
+    brand.textContent = 'Quiet'
+    brand.style.cssText = 'position:absolute;left:28px;top:10px;font-size:18px;font-weight:600;color:#fff;pointer-events:none'
+    header.appendChild(brand)
     const timer = setInterval(() => {
       show()
       setDownload(downloadPercent())
@@ -59,6 +64,7 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     }, 2000)
     return () => {
       clearInterval(timer)
+      brand.remove()
       header.style.opacity = previous
       header.style.background = previousBackground
     }
@@ -91,14 +97,14 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     if (e.detail.button === GamepadButton.BUMPER_RIGHT) change(1)
   }
 
-  const ach = useMemo(() => (focused ? achievements(focused.appid) : null), [focused, tabs, download])
+  // Sem memo: as conquistas chegam depois do primeiro desenho, e o timer de 2 s redesenha.
+  const ach = focused ? achievements(focused.appid) : null
 
   return (
     <div className="qh" ref={root}>
       <style>{styles}</style>
       {focused && focused.heroes.length > 0 && <div className="qh-art" style={{ backgroundImage: focused.heroes.map((u) => `url("${u}")`).join(', ') }} />}
       <div className="qh-scrim" />
-      <div className="qh-brand">Quiet</div>
       {download !== null && <div className="qh-download">↓ {download}%</div>}
       <Focusable className="qh-body" onButtonDown={onButtonDown}>
         <div className="qh-info">
