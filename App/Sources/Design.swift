@@ -13,18 +13,50 @@ enum Motion {
 }
 
 extension View {
-    /// Liquid Glass no macOS 26+, material com vibrancy antes disso.
-    @ViewBuilder func glassPanel(cornerRadius: CGFloat = 14, interactive: Bool = false) -> some View {
-        if #available(macOS 26, *) {
-            glassEffect(interactive ? .regular.interactive() : .regular, in: .rect(cornerRadius: cornerRadius))
-        } else {
-            background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
-        }
+    /// Só para navegação e controles. Conteúdo usa `contentPanel`: vidro sobre vidro não existe aqui.
+    func glassPanel(cornerRadius: CGFloat = 14) -> some View {
+        glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+    }
+
+    /// Superfície opaca para conteúdo: capas, listas e texto longo ficam fora do vidro.
+    func contentPanel(cornerRadius: CGFloat = 14) -> some View {
+        background(.fill.quaternary, in: .rect(cornerRadius: cornerRadius))
     }
 }
 
 extension Int64 {
     var bytes: String { ByteCountFormatter.string(fromByteCount: self, countStyle: .file) }
+}
+
+/// Filtro por sistema: a seleção escorre de um chip a outro pelo vidro.
+struct SystemChips: View {
+    @Environment(AppModel.self) private var model
+    var ids: [String]
+    @Binding var selection: String?
+    @Namespace private var glass
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            GlassEffectContainer(spacing: 6) {
+                HStack(spacing: 6) {
+                    chip(Text("All"), nil)
+                    ForEach(ids, id: \.self) { chip(Text(verbatim: model.catalog.system($0)?.name ?? $0), $0) }
+                }
+            }
+            .padding(2)
+        }
+    }
+
+    private func chip(_ label: Text, _ id: String?) -> some View {
+        Button { Motion.run { selection = id } } label: {
+            label.font(.callout).padding(.horizontal, 10).padding(.vertical, 4)
+                .foregroundStyle(selection == id ? Color.white : .primary)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(selection == id ? .regular.tint(.accentColor).interactive() : .regular.interactive(), in: .capsule)
+        .glassEffectID(id ?? "all", in: glass)
+        .accessibilityAddTraits(selection == id ? .isSelected : [])
+    }
 }
 
 /// Texto em SF Mono, para caminhos e comandos.
@@ -61,7 +93,7 @@ struct Card<Content: View>: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .glassPanel()
+        .contentPanel()
     }
 }
 
@@ -90,7 +122,7 @@ struct EmptyState: View {
             Image(nsImage: DeckModel.still).resizable().scaledToFit().frame(width: 230).accessibilityHidden(true)
             Text(title).font(.title3.weight(.semibold))
             Text(message).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 340)
-            if let action, let perform { Button(action, action: perform).buttonStyle(.borderedProminent) }
+            if let action, let perform { Button(action, action: perform).buttonStyle(.glassProminent) }
         }
         .frame(maxWidth: .infinity)
         .padding(28)
@@ -184,39 +216,52 @@ extension SessionMode {
     }
 }
 
-/// Barra fixa no topo da área de conteúdo.
+/// Barra flutuante no topo do conteúdo. As duas cápsulas se fundem e se separam com o estado do Deck.
 struct DeckStatusBar: View {
     @Environment(AppModel.self) private var model
+    @Namespace private var glass
 
     var body: some View {
-        HStack(spacing: 16) {
-            if let deck = model.current {
-                connection(deck)
-                Divider().frame(height: 14)
-                Label(deck.status.mode.label, systemImage: "display")
-                if let battery = deck.status.batteryPercent {
-                    Label { Text(verbatim: "\(battery)%").monospacedDigit().contentTransition(.numericText()) } icon: {
-                        Image(systemName: batterySymbol(battery, deck.status.batteryState))
-                    }
-                    .accessibilityLabel(Text("Battery \(battery) percent"))
+        GlassEffectContainer(spacing: 12) {
+            HStack(spacing: 12) {
+                HStack(spacing: 16) {
+                    if let deck = model.current { status(deck) } else { Text("No Deck").foregroundStyle(.secondary) }
                 }
-                if let storage = deck.status.internalStorage { Label("\(storage.free.bytes) free", systemImage: "internaldrive") }
-                if let sd = deck.status.sdCard { Label("\(sd.free.bytes) free", systemImage: "sdcard") }
-                Spacer()
-                Button { model.showPalette = true } label: { Image(systemName: "magnifyingglass") }
-                    .buttonStyle(.borderless).help("Command palette (⌘K)").accessibilityLabel("Command palette")
-                Button { Task { await deck.refresh() } } label: { Image(systemName: "arrow.clockwise") }
-                    .buttonStyle(.borderless).help("Refresh (⌘R)").accessibilityLabel("Refresh")
-            } else {
-                Text("No Deck").foregroundStyle(.secondary)
-                Spacer()
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .glassEffect(.regular, in: .capsule)
+                .glassEffectID("status", in: glass)
+                Spacer(minLength: 0)
+                if let deck = model.current {
+                    HStack(spacing: 4) {
+                        Button { model.showPalette = true } label: { Image(systemName: "magnifyingglass") }
+                            .help("Command palette (⌘K)").accessibilityLabel("Command palette")
+                        Button { Task { await deck.refresh() } } label: { Image(systemName: "arrow.clockwise") }
+                            .help("Refresh (⌘R)").accessibilityLabel("Refresh")
+                    }
+                    .buttonStyle(.glass)
+                    .glassEffectID("actions", in: glass)
+                }
             }
         }
         .font(.callout)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(.bar)
         .animation(Motion.animation, value: model.current?.status)
+    }
+
+    @ViewBuilder private func status(_ deck: LiveDeck) -> some View {
+        connection(deck)
+        Divider().frame(height: 14)
+        Label(deck.status.mode.label, systemImage: "display")
+        if let battery = deck.status.batteryPercent {
+            Label { Text(verbatim: "\(battery)%").monospacedDigit().contentTransition(.numericText()) } icon: {
+                Image(systemName: batterySymbol(battery, deck.status.batteryState))
+            }
+            .accessibilityLabel(Text("Battery \(battery) percent"))
+        }
+        if let storage = deck.status.internalStorage { Label("\(storage.free.bytes) free", systemImage: "internaldrive") }
+        if let sd = deck.status.sdCard { Label("\(sd.free.bytes) free", systemImage: "sdcard") }
     }
 
     private func connection(_ deck: LiveDeck) -> some View {
@@ -238,7 +283,7 @@ extension LiveDeck.Connection {
     var detail: String? { if case let .failed(m) = self { m } else { nil } }
 }
 
-/// Fila no rodapé da sidebar: progresso, cancelar e tentar de novo.
+/// Fila no rodapé da sidebar: progresso, cancelar e tentar de novo. Sem fundo próprio: já está no vidro dela.
 struct QueueFooter: View {
     @Environment(AppModel.self) private var model
 
@@ -254,7 +299,6 @@ struct QueueFooter: View {
                 ForEach(model.queue.jobs.suffix(4)) { JobRow(job: $0) }
             }
             .padding(10)
-            .background(.bar)
             .anchorPreference(key: QueueAnchor.self, value: .bounds) { $0 }
         }
     }

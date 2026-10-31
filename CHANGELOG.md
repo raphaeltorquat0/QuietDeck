@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Requires macOS 26.** The interface now uses native Liquid Glass for navigation and controls, while content stays opaque.
+- The app icon has light, dark, tinted and clear variants.
+
 ### Added
 
 - **Shelf**: a storefront over your own collection, from a folder, an SMB/NFS share, an SSH server or an optional container service. Incremental hashing, your own No-Intro/Redump DATs, deduplication, filters, details and one-click install and remove.

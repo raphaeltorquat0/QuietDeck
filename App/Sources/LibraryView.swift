@@ -102,23 +102,7 @@ struct LibraryView: View {
     }
 
     private var filters: some View {
-        let ids = Array(Set(deck.games.map(\.systemID))).sorted()
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                chip(Text("All"), nil)
-                ForEach(ids, id: \.self) { chip(Text(verbatim: model.catalog.system($0)?.name ?? $0), $0) }
-            }
-        }
-    }
-
-    private func chip(_ label: Text, _ id: String?) -> some View {
-        Button { Motion.run { filter = id } } label: {
-            label.font(.callout).padding(.horizontal, 10).padding(.vertical, 4)
-                .foregroundStyle(filter == id ? Color.white : .primary)
-                .background(filter == id ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(filter == id ? .isSelected : [])
+        SystemChips(ids: Array(Set(deck.games.map(\.systemID))).sorted(), selection: $filter)
     }
 
     private var dropZone: some View {
@@ -180,7 +164,7 @@ struct LibraryView: View {
                 if addToSteam { confirmSend = true } else { send() }
             }
             .keyboardShortcut(.defaultAction)
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .disabled(!candidates.contains { $0.systemID != nil })
         }
     }

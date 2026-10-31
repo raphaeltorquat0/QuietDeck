@@ -82,7 +82,6 @@ struct CommandPalette: View {
             }
             .frame(width: 520)
             .glassPanel(cornerRadius: 16)
-            .shadow(color: .black.opacity(0.2), radius: 22, y: 10)
             .padding(.top, 70)
         }
         .onAppear { focused = true }

@@ -230,7 +230,7 @@ struct ShelfView: View {
             if model.shelf.undecided > 0 {
                 InlineNote(text: "\(model.shelf.undecided) files fit more than one system. Move them into a system folder.", symbol: "questionmark.folder")
             }
-            chips
+            SystemChips(ids: Array(Set(model.shelf.items.map(\.systemID))).sorted(), selection: $system)
             if shown.isEmpty {
                 EmptyState(title: "Nothing here", message: "Scan your sources, or change the filters.", action: "Scan") { scan() }
             } else {
@@ -255,26 +255,6 @@ struct ShelfView: View {
     private func lookUp(retry: Bool) {
         let shelf = model.shelf, m = model
         Task { await shelf.lookUp(shelf.items, covers: m.covers, describe: { m.describe($0) }, retry: retry) }
-    }
-
-    private var chips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                chip(Text("All"), nil)
-                ForEach(Array(Set(model.shelf.items.map(\.systemID))).sorted(), id: \.self) {
-                    chip(Text(verbatim: model.catalog.system($0)?.name ?? $0), $0)
-                }
-            }
-        }
-    }
-
-    private func chip(_ label: Text, _ id: String?) -> some View {
-        Button { Motion.run { system = id } } label: {
-            label.font(.callout).padding(.horizontal, 10).padding(.vertical, 4)
-                .foregroundStyle(system == id ? Color.white : .primary)
-                .background(system == id ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
-        }
-        .buttonStyle(.plain)
     }
 
     private func tile(_ item: ShelfItem) -> some View {
@@ -402,7 +382,7 @@ struct ShelfDetail: View {
                 }
             }
             Button("Install on Deck") { addToSteam ? (confirmInstall = true) : install() }
-                .buttonStyle(.borderedProminent).disabled(!fits)
+                .buttonStyle(.glassProminent).disabled(!fits)
         }
     }
 

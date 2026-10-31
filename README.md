@@ -76,7 +76,7 @@ Either way, macOS blocks the first launch because the app isn't notarized by App
 
 Allow **Local Network** access when macOS asks.
 
-QuietDeck runs on macOS 14 or later, on Apple Silicon and Intel. Converting games to CHD uses `chdman`, which QuietDeck installs through Homebrew the first time it's needed.
+QuietDeck runs on macOS 26 or later, on Apple Silicon and Intel. Converting games to CHD uses `chdman`, which QuietDeck installs through Homebrew the first time it's needed.
 
 ### Build from source
 

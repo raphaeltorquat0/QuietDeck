@@ -3,7 +3,8 @@ import PackageDescription
 
 let package = Package(
     name: "QuietDeck",
-    platforms: [.macOS(.v14)],
+    // Em texto: `.v26` exigiria tools 6.2, e o Linux do CI compila só os pacotes com 6.1.
+    platforms: [.macOS("26.0")],
     products: [
         .library(name: "DeckKit", targets: ["DeckKit"]),
         .library(name: "DeckRemote", targets: ["DeckRemote"]),

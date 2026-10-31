@@ -103,7 +103,7 @@ struct Gauge: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity)
-        .glassPanel()
+        .contentPanel()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityValue(Text(verbatim: "\(value), \(detail)"))

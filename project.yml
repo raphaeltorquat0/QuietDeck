@@ -2,7 +2,7 @@ name: QuietDeck
 options:
   bundleIdPrefix: io.github.raphaeltorquat0
   deploymentTarget:
-    macOS: "14.0"
+    macOS: "26.0"
   createIntermediateGroups: true
   developmentLanguage: en
   fileTypes:
