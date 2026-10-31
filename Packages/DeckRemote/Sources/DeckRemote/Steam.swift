@@ -94,7 +94,7 @@ public struct SteamControl: Sendable {
         guard let data = try await files.read(path) else { throw DeckError.unexpectedState("shortcuts.vdf disappeared after restarting Steam.") }
         let names = Set(ShortcutsFile.existing(in: try VDF.parse(data)).map(\.name))
         guard merged.added.allSatisfy({ names.contains($0.name) }) else {
-            throw DeckError.unexpectedState("Steam overwrote shortcuts.vdf while restarting. Restore \(backup ?? "the backup") and try again.")
+            throw DeckError.unexpectedState("Steam overwrote shortcuts.vdf while restarting. Restore %@ and try again.", backup ?? "the backup")
         }
         return WriteResult(added: merged.added, backup: backup)
     }

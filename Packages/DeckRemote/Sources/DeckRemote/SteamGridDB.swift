@@ -13,7 +13,7 @@ enum PublicAPI {
         for (k, v) in headers { request.setValue(v, forHTTPHeaderField: k) }
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-            throw DeckError.unexpectedState("\(u.host ?? "server") answered \(http.statusCode).")
+            throw DeckError.unexpectedState("%@ answered %@. Check the API key in Settings.", u.host ?? "server", String(http.statusCode))
         }
         return try JSONDecoder().decode(T.self, from: data)
     }

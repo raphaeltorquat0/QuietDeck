@@ -33,6 +33,7 @@ struct QuietDeckApp: App {
         .defaultSize(width: 1040, height: 700)
         .commands {
             CommandGroup(after: .sidebar) {
+                Button("Command Palette") { Motion.run { model.showPalette.toggle() } }.keyboardShortcut("k")
                 ForEach(Array(AppSection.allCases.enumerated()), id: \.element) { index, section in
                     Button(section.title) { model.section = section }
                         .keyboardShortcut(KeyEquivalent(Character(String(index + 1))), modifiers: .command)
@@ -63,7 +64,7 @@ struct RootView: View {
         @Bindable var model = model
         NavigationSplitView {
             List(AppSection.allCases, selection: $model.section) { section in
-                Label(section.title, systemImage: section.symbol).tag(section)
+                Label { Text(section.title) } icon: { Image(systemName: section.symbol) }.tag(section)
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 230)
             .safeAreaInset(edge: .bottom, spacing: 0) { QueueFooter() }
@@ -71,7 +72,7 @@ struct RootView: View {
                 if model.decks.count > 1 {
                     ToolbarItem {
                         Picker("Deck", selection: $model.selectedDeckID) {
-                            ForEach(model.decks) { Text($0.name).tag(UUID?.some($0.id)) }
+                            ForEach(model.decks) { Text(verbatim: $0.name).tag(UUID?.some($0.id)) }
                         }
                     }
                 }
@@ -79,9 +80,23 @@ struct RootView: View {
         } detail: {
             detail(model.section ?? .overview)
                 .safeAreaInset(edge: .top, spacing: 0) { DeckStatusBar() }
-                .navigationTitle((model.section ?? .overview).title)
+                .navigationTitle(Text((model.section ?? .overview).title))
         }
-        .sheet(isPresented: $model.showOnboarding) { OnboardingView() }
+        .coordinateSpace(name: "root")
+        .overlayPreferenceValue(QueueAnchor.self) { anchor in
+            GeometryReader { geo in
+                let target = anchor.map { geo[$0] } ?? CGRect(x: 40, y: geo.size.height - 40, width: 40, height: 40)
+                ForEach(model.flights) { FlyingCover(flight: $0, target: target) }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) { ToastView() }
+        .overlay {
+            if model.showPalette {
+                CommandPalette().transition(.opacity)
+            }
+        }
+        .animation(Motion.animation, value: model.showPalette)
+        .sheet(isPresented: $model.showOnboarding) { PairingWizard() }
     }
 
     @ViewBuilder private func detail(_ section: AppSection) -> some View {
@@ -95,10 +110,8 @@ struct RootView: View {
             case .saves: SavesView(deck: deck)
             }
         } else {
-            ContentUnavailableView {
-                Label("No Deck yet", systemImage: "gamecontroller")
-            } actions: {
-                Button("Add Deck…") { model.showOnboarding = true }
+            EmptyState(title: "No Deck yet", message: "Pair your Steam Deck with this Mac to get started.", action: "Add Deck…") {
+                model.showOnboarding = true
             }
         }
     }

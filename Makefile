@@ -19,7 +19,7 @@ install: ## Compila em Release, assina ad-hoc, instala em /Applications e abre o
 	open "$(DEST)"
 
 dev: ## Compila em Debug e roda o app no terminal (logs aqui; Ctrl-C para sair)
-	@command -v xcodegen >/dev/null && xcodegen generate --quiet || true
+	@command -v xcodegen >/dev/null && scripts/generate-project.sh || true
 	xcodebuild -project $(APP_NAME).xcodeproj -scheme $(APP_NAME) -configuration Debug \
 	  -derivedDataPath $(DEV_DD) build -quiet
 	$(DEV_DD)/Build/Products/Debug/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)
@@ -30,7 +30,7 @@ test: ## Roda os testes unitários e os de replay (sem Docker)
 harness: ## Sobe o Deck simulado em 127.0.0.1:2222 (Docker)
 	docker build --build-arg BASE=$(HARNESS_BASE) -t quietdeck-harness Harness
 	-docker rm -f quietdeck-sim
-	docker run -d --name quietdeck-sim -p 127.0.0.1:2222:22 quietdeck-harness
+	docker run -d --name quietdeck-sim -p 127.0.0.1:2222:22 -p 127.0.0.1:32000:32000 quietdeck-harness
 	@for i in $$(seq 1 60); do docker exec quietdeck-sim pgrep -x sshd >/dev/null 2>&1 && exit 0; sleep 0.5; done; echo 'sshd não subiu' >&2; exit 1
 
 integration: harness ## Roda os testes de integração contra o Deck simulado

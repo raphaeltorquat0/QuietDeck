@@ -1,0 +1,2396 @@
+{
+ "sourceLanguage": "en",
+ "strings": {
+  "%@ already exists.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ já existe."
+     }
+    }
+   }
+  },
+  "%@ answered %@. Check the API key in Settings.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ respondeu %@. Confira a chave de API em Ajustes."
+     }
+    }
+   }
+  },
+  "%@ doesn't match any known BIOS hash, so it wasn't copied.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não confere com nenhum hash de BIOS conhecido, então não foi copiado."
+     }
+    }
+   }
+  },
+  "%@ free": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ livres"
+     }
+    }
+   }
+  },
+  "%@ is missing and Homebrew isn't installed. Install Homebrew from brew.sh, then try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não foi encontrado, e o Homebrew não está instalado. Instale o Homebrew em brew.sh e tente de novo."
+     }
+    }
+   }
+  },
+  "%@ isn't there anymore. Check that the network share is mounted.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não está mais lá. Confira se o compartilhamento de rede está montado."
+     }
+    }
+   }
+  },
+  "%lld updates": {
+   "localizations": {
+    "en": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld update"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld updates"
+        }
+       }
+      }
+     }
+    },
+    "pt-BR": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld atualização"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "%lld atualizações"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "A config file already exists. Only the ROM, BIOS and save paths change, and a backup is kept next to it.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Já existe um arquivo de configuração. Só os caminhos de ROM, BIOS e saves mudam, e um backup fica ao lado dele."
+     }
+    }
+   }
+  },
+  "A pairing request from this Mac is on the Deck's screen. Choose **Approve**.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Há um pedido de pareamento deste Mac na tela do Deck. Escolha **Aprovar**."
+     }
+    }
+   }
+  },
+  "API key": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chave de API"
+     }
+    }
+   }
+  },
+  "About": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sobre"
+     }
+    }
+   }
+  },
+  "Add %@ to Steam?": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar %@ ao Steam?"
+     }
+    }
+   }
+  },
+  "Add %lld to Steam…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar %lld ao Steam…"
+     }
+    }
+   }
+  },
+  "Add Deck…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar Deck…"
+     }
+    }
+   }
+  },
+  "Add Folder…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar pasta…"
+     }
+    }
+   }
+  },
+  "Add to Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar ao Steam"
+     }
+    }
+   }
+  },
+  "Add to Steam after sending?": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar ao Steam depois de enviar?"
+     }
+    }
+   }
+  },
+  "Add to Steam when done": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar ao Steam ao terminar"
+     }
+    }
+   }
+  },
+  "Add to Steam…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar ao Steam…"
+     }
+    }
+   }
+  },
+  "Add your SteamGridDB API key in Settings to choose artwork.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicione sua chave de API do SteamGridDB em Ajustes para escolher artes."
+     }
+    }
+   }
+  },
+  "Added to Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionado ao Steam"
+     }
+    }
+   }
+  },
+  "All": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Todos"
+     }
+    }
+   }
+  },
+  "Already in Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Já está no Steam"
+     }
+    }
+   }
+  },
+  "Already installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Já instalado"
+     }
+    }
+   }
+  },
+  "Already on the Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Já está no Deck"
+     }
+    }
+   }
+  },
+  "Any game running on the Deck will close and unsaved progress will be lost.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O jogo aberto no Deck vai fechar, e o progresso não salvo será perdido."
+     }
+    }
+   }
+  },
+  "Apply %lld": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicar %lld"
+     }
+    }
+   }
+  },
+  "Applying artwork doesn't close anything. Steam shows it the next time the library reloads.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicar artes não fecha nada. O Steam as mostra na próxima vez que a biblioteca recarregar."
+     }
+    }
+   }
+  },
+  "Approve": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aprovar"
+     }
+    }
+   }
+  },
+  "Approve on the Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aprove no Deck"
+     }
+    }
+   }
+  },
+  "Archives are extracted when the emulator can't read them, CD and DVD images become CHD on supported systems, and multi-disc games get an .m3u. Your original files aren't changed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Arquivos compactados são extraídos quando o emulador não os lê, imagens de CD e DVD viram CHD nos sistemas compatíveis, e jogos com vários discos ganham um .m3u. Seus arquivos originais não são alterados."
+     }
+    }
+   }
+  },
+  "Artwork": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Artes"
+     }
+    }
+   }
+  },
+  "Artwork: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Arte: %@"
+     }
+    }
+   }
+  },
+  "Audio": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Áudio"
+     }
+    }
+   }
+  },
+  "Back": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voltar"
+     }
+    }
+   }
+  },
+  "Back Up Now": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fazer backup agora"
+     }
+    }
+   }
+  },
+  "Back up saves": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Backup dos saves"
+     }
+    }
+   }
+  },
+  "Backup Folder": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pasta de backup"
+     }
+    }
+   }
+  },
+  "Backups": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Backups"
+     }
+    }
+   }
+  },
+  "Battery": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bateria"
+     }
+    }
+   }
+  },
+  "Battery %lld percent": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Bateria em %lld por cento"
+     }
+    }
+   }
+  },
+  "Buy Me a Coffee": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Buy Me a Coffee"
+     }
+    }
+   }
+  },
+  "Cancel": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cancelar"
+     }
+    }
+   }
+  },
+  "Cancelled": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cancelado"
+     }
+    }
+   }
+  },
+  "Charging": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Carregando"
+     }
+    }
+   }
+  },
+  "Checking for duplicates": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procurando duplicatas"
+     }
+    }
+   }
+  },
+  "Choose Files…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Escolher arquivos…"
+     }
+    }
+   }
+  },
+  "Choose a folder on this Mac and back up your saves.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Escolha uma pasta neste Mac e faça backup dos seus saves."
+     }
+    }
+   }
+  },
+  "Choose…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Escolher…"
+     }
+    }
+   }
+  },
+  "Clear": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Limpar"
+     }
+    }
+   }
+  },
+  "Command Palette": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paleta de comandos"
+     }
+    }
+   }
+  },
+  "Command failed (%@): %@\n%@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O comando falhou (%@): %@\n%@"
+     }
+    }
+   }
+  },
+  "Command palette": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paleta de comandos"
+     }
+    }
+   }
+  },
+  "Command palette (⌘K)": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Paleta de comandos (⌘K)"
+     }
+    }
+   }
+  },
+  "Compat Tools": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Compat tools"
+     }
+    }
+   }
+  },
+  "Confirm": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Confirmar"
+     }
+    }
+   }
+  },
+  "Connect": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conectar"
+     }
+    }
+   }
+  },
+  "Connected": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conectado"
+     }
+    }
+   }
+  },
+  "Connecting": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conectando"
+     }
+    }
+   }
+  },
+  "Connecting…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conectando…"
+     }
+    }
+   }
+  },
+  "Converting to CHD": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Convertendo para CHD"
+     }
+    }
+   }
+  },
+  "Copied": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Copiado"
+     }
+    }
+   }
+  },
+  "Copies Emulation/saves and each emulator's save folders to this Mac. Nothing on the Deck is deleted.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Copia Emulation/saves e as pastas de saves de cada emulador para este Mac. Nada é apagado no Deck."
+     }
+    }
+   }
+  },
+  "Copy": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Copiar"
+     }
+    }
+   }
+  },
+  "Couldn't reach the Deck. Check that it's awake and on this network. %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível falar com o Deck. Confira se ele está ligado e nesta rede. %@"
+     }
+    }
+   }
+  },
+  "Create Emulation Folders": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Criar pastas de emulação"
+     }
+    }
+   }
+  },
+  "Create Emulation folders": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Criar pastas de emulação"
+     }
+    }
+   }
+  },
+  "Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Deck"
+     }
+    }
+   }
+  },
+  "Deck host name or IP address": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nome ou endereço IP do Deck"
+     }
+    }
+   }
+  },
+  "Decks": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Decks"
+     }
+    }
+   }
+  },
+  "Decky": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Decky"
+     }
+    }
+   }
+  },
+  "Decky Loader": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Decky Loader"
+     }
+    }
+   }
+  },
+  "Desktop Mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Desktop Mode"
+     }
+    }
+   }
+  },
+  "Details": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Detalhes"
+     }
+    }
+   }
+  },
+  "Developer": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Desenvolvedor"
+     }
+    }
+   }
+  },
+  "Developer Mode exposes Steam's debug port on your local network. Turn it off in Settings if you don't trust this network.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Modo de Desenvolvedor expõe a porta de debug do Steam na sua rede local. Desligue-o nas configurações se não confiar nesta rede."
+     }
+    }
+   }
+  },
+  "Discharging": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Descarregando"
+     }
+    }
+   }
+  },
+  "Dismiss": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Dispensar"
+     }
+    }
+   }
+  },
+  "Display": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tela"
+     }
+    }
+   }
+  },
+  "Done": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Concluído"
+     }
+    }
+   }
+  },
+  "Drop ROMs or BIOS files here": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Solte aqui ROMs ou arquivos de BIOS"
+     }
+    }
+   }
+  },
+  "Drop your own ROMs here to send them to the Deck.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Solte aqui suas próprias ROMs para enviá-las ao Deck."
+     }
+    }
+   }
+  },
+  "EmuDeck is installed. QuietDeck follows its folders and doesn't change emulator settings.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O EmuDeck está instalado. O QuietDeck segue as pastas dele e não muda as configurações dos emuladores."
+     }
+    }
+   }
+  },
+  "EmuDeck manages this emulator": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O EmuDeck gerencia este emulador"
+     }
+    }
+   }
+  },
+  "Emulators": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Emuladores"
+     }
+    }
+   }
+  },
+  "Enable Developer Mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ativar Modo de Desenvolvedor"
+     }
+    }
+   }
+  },
+  "Enter the password of the deck user. It stays in your Keychain.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Digite a senha do usuário deck. Ela fica no seu Keychain."
+     }
+    }
+   }
+  },
+  "Files must already be yours. QuietDeck never downloads ROMs.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Os arquivos precisam ser seus. O QuietDeck nunca baixa ROMs."
+     }
+    }
+   }
+  },
+  "Flatpak finished, but the app state didn't change: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Flatpak terminou, mas o estado do app não mudou: %@"
+     }
+    }
+   }
+  },
+  "Folders on this Mac or on a mounted SMB or NFS share. Library › Scan Sync Folders looks for new games, and games already on the Deck are skipped by hash.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pastas neste Mac ou em um compartilhamento SMB ou NFS montado. Biblioteca › Procurar nas pastas sincronizadas encontra jogos novos, e os que já estão no Deck são ignorados pelo hash."
+     }
+    }
+   }
+  },
+  "Folders ready": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pastas prontas"
+     }
+    }
+   }
+  },
+  "Forget": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Esquecer"
+     }
+    }
+   }
+  },
+  "Full": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cheia"
+     }
+    }
+   }
+  },
+  "Game Mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Game Mode"
+     }
+    }
+   }
+  },
+  "Get a key at steamgriddb.com": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Obtenha uma chave em steamgriddb.com"
+     }
+    }
+   }
+  },
+  "Go to Settings › Developer › **Pair new host**. This screen moves on by itself.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Vá em Configurações › Desenvolvedor › **Parear novo host**. Esta tela avança sozinha."
+     }
+    }
+   }
+  },
+  "Hold the Power button, choose **Switch to Desktop** and open **Konsole**. Then run:": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Segure o botão Power, escolha **Mudar para o Desktop** e abra o **Konsole**. Depois rode:"
+     }
+    }
+   }
+  },
+  "Host": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Host"
+     }
+    }
+   }
+  },
+  "Import %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Importar %@"
+     }
+    }
+   }
+  },
+  "Import BIOS File…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Importar arquivo de BIOS…"
+     }
+    }
+   }
+  },
+  "Install": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar"
+     }
+    }
+   }
+  },
+  "Install %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar %@"
+     }
+    }
+   }
+  },
+  "Install Decky": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar Decky"
+     }
+    }
+   }
+  },
+  "Install GE-Proton below for games that need it.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instale o GE-Proton abaixo para os jogos que precisam dele."
+     }
+    }
+   }
+  },
+  "Installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalados"
+     }
+    }
+   }
+  },
+  "Installed Plugins": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Plugins instalados"
+     }
+    }
+   }
+  },
+  "Internal": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Interno"
+     }
+    }
+   }
+  },
+  "Interrupted when the app closed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Interrompido ao fechar o app"
+     }
+    }
+   }
+  },
+  "Invalid hash": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hash inválido"
+     }
+    }
+   }
+  },
+  "Invalid tool name: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nome de ferramenta inválido: %@"
+     }
+    }
+   }
+  },
+  "Library": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Biblioteca"
+     }
+    }
+   }
+  },
+  "Looking for your Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procurando seu Deck"
+     }
+    }
+   }
+  },
+  "Missing": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Faltando"
+     }
+    }
+   }
+  },
+  "New password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nova senha"
+     }
+    }
+   }
+  },
+  "New password for the deck user": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nova senha do usuário deck"
+     }
+    }
+   }
+  },
+  "New tools appear in Steam after it restarts.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Novas ferramentas aparecem no Steam depois que ele reinicia."
+     }
+    }
+   }
+  },
+  "No Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum Deck"
+     }
+    }
+   }
+  },
+  "No Deck yet": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum Deck ainda"
+     }
+    }
+   }
+  },
+  "No backups yet": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum backup ainda"
+     }
+    }
+   }
+  },
+  "No compat tools yet": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma compat tool ainda"
+     }
+    }
+   }
+  },
+  "No game found inside %@.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum jogo encontrado em %@."
+     }
+    }
+   }
+  },
+  "No games yet": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum jogo ainda"
+     }
+    }
+   }
+  },
+  "No results": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum resultado"
+     }
+    }
+   }
+  },
+  "None": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhum"
+     }
+    }
+   }
+  },
+  "Not charging": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem carregar"
+     }
+    }
+   }
+  },
+  "Not enough space on the Deck: %@ MB needed, %@ MB free. Free up space or send to the microSD.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem espaço no Deck: faltam %@ MB, há %@ MB livres. Libere espaço ou envie para o microSD."
+     }
+    }
+   }
+  },
+  "Not inserted": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não inserido"
+     }
+    }
+   }
+  },
+  "OK": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "OK"
+     }
+    }
+   }
+  },
+  "Offline": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Offline"
+     }
+    }
+   }
+  },
+  "On the Deck, press the STEAM button and go to Settings › System, then turn on **Enable Developer Mode**.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No Deck, aperte o botão STEAM, vá em Configurações › Sistema e ligue **Ativar Modo de Desenvolvedor**."
+     }
+    }
+   }
+  },
+  "Open %@ in Emulators": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abrir %@ em Emuladores"
+     }
+    }
+   }
+  },
+  "Open QuietDeck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abrir QuietDeck"
+     }
+    }
+   }
+  },
+  "Open pairing on the Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abra o pareamento no Deck"
+     }
+    }
+   }
+  },
+  "Overview": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Visão geral"
+     }
+    }
+   }
+  },
+  "Pair Manually…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Parear manualmente…"
+     }
+    }
+   }
+  },
+  "Pair manually": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Parear manualmente"
+     }
+    }
+   }
+  },
+  "Pair new host": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Parear novo host"
+     }
+    }
+   }
+  },
+  "Pair this host?": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Parear este host?"
+     }
+    }
+   }
+  },
+  "Pair your Steam Deck with this Mac to get started.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pareie seu Steam Deck com este Mac para começar."
+     }
+    }
+   }
+  },
+  "Paired": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pareado"
+     }
+    }
+   }
+  },
+  "Pairing didn't finish": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O pareamento não terminou"
+     }
+    }
+   }
+  },
+  "Password of the deck user": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Senha do usuário deck"
+     }
+    }
+   }
+  },
+  "Paths already set": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Caminhos já definidos"
+     }
+    }
+   }
+  },
+  "Paths written": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Caminhos gravados"
+     }
+    }
+   }
+  },
+  "Play a sound when an operation finishes": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tocar um som ao concluir uma operação"
+     }
+    }
+   }
+  },
+  "Plugin Store": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Loja de plugins"
+     }
+    }
+   }
+  },
+  "Preparing the emulator": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preparando o emulador"
+     }
+    }
+   }
+  },
+  "Queue": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fila"
+     }
+    }
+   }
+  },
+  "Queue (%lld)": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fila (%lld)"
+     }
+    }
+   }
+  },
+  "Quick Actions": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ações rápidas"
+     }
+    }
+   }
+  },
+  "QuietDeck never downloads BIOS files. A file you import is checked against a table of known hashes before it's copied.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O QuietDeck nunca baixa BIOS. Cada arquivo importado é conferido em uma tabela de hashes conhecidos antes de ser copiado."
+     }
+    }
+   }
+  },
+  "Ready to Send": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pronto para enviar"
+     }
+    }
+   }
+  },
+  "Reboot": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reiniciar"
+     }
+    }
+   }
+  },
+  "Refresh": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar"
+     }
+    }
+   }
+  },
+  "Refresh (⌘R)": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar (⌘R)"
+     }
+    }
+   }
+  },
+  "Remove": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover"
+     }
+    }
+   }
+  },
+  "Remove %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover %@"
+     }
+    }
+   }
+  },
+  "Removed from Flathub (end of life). PlayStation games use the SwanStation core in RetroArch.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Removido do Flathub (fim de vida). Jogos de PlayStation usam o core SwanStation no RetroArch."
+     }
+    }
+   }
+  },
+  "Repeat the password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Repita a senha"
+     }
+    }
+   }
+  },
+  "Replace Saves": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Substituir saves"
+     }
+    }
+   }
+  },
+  "Restart Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reiniciar Steam"
+     }
+    }
+   }
+  },
+  "Restore": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Restaurar"
+     }
+    }
+   }
+  },
+  "Restore saves": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Restaurar saves"
+     }
+    }
+   }
+  },
+  "Running": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Em execução"
+     }
+    }
+   }
+  },
+  "Save": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Salvar"
+     }
+    }
+   }
+  },
+  "Save Password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Salvar senha"
+     }
+    }
+   }
+  },
+  "Saves": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Saves"
+     }
+    }
+   }
+  },
+  "Saves with the same name on the Deck are replaced by the backup. Close the game first.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Saves com o mesmo nome no Deck são substituídos pelo backup. Feche o jogo antes."
+     }
+    }
+   }
+  },
+  "Scan Sync Folders": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procurar nas pastas sincronizadas"
+     }
+    }
+   }
+  },
+  "Search": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Buscar"
+     }
+    }
+   }
+  },
+  "Search actions, games, emulators and plugins": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Buscar ações, jogos, emuladores e plugins"
+     }
+    }
+   }
+  },
+  "Send %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enviar %@"
+     }
+    }
+   }
+  },
+  "Send %lld Games": {
+   "localizations": {
+    "en": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "Send %lld Game"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "Send %lld Games"
+        }
+       }
+      }
+     }
+    },
+    "pt-BR": {
+     "variations": {
+      "plural": {
+       "one": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "Enviar %lld jogo"
+        }
+       },
+       "other": {
+        "stringUnit": {
+         "state": "translated",
+         "value": "Enviar %lld jogos"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "Send and Add to Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enviar e adicionar ao Steam"
+     }
+    }
+   }
+  },
+  "Send to": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enviar para"
+     }
+    }
+   }
+  },
+  "Sending": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enviando"
+     }
+    }
+   }
+  },
+  "Service": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Serviço"
+     }
+    }
+   }
+  },
+  "Set Password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Definir senha"
+     }
+    }
+   }
+  },
+  "Set Paths": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Definir caminhos"
+     }
+    }
+   }
+  },
+  "Set paths in %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Definir caminhos no %@"
+     }
+    }
+   }
+  },
+  "Set the game path inside Cemu: QuietDeck doesn't write its config because the Flatpak path isn't documented.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Defina a pasta de jogos dentro do Cemu: o QuietDeck não grava a configuração porque o caminho no Flatpak não é documentado."
+     }
+    }
+   }
+  },
+  "Setting…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Definindo…"
+     }
+    }
+   }
+  },
+  "Show in the menu bar": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mostrar na barra de menus"
+     }
+    }
+   }
+  },
+  "Shut Down": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Desligar"
+     }
+    }
+   }
+  },
+  "Size": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tamanho"
+     }
+    }
+   }
+  },
+  "Source code": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Código-fonte"
+     }
+    }
+   }
+  },
+  "Steam came back before the write, so shortcuts.vdf was left untouched.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam voltou antes da gravação, então shortcuts.vdf ficou intacto."
+     }
+    }
+   }
+  },
+  "Steam didn't come back. Check the Deck's screen.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam não voltou. Confira a tela do Deck."
+     }
+    }
+   }
+  },
+  "Steam didn't stop, so shortcuts.vdf was left untouched.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam não parou, então shortcuts.vdf ficou intacto."
+     }
+    }
+   }
+  },
+  "Steam didn't stop.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam não parou."
+     }
+    }
+   }
+  },
+  "Steam overwrote shortcuts.vdf while restarting. Restore %@ and try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam sobrescreveu shortcuts.vdf ao reiniciar. Restaure %@ e tente de novo."
+     }
+    }
+   }
+  },
+  "Steam restarts to save the shortcuts, so any running game will close.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam reinicia para salvar os atalhos, então o jogo aberto vai fechar."
+     }
+    }
+   }
+  },
+  "Steam restarts to save the shortcuts, so any running game will close. A backup of shortcuts.vdf is kept.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam reinicia para salvar os atalhos, então o jogo aberto vai fechar. Um backup de shortcuts.vdf é mantido."
+     }
+    }
+   }
+  },
+  "SteamOS %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "SteamOS %@"
+     }
+    }
+   }
+  },
+  "Step %lld of 4": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Passo %lld de 4"
+     }
+    }
+   }
+  },
+  "Stopped": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Parado"
+     }
+    }
+   }
+  },
+  "Storage": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Armazenamento"
+     }
+    }
+   }
+  },
+  "Switch to Game Mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Mudar para o Game Mode"
+     }
+    }
+   }
+  },
+  "Sync Folders": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Pastas sincronizadas"
+     }
+    }
+   }
+  },
+  "System": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sistema"
+     }
+    }
+   }
+  },
+  "Temperature": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Temperatura"
+     }
+    }
+   }
+  },
+  "Testing…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Testando…"
+     }
+    }
+   }
+  },
+  "The Deck approved the pairing, but SSH didn't start.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Deck aprovou o pareamento, mas o SSH não iniciou."
+     }
+    }
+   }
+  },
+  "The Deck approved this Mac and is turning on SSH.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Deck aprovou este Mac e está ligando o SSH."
+     }
+    }
+   }
+  },
+  "The Deck refused the login. Pair it again. %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Deck recusou o login. Pareie de novo. %@"
+     }
+    }
+   }
+  },
+  "The Deck refused the password. Enter it again in Settings.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Deck recusou a senha. Digite de novo em Ajustes."
+     }
+    }
+   }
+  },
+  "The deck user has no password yet, and installing needs one. Set it from here.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O usuário deck ainda não tem senha, e a instalação precisa de uma. Defina por aqui."
+     }
+    }
+   }
+  },
+  "The file on the Deck has %@ bytes instead of %@. Try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O arquivo no Deck tem %@ bytes em vez de %@. Tente de novo."
+     }
+    }
+   }
+  },
+  "The installer finished, but Decky isn't there.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O instalador terminou, mas o Decky não está lá."
+     }
+    }
+   }
+  },
+  "The official installer runs with sudo. Besides ~/homebrew, it adds a service in /etc/systemd/system, the one place QuietDeck writes outside /home/deck.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O instalador oficial roda com sudo. Além de ~/homebrew, ele adiciona um serviço em /etc/systemd/system, o único lugar fora de /home/deck em que o QuietDeck grava."
+     }
+    }
+   }
+  },
+  "Then enter the same password here. It stays in your Keychain.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Depois digite a mesma senha aqui. Ela fica no seu Keychain."
+     }
+    }
+   }
+  },
+  "These actions close the running game, so each one asks first.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Estas ações fecham o jogo aberto, por isso cada uma pergunta antes."
+     }
+    }
+   }
+  },
+  "This Deck isn't connected.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este Deck não está conectado."
+     }
+    }
+   }
+  },
+  "This action needs the deck password. Add it in Settings.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Esta ação precisa da senha do deck. Adicione em Ajustes."
+     }
+    }
+   }
+  },
+  "This app is installed system-wide, and QuietDeck only manages --user installs.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este app está instalado no sistema, e o QuietDeck só gerencia instalações --user."
+     }
+    }
+   }
+  },
+  "Try Again": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tentar de novo"
+     }
+    }
+   }
+  },
+  "Try again": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tentar de novo"
+     }
+    }
+   }
+  },
+  "Turn it on and connect it to the same network as this Mac.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ligue o Deck e conecte-o à mesma rede deste Mac."
+     }
+    }
+   }
+  },
+  "Turn on Developer Mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ative o Modo de Desenvolvedor"
+     }
+    }
+   }
+  },
+  "Type": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tipo"
+     }
+    }
+   }
+  },
+  "Unavailable": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Indisponível"
+     }
+    }
+   }
+  },
+  "Unknown mode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Modo desconhecido"
+     }
+    }
+   }
+  },
+  "Unknown system: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sistema desconhecido: %@"
+     }
+    }
+   }
+  },
+  "Update": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar"
+     }
+    }
+   }
+  },
+  "Update %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar %@"
+     }
+    }
+   }
+  },
+  "Update Decky": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar Decky"
+     }
+    }
+   }
+  },
+  "Update Paths": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar caminhos"
+     }
+    }
+   }
+  },
+  "Update to %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atualizar para %@"
+     }
+    }
+   }
+  },
+  "Version": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Versão"
+     }
+    }
+   }
+  },
+  "Waiting": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aguardando"
+     }
+    }
+   }
+  },
+  "Waiting for the Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aguardando o Deck"
+     }
+    }
+   }
+  },
+  "shortcuts.vdf disappeared after restarting Steam.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O shortcuts.vdf sumiu depois de reiniciar o Steam."
+     }
+    }
+   }
+  },
+  "shortcuts.vdf on the Deck doesn't match what was written.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O shortcuts.vdf no Deck não confere com o que foi gravado."
+     }
+    }
+   }
+  }
+ },
+ "version": "1.0"
+}

@@ -69,7 +69,7 @@ public enum Flatpaks {
 
     private static func verify(_ appID: String, _ runner: any CommandRunner, present: Bool) async throws -> Outcome {
         let isThere = try await installed(runner).contains { $0.appID == appID }
-        guard isThere == present else { throw DeckError.unexpectedState("flatpak finished, but \(appID) is \(isThere ? "still" : "not") installed.") }
+        guard isThere == present else { throw DeckError.unexpectedState("Flatpak finished, but the app state didn't change: %@", appID) }
         return .done
     }
 }

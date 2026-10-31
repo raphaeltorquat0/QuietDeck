@@ -1,0 +1,11 @@
+{
+  "fill" : { "automatic-gradient" : "extended-gray:0.92,1.0" },
+  "groups" : [
+    {
+      "layers" : [ { "image-name" : "console.svg", "name" : "console", "glass" : true } ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.4 },
+      "translucency" : { "enabled" : true, "value" : 0.25 }
+    }
+  ],
+  "supported-platforms" : { "squares" : [ "macOS" ] }
+}

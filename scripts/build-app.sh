@@ -13,7 +13,7 @@ yaml_value() { sed -n "s/^ *$1: \"\(.*\)\"$/\1/p" project.yml; }
 VERSION=$(yaml_value MARKETING_VERSION)
 BUILD_NUMBER=$(yaml_value CURRENT_PROJECT_VERSION)
 
-command -v xcodegen >/dev/null && xcodegen generate --quiet
+command -v xcodegen >/dev/null && scripts/generate-project.sh
 
 # Sem .app anterior, uma falha de build nunca reaproveita um produto antigo.
 rm -rf "$BUILT" dist/QuietDeck.app

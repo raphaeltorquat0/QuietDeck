@@ -2,62 +2,110 @@ import DeckKit
 import DeckRemote
 import SwiftUI
 
+/// Ilustração do Deck ao centro, com bateria, armazenamento e temperatura em volta, ao vivo.
 struct OverviewView: View {
     @Environment(AppModel.self) private var model
     var deck: LiveDeck
     @State private var pending: QuickAction?
 
+    private var battery: Double { Double(deck.status.batteryPercent ?? 0) / 100 }
+
     var body: some View {
         Page {
-            if case let .failed(message) = deck.connection {
-                InlineNote(text: message, symbol: "exclamationmark.triangle", tint: .orange)
+            if let failure = deck.connection.detail {
+                InlineNote(text: "\(failure)", symbol: "exclamationmark.triangle", tint: .orange)
             }
-            LazyVGrid(columns: [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)], spacing: 16) {
-                Card(title: deck.status.model ?? "Steam Deck", symbol: "gamecontroller") {
-                    row("SteamOS", deck.status.osVersion ?? "–")
-                    row("Build", deck.status.buildID ?? "–")
-                    row("Host", deck.profile.host)
-                }
-                Card(title: "Battery", symbol: batterySymbol(deck.status.batteryPercent ?? 0, deck.status.batteryState)) {
-                    row("Charge", deck.status.batteryPercent.map { "\($0)%" } ?? "–")
-                    row("State", deck.status.batteryState ?? "–")
-                    if let p = deck.status.batteryPercent { ProgressView(value: Double(p), total: 100) }
-                }
-                Card(title: "Storage", symbol: "internaldrive") {
-                    if let v = deck.status.internalStorage { volume(v) }
-                    if let v = deck.status.sdCard { volume(v) } else { row("microSD", "Not inserted") }
-                }
-                Card(title: "Temperature", symbol: "thermometer.medium") {
-                    if deck.status.temperatures.isEmpty { row("Sensors", "–") }
-                    ForEach(deck.status.temperatures.keys.sorted(), id: \.self) { key in
-                        row(key, String(format: "%.0f °C", deck.status.temperatures[key] ?? 0))
+            DeckIllustration {
+                ZStack {
+                    LinearGradient(colors: [Color.accentColor.opacity(0.5), .black], startPoint: .top, endPoint: .bottom)
+                    VStack(spacing: 4) {
+                        Text(verbatim: deck.status.model ?? "Steam Deck").font(.headline).foregroundStyle(.white)
+                        Text("SteamOS \(deck.status.osVersion ?? "–")").font(.callout).foregroundStyle(.white.opacity(0.8))
+                        Text(deck.status.mode.label).font(.caption).foregroundStyle(.white.opacity(0.7))
                     }
                 }
             }
+            .frame(maxWidth: 620)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+
+            HStack(alignment: .top, spacing: 16) {
+                Gauge(title: "Battery", symbol: batterySymbol(deck.status.batteryPercent ?? 0, deck.status.batteryState), fraction: battery,
+                      value: deck.status.batteryPercent.map { "\($0)%" } ?? "–", detail: deck.status.batteryState.map { Bundle.main.localizedString(forKey: $0, value: $0, table: nil) } ?? "")
+                storage(deck.status.internalStorage, title: "Internal", symbol: "internaldrive")
+                storage(deck.status.sdCard, title: "microSD", symbol: "sdcard")
+                temperature
+            }
+            .animation(Motion.animation, value: deck.status)
+
             Card(title: "Quick Actions", symbol: "bolt") {
                 HStack {
                     ForEach(QuickAction.allCases, id: \.self) { action in
-                        Button(action.title) { pending = action }
+                        Button(action.localized) { pending = action }
                     }
                 }
                 InlineNote(text: "These actions close the running game, so each one asks first.")
             }
         }
-        .confirmationDialog(pending?.title ?? "", isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }), presenting: pending) { action in
-            Button(action.title, role: .destructive) { model.enqueue(action.title, .quickAction(action)) }
+        .confirmationDialog(Text(pending?.localized ?? ""), isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }), presenting: pending) { action in
+            Button(action.localized, role: .destructive) { model.enqueue(String(localized: action.localized), .quickAction(action)) }
         } message: { _ in
             Text("Any game running on the Deck will close and unsaved progress will be lost.")
         }
     }
 
-    private func row(_ label: String, _ value: String) -> some View {
-        LabeledContent(label, value: value).font(.callout)
+    private func storage(_ v: Volume?, title: LocalizedStringKey, symbol: String) -> some View {
+        Gauge(title: title, symbol: symbol, fraction: v.map { Double($0.total - $0.free) / Double(max($0.total, 1)) } ?? 0,
+              value: v.map { $0.free.bytes } ?? "–", detail: v.map { "\($0.total.bytes)" } ?? String(localized: "Not inserted"))
     }
 
-    private func volume(_ v: Volume) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            row(v.name, "\(v.free.bytes) free of \(v.total.bytes)")
-            ProgressView(value: Double(v.total - v.free), total: Double(max(v.total, 1)))
+    private var temperature: some View {
+        let t = deck.status.temperatures
+        let cpu = t["CPU"] ?? 0
+        return Gauge(title: "Temperature", symbol: "thermometer.medium", fraction: min(cpu / 100, 1),
+                     value: t["CPU"].map { String(format: "%.0f °C", $0) } ?? "–",
+                     detail: t["GPU"].map { String(format: "GPU %.0f °C", $0) } ?? "")
+    }
+}
+
+extension QuickAction {
+    var localized: LocalizedStringResource {
+        switch self {
+        case .restartSteam: "Restart Steam"
+        case .switchToGameMode: "Switch to Game Mode"
+        case .reboot: "Reboot"
+        case .powerOff: "Shut Down"
         }
+    }
+}
+
+/// Indicador circular com animação suave a cada leitura.
+struct Gauge: View {
+    var title: LocalizedStringKey
+    var symbol: String
+    var fraction: Double
+    var value: String
+    var detail: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle().stroke(.quaternary, lineWidth: 7)
+                Circle().trim(from: 0, to: fraction)
+                    .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Image(systemName: symbol).font(.title3).foregroundStyle(.secondary)
+            }
+            .frame(width: 68, height: 68)
+            Text(verbatim: value).font(.headline).monospacedDigit().contentTransition(.numericText()).lineLimit(1).minimumScaleFactor(0.7)
+            Text(title).font(.callout)
+            Text(verbatim: detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity)
+        .glassPanel()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(Text(verbatim: "\(value), \(detail)"))
     }
 }

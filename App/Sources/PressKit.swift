@@ -22,16 +22,48 @@ import SwiftUI
         for appearance in [("dark", NSAppearance.Name.darkAqua), ("light", NSAppearance.Name.aqua)] {
             for section in AppSection.allCases {
                 model.section = section
-                await shot(RootView().environment(model), title: section.title, size: NSSize(width: 1040, height: 700), appearance: appearance.1,
+                await shot(RootView().environment(model), title: String(localized: section.title), size: NSSize(width: 1040, height: 700), appearance: appearance.1,
                            to: dir.appending(path: "\(section.rawValue)-\(appearance.0).png"))
             }
             model.showOnboarding = false
-            await shot(OnboardingView().environment(model), title: "Add Deck", size: NSSize(width: 520, height: 420), appearance: appearance.1,
+            await shot(PairingWizard().environment(model), title: "Add Deck", size: NSSize(width: 580, height: 560), appearance: appearance.1,
                        to: dir.appending(path: "onboarding-\(appearance.0).png"))
             await shot(MenuBarPanel().environment(model), title: nil, size: NSSize(width: 260, height: 150), appearance: appearance.1,
                        to: dir.appending(path: "menubar-\(appearance.0).png"))
         }
+        await tour(model, to: dir.appending(path: "demo.mov"))
         exit(0)
+    }
+
+    /// Vídeo curto: passa por todas as telas na mesma janela, com a paleta no fim.
+    private static func tour(_ model: AppModel, to url: URL) async {
+        NSApp.appearance = NSAppearance(named: .darkAqua)
+        model.section = .overview
+        let w = NSWindow(contentViewController: NSHostingController(rootView: RootView().environment(model)))
+        w.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+        w.title = "QuietDeck"
+        w.setContentSize(NSSize(width: 1040, height: 700))
+        w.center()
+        NSApp.activate(ignoringOtherApps: true)
+        w.makeKeyAndOrderFront(nil)
+        try? await Task.sleep(for: .seconds(1))
+        let screen = NSScreen.main?.frame.height ?? 0
+        let f = w.frame
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+        p.arguments = ["-x", "-v", "-V", "16", "-R", "\(Int(f.minX)),\(Int(screen - f.maxY)),\(Int(f.width)),\(Int(f.height))", url.path]
+        try? p.run()
+        try? await Task.sleep(for: .seconds(1.5))
+        for section in AppSection.allCases.dropFirst() {
+            Motion.run { model.section = section }
+            try? await Task.sleep(for: .seconds(2))
+        }
+        Motion.run { model.section = .library }
+        try? await Task.sleep(for: .seconds(1))
+        Motion.run { model.showPalette = true }
+        try? await Task.sleep(for: .seconds(3))
+        p.waitUntilExit()
+        w.orderOut(nil)
     }
 
     /// Janela real e `screencapture -l`: `cacheDisplay` não desenha a sidebar nem os materiais.

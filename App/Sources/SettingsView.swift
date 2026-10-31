@@ -11,6 +11,7 @@ struct SettingsView: View {
         @Bindable var settings = model.settings
         Form {
             Toggle("Show in the menu bar", isOn: $settings.showMenuBarExtra)
+            Toggle("Play a sound when an operation finishes", isOn: $settings.completionSound)
             Section("SteamGridDB") {
                 SecureField("API key", text: $apiKey)
                     .onChange(of: apiKey) { Keychain.set(apiKey, for: AppModel.steamGridKeyAccount) }
@@ -19,7 +20,7 @@ struct SettingsView: View {
             Section("Sync Folders") {
                 ForEach(settings.syncFolders, id: \.self) { path in
                     HStack {
-                        Text(path).lineLimit(1).truncationMode(.middle)
+                        Text(verbatim: path).font(.callout.monospaced()).lineLimit(1).truncationMode(.middle)
                         Spacer()
                         Button("Remove") { settings.syncFolders.removeAll { $0 == path } }
                     }
@@ -31,7 +32,7 @@ struct SettingsView: View {
             Section("Decks") {
                 ForEach(model.decks) { deck in
                     HStack {
-                        Text("\(deck.name) (\(deck.host))")
+                        Text(verbatim: "\(deck.name) (\(deck.host))")
                         Spacer()
                         Button("Forget") { model.remove(deck) }
                     }
@@ -40,6 +41,7 @@ struct SettingsView: View {
                     SecureField("New password for the deck user", text: $password)
                     Button("Save Password") {
                         Keychain.set(password, for: id.uuidString)
+                        model.current?.hasPassword = true
                         password = ""
                     }
                     .disabled(password.isEmpty)

@@ -17,7 +17,7 @@ public enum LocalTools {
         func found() -> String? { names.lazy.compactMap { find($0) }.first }
         if let path = found() { return path }
         guard let brew = find("brew") else {
-            throw DeckError.unexpectedState("\(names[0]) is missing and Homebrew isn't installed. Install Homebrew from brew.sh, then try again.")
+            throw DeckError.unexpectedState("%@ is missing and Homebrew isn't installed. Install Homebrew from brew.sh, then try again.", names[0])
         }
         let r = try await LocalProcess.run(brew, ["install", formula], onOutput: onOutput)
         guard r.ok, let path = found() else { throw DeckError.commandFailed(command: "brew install \(formula)", result: r) }
@@ -143,7 +143,7 @@ public struct RomImporter: Sendable {
     private func checkFreeSpace(_ needed: Int64, directory: String) async throws {
         let r = try await runner.check("df -B1 --output=avail \(Shell.quote(directory)) | tail -1")
         if let free = Int64(r.trimmed), free < needed {
-            throw DeckError.unexpectedState("Not enough space on the Deck: \(needed / 1_048_576) MB needed, \(free / 1_048_576) MB free.")
+            throw DeckError.unexpectedState("Not enough space on the Deck: %@ MB needed, %@ MB free. Free up space or send to the microSD.", String(needed / 1_048_576), String(free / 1_048_576))
         }
     }
 
@@ -188,15 +188,15 @@ public struct RomImporter: Sendable {
     }
 
     public func importGame(path: String, systemID: String, paths: EmulationPaths, progress: @escaping Progress) async throws -> ROMImportResult {
-        guard let system = catalog.system(systemID) else { throw DeckError.unexpectedState("Unknown system: \(systemID)") }
+        guard let system = catalog.system(systemID) else { throw DeckError.unexpectedState("Unknown system: %@", systemID) }
         let source = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: path) else {
-            throw DeckError.unexpectedState("\(source.lastPathComponent) isn't there anymore. Is the network share mounted?")
+            throw DeckError.unexpectedState("%@ isn't there anymore. Check that the network share is mounted.", source.lastPathComponent)
         }
         let files = RemoteFiles(runner: runner)
         let home = try await files.home()
 
-        progress(nil, "Hashing \(source.lastPathComponent)")
+        progress(nil, "Checking for duplicates")
         let hash = try await LocalHash.compute(path, algorithm: 256)
         if let existing = try await duplicate(of: hash, files: files, home: home) {
             progress(100, "Already on the Deck")
@@ -211,14 +211,14 @@ public struct RomImporter: Sendable {
             let dir = work.appendingPathComponent("extracted")
             try await extract(source, to: dir)
             entries = ROMScanner.scan([dir], catalog: catalog).map { URL(fileURLWithPath: $0.path) }
-            guard !entries.isEmpty else { throw DeckError.unexpectedState("No game found inside \(source.lastPathComponent).") }
+            guard !entries.isEmpty else { throw DeckError.unexpectedState("No game found inside %@.", source.lastPathComponent) }
         }
 
         var outputs: [URL] = []
         for entry in entries {
             let size = (try? FileManager.default.attributesOfItem(atPath: entry.path)[.size] as? Int64) ?? 0
             if let mode = ROMPlan.conversion(for: system, fileExtension: entry.pathExtension, size: size) {
-                progress(nil, "Converting \(entry.lastPathComponent) to CHD")
+                progress(nil, "Converting to CHD")
                 outputs.append(try await convert(entry, mode: mode, work: work))
             } else {
                 outputs += companions(of: entry)
@@ -232,14 +232,14 @@ public struct RomImporter: Sendable {
         for (i, output) in outputs.enumerated() {
             let count = outputs.count
             try await Transfer.upload(output, to: directory, config: config) { p in
-                progress((i * 100 + p.percent) / count, "Sending \(output.lastPathComponent) \(p.rate ?? "")")
+                progress((i * 100 + p.percent) / count, "Sending")
             }
         }
 
         let main = directory + "/" + outputs[0].lastPathComponent
         let mainSize = (try? FileManager.default.attributesOfItem(atPath: outputs[0].path)[.size] as? Int64) ?? 0
         let verified = try await runner.run("stat -c %s \(Shell.quote(main))").trimmed
-        guard verified == String(mainSize) else { throw DeckError.unexpectedState("The file on the Deck has \(verified) bytes, expected \(mainSize).") }
+        guard verified == String(mainSize) else { throw DeckError.unexpectedState("The file on the Deck has %@ bytes instead of %@. Try again.", verified, String(mainSize)) }
         try await record(hash: hash, path: main, size: mainSize, home: home)
         let playlist = try await updatePlaylist(for: outputs[0].lastPathComponent, directory: directory)
         // Pastas de trabalho crescem como as ROMs: depois de confirmar no Deck, não servem mais.

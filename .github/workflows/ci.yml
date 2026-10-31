@@ -28,5 +28,11 @@ jobs:
         run: make harness
       - name: Testes de integração
         run: |
-          QUIETDECK_TEST_NETWORK=1 QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
+          QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
             swift test --filter Integration --no-parallel
+      # O instalador oficial consulta github.com e a API do GitHub: pode falhar por limite de taxa do runner.
+      - name: Instalador oficial do Decky
+        continue-on-error: true
+        run: |
+          QUIETDECK_TEST_NETWORK=1 QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
+            swift test --filter officialDeckyInstaller --no-parallel

@@ -82,6 +82,9 @@ public final class JobQueue {
     public private(set) var jobs: [Job] = []
     private let storeURL: URL?
     private let executor: Executor
+    /// Traduz erros e avisa a UI ao terminar; o pacote não conhece textos da interface.
+    @ObservationIgnored public var describe: (Error) -> String = { String(describing: $0) }
+    @ObservationIgnored public var onFinish: ((Job) -> Void)?
     @ObservationIgnored private var workers: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var running: [UUID: Task<Void, Error>] = [:]
 
@@ -175,6 +178,7 @@ public final class JobQueue {
         running[job.id] = task
         let outcome = await task.result
         running[job.id] = nil
+        defer { if let finished = jobs.first(where: { $0.id == job.id }) { onFinish?(finished) } }
         update(job.id) {
             switch outcome {
             case .success:
@@ -183,7 +187,7 @@ public final class JobQueue {
             case .failure(is CancellationError):
                 $0.state = .cancelled
             case let .failure(error):
-                $0.state = task.isCancelled ? .cancelled : .failed(String(describing: error))
+                $0.state = task.isCancelled ? .cancelled : .failed(self.describe(error))
             }
         }
     }

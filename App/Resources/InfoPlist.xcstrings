@@ -1,0 +1,18 @@
+{
+ "sourceLanguage": "en",
+ "strings": {
+  "NSLocalNetworkUsageDescription": {
+   "localizations": {
+    "en": {"stringUnit": {"state": "translated", "value": "QuietDeck finds your Steam Deck on the local network and connects to it over SSH."}},
+    "pt-BR": {"stringUnit": {"state": "translated", "value": "O QuietDeck encontra seu Steam Deck na rede local e se conecta a ele por SSH."}}
+   }
+  },
+  "NSHumanReadableCopyright": {
+   "localizations": {
+    "en": {"stringUnit": {"state": "translated", "value": "Independent project, not affiliated with Valve."}},
+    "pt-BR": {"stringUnit": {"state": "translated", "value": "Projeto independente, sem afiliação com a Valve."}}
+   }
+  }
+ },
+ "version": "1.0"
+}

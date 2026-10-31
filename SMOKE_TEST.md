@@ -36,6 +36,17 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 - [ ] Step 3 connects with the password, and `ssh -i ~/.ssh/quietdeck_ed25519 deck@<ip> true` works without one
 - [ ] Reopening the app doesn't show onboarding
 
+## Devkit pairing
+
+This flow can't be simulated: the approval happens inside Steam. Test on a current SteamOS with SSH off.
+
+- [ ] With no Decks saved, the wizard finds the Deck through `_steamos-devkit._tcp`
+- [ ] Without Developer Mode, the wizard asks for it and moves on by itself once it's on
+- [ ] It asks for Settings › Developer › Pair new host and moves on by itself
+- [ ] The request appears on the Deck, and approving it finishes pairing without touching the Deck's keyboard
+- [ ] Denying it shows the manual path with copyable commands
+- [ ] Installing Decky on a `deck` user with no password offers to set one from the Mac
+
 ## Overview
 
 - [ ] SteamOS version, battery, storage and temperatures match the Deck

@@ -8,8 +8,6 @@ struct DeckyView: View {
     @State private var store: [StorePlugin] = []
     @State private var query = ""
     @State private var failure: String?
-    @State private var confirmInstall = false
-    @State private var removing: InstalledPlugin?
 
     private var filtered: [StorePlugin] {
         query.isEmpty ? store : store.filter { $0.name.localizedCaseInsensitiveContains(query) || $0.description.localizedCaseInsensitiveContains(query) }
@@ -20,40 +18,48 @@ struct DeckyView: View {
             Card(title: "Decky Loader", symbol: "puzzlepiece.extension") {
                 if let d = deck.decky, d.installed {
                     LabeledContent("Version", value: d.version ?? "–")
-                    LabeledContent("Service", value: d.serviceActive ? "Running" : "Stopped")
-                    Button("Update Decky…") { confirmInstall = true }
-                } else {
-                    Text("Decky isn't installed.").foregroundStyle(.secondary)
-                    Button("Install Decky…") { confirmInstall = true }
+                    LabeledContent { Text(d.serviceActive ? "Running" : "Stopped") } label: { Text("Service") }
                 }
+                if !deck.hasPassword { PasswordPanel(deck: deck) }
+                InlineNote(text: "The official installer runs with sudo. Besides ~/homebrew, it adds a service in /etc/systemd/system, the one place QuietDeck writes outside /home/deck.")
+                Button(deck.decky?.installed == true ? "Update Decky" : "Install Decky") {
+                    model.enqueue(String(localized: "Install Decky"), .installDecky)
+                }
+                .disabled(!deck.hasPassword)
             }
             Card(title: "Installed Plugins", symbol: "checkmark.circle") {
                 if deck.plugins.isEmpty { Text("None").foregroundStyle(.secondary) }
                 ForEach(deck.plugins) { plugin in
                     HStack {
-                        Text(plugin.name)
-                        Text(plugin.version ?? "").font(.caption).foregroundStyle(.secondary)
+                        Text(verbatim: plugin.name)
+                        Text(verbatim: plugin.version ?? "").font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         if let latest = store.first(where: { $0.name == plugin.name })?.versions.first, latest.name != plugin.version {
-                            Button("Update to \(latest.name)") { model.enqueue("Update \(plugin.name)", .installPlugin(name: plugin.name, version: latest)) }
+                            Button("Update to \(latest.name)") {
+                                model.enqueue(String(localized: "Update \(plugin.name)"), .installPlugin(name: plugin.name, version: latest))
+                            }
+                            .disabled(!deck.hasPassword)
                         }
-                        Button("Remove") { removing = plugin }
+                        ConfirmButton(title: "Remove", confirm: "Confirm") {
+                            model.enqueue(String(localized: "Remove \(plugin.name)"), .removePlugin(name: plugin.name))
+                        }
+                        .disabled(!deck.hasPassword)
                     }
                 }
             }
             Card(title: "Plugin Store", symbol: "bag") {
                 TextField("Search", text: $query).textFieldStyle(.roundedBorder)
-                if let failure { InlineNote(text: failure, symbol: "exclamationmark.triangle", tint: .orange) }
+                if let failure { Text(verbatim: failure).font(.callout).foregroundStyle(.orange) }
                 ForEach(filtered) { plugin in
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(plugin.name)
-                            Text("\(plugin.author) · \(plugin.description)").font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                            Text(verbatim: plugin.name)
+                            Text(verbatim: "\(plugin.author) · \(plugin.description)").font(.caption).foregroundStyle(.secondary).lineLimit(2)
                         }
                         Spacer()
                         if !deck.plugins.contains(where: { $0.name == plugin.name }), let version = plugin.versions.first {
-                            Button("Install") { model.enqueue("Install \(plugin.name)", .installPlugin(name: plugin.name, version: version)) }
-                                .disabled(deck.decky?.installed != true)
+                            Button("Install") { model.enqueue(String(localized: "Install \(plugin.name)"), .installPlugin(name: plugin.name, version: version)) }
+                                .disabled(deck.decky?.installed != true || !deck.hasPassword)
                         }
                     }
                 }
@@ -61,16 +67,8 @@ struct DeckyView: View {
         }
         .task {
             guard store.isEmpty else { return }
-            do { store = try await Decky.store() } catch { failure = String(describing: error) }
+            do { store = try await Decky.store() } catch { failure = model.describe(error) }
         }
-        .confirmationDialog("Run the official Decky installer?", isPresented: $confirmInstall) {
-            Button("Run Installer") { model.enqueue("Install Decky", .installDecky) }
-        } message: {
-            Text("It runs with sudo. Besides ~/homebrew, it adds a service in /etc/systemd/system, the one place QuietDeck writes outside /home/deck.")
-        }
-        .confirmationDialog("Remove \(removing?.name ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }), presenting: removing) { p in
-            Button("Remove", role: .destructive) { model.enqueue("Remove \(p.name)", .removePlugin(name: p.name)) }
-        } message: { _ in Text("Installing or removing a plugin restarts Decky.") }
     }
 }
 
@@ -79,36 +77,39 @@ struct CompatToolsView: View {
     var deck: LiveDeck
     @State private var releases: [String: [GitHubRelease]] = [:]
     @State private var failure: String?
-    @State private var removing: String?
 
     var body: some View {
         Page {
             Card(title: "Installed", symbol: "wineglass") {
-                if deck.compatTools.isEmpty { Text("None").foregroundStyle(.secondary) }
+                if deck.compatTools.isEmpty {
+                    EmptyState(title: "No compat tools yet", message: "Install GE-Proton below for games that need it.")
+                }
                 ForEach(deck.compatTools, id: \.self) { tool in
                     HStack {
-                        Text(tool)
+                        Text(verbatim: tool)
                         Spacer()
-                        Button("Remove") { removing = tool }
+                        ConfirmButton(title: "Remove", confirm: "Confirm") {
+                            model.enqueue(String(localized: "Remove \(tool)"), .removeCompatTool(name: tool))
+                        }
                     }
                 }
                 InlineNote(text: "New tools appear in Steam after it restarts.")
             }
-            if let failure { InlineNote(text: failure, symbol: "exclamationmark.triangle", tint: .orange) }
+            if let failure { Text(verbatim: failure).font(.callout).foregroundStyle(.orange) }
             ForEach(model.catalog.compatTools) { source in
-                Card(title: source.name, symbol: "arrow.down.circle") {
+                Card(title: "\(source.name)", symbol: "arrow.down.circle") {
                     let list = (releases[source.id] ?? []).filter { !$0.prerelease }.prefix(5)
                     if list.isEmpty { ProgressView().controlSize(.small) }
                     ForEach(Array(list)) { release in
                         HStack {
-                            Text(release.tag_name)
+                            Text(verbatim: release.tag_name)
                             Spacer()
                             if let assets = CompatTools.assets(in: release, source: source) {
-                                let folder = folderName(assets.archive, source)
+                                let folder = assets.archive.name.replacingOccurrences(of: source.assetSuffix, with: "")
                                 if deck.compatTools.contains(folder) { Text("Installed").foregroundStyle(.secondary) }
                                 else {
                                     Button("Install") {
-                                        model.enqueue("Install \(release.tag_name)", .installCompatTool(archive: assets.archive, checksum: assets.checksum, folderName: folder))
+                                        model.enqueue(String(localized: "Install \(release.tag_name)"), .installCompatTool(archive: assets.archive, checksum: assets.checksum, folderName: folder))
                                     }
                                 }
                             }
@@ -120,24 +121,15 @@ struct CompatToolsView: View {
         .task {
             for source in model.catalog.compatTools where releases[source.id] == nil {
                 do { releases[source.id] = try await CompatTools.releases(repo: source.repo) }
-                catch { failure = String(describing: error) }
+                catch { failure = model.describe(error) }
             }
         }
-        .confirmationDialog("Remove \(removing ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }), presenting: removing) { tool in
-            Button("Remove", role: .destructive) { model.enqueue("Remove \(tool)", .removeCompatTool(name: tool)) }
-        } message: { _ in Text("Games set to this tool need another one before they'll run.") }
-    }
-
-    /// O tar de cada release traz uma pasta com o nome do arquivo sem a arquitetura.
-    private func folderName(_ asset: GitHubAsset, _ source: CompatToolSource) -> String {
-        asset.name.replacingOccurrences(of: source.assetSuffix, with: "")
     }
 }
 
 struct SavesView: View {
     @Environment(AppModel.self) private var model
     var deck: LiveDeck
-    @State private var restoring: URL?
     @State private var choosing = false
 
     private var folder: URL? { model.settings.savesFolder.map { URL(fileURLWithPath: $0) } }
@@ -149,7 +141,7 @@ struct SavesView: View {
     var body: some View {
         Page {
             Card(title: "Backup Folder", symbol: "folder") {
-                Text(model.settings.savesFolder ?? "Not chosen").font(.callout.monospaced()).foregroundStyle(.secondary)
+                if let path = model.settings.savesFolder { MonoText(text: path) }
                 HStack {
                     Button("Choose…") { choosing = true }
                     Button("Back Up Now") { backup() }.disabled(folder == nil)
@@ -157,14 +149,19 @@ struct SavesView: View {
                 InlineNote(text: "Copies Emulation/saves and each emulator's save folders to this Mac. Nothing on the Deck is deleted.")
             }
             Card(title: "Backups", symbol: "clock.arrow.circlepath") {
-                if backups.isEmpty { Text("None yet").foregroundStyle(.secondary) }
+                if backups.isEmpty {
+                    EmptyState(title: "No backups yet", message: "Choose a folder on this Mac and back up your saves.", action: "Choose…") { choosing = true }
+                }
                 ForEach(backups, id: \.self) { backup in
                     HStack {
-                        Text(backup.lastPathComponent)
+                        Text(verbatim: backup.lastPathComponent)
                         Spacer()
-                        Button("Restore…") { restoring = backup }
+                        ConfirmButton(title: "Restore", confirm: "Replace Saves") {
+                            model.enqueue(String(localized: "Restore saves"), .restoreSaves(localPath: backup.path))
+                        }
                     }
                 }
+                InlineNote(text: "Saves with the same name on the Deck are replaced by the backup. Close the game first.")
             }
         }
         .fileImporter(isPresented: $choosing, allowedContentTypes: [.folder]) { result in
@@ -173,9 +170,6 @@ struct SavesView: View {
                 model.settings.savesFolder = url.path
             }
         }
-        .confirmationDialog("Restore \(restoring?.lastPathComponent ?? "")?", isPresented: Binding(get: { restoring != nil }, set: { if !$0 { restoring = nil } }), presenting: restoring) { url in
-            Button("Restore", role: .destructive) { model.enqueue("Restore saves", .restoreSaves(localPath: url.path)) }
-        } message: { _ in Text("Saves with the same name on the Deck are replaced by this backup. Close the game first.") }
     }
 
     private func backup() {
@@ -183,6 +177,6 @@ struct SavesView: View {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd HH-mm"
         let target = folder.appending(path: deck.profile.name).appending(path: f.string(from: Date()))
-        model.enqueue("Back up saves", .backupSaves(localPath: target.path))
+        model.enqueue(String(localized: "Back up saves"), .backupSaves(localPath: target.path))
     }
 }

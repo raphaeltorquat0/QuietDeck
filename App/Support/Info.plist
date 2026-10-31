@@ -4,6 +4,11 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>pt-BR</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>QuietDeck</string>
 	<key>CFBundleExecutable</key>
@@ -25,6 +30,7 @@
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_ssh._tcp</string>
+		<string>_steamos-devkit._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>QuietDeck finds your Steam Deck on the local network and connects to it over SSH.</string>

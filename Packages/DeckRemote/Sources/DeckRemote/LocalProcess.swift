@@ -22,8 +22,8 @@ public enum LocalProcess {
     public typealias Output = @Sendable (String) -> Void
 
     public static func run(_ executable: String, _ arguments: [String], environment: [String: String]? = nil,
-                           stdin: Data? = nil, timeout: TimeInterval? = nil,
-                           onOutput: Output? = nil) async throws -> CommandResult {
+                           stdin: Data? = nil, timeout: TimeInterval? = nil, onOutput: Output? = nil,
+                           respond: (@Sendable (String) -> Data?)? = nil) async throws -> CommandResult {
         signal(SIGPIPE, SIG_IGN) // ssh pode sair antes de ler a senha; isso não pode derrubar o app.
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
@@ -32,13 +32,15 @@ public enum LocalProcess {
         let out = Pipe(), err = Pipe(), input = Pipe()
         process.standardOutput = out
         process.standardError = err
-        process.standardInput = stdin == nil ? FileHandle.nullDevice : input
+        process.standardInput = stdin == nil && respond == nil ? FileHandle.nullDevice : input
 
         let handle = ProcessHandle(process)
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (c: CheckedContinuation<CommandResult, Error>) in
                 let group = DispatchGroup()
-                let stdoutBox = Collector(onOutput), stderrBox = Collector(onOutput)
+                // Conversa por pty: cada pedaço de saída pode gerar uma resposta na entrada padrão.
+                let sink = conversation(onOutput, respond, input.fileHandleForWriting)
+                let stdoutBox = Collector(sink), stderrBox = Collector(sink)
                 drain(out.fileHandleForReading, into: stdoutBox, group)
                 drain(err.fileHandleForReading, into: stderrBox, group)
                 process.terminationHandler = { p in
@@ -68,6 +70,14 @@ public enum LocalProcess {
             }
         } onCancel: {
             handle.terminate()
+        }
+    }
+
+    private static func conversation(_ onOutput: Output?, _ respond: (@Sendable (String) -> Data?)?, _ writer: FileHandle) -> Output? {
+        guard let respond else { return onOutput }
+        return { chunk in
+            onOutput?(chunk)
+            if let reply = respond(chunk) { try? writer.write(contentsOf: reply) }
         }
     }
 

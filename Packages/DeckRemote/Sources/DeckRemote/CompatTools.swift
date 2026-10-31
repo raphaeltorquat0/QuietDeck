@@ -41,7 +41,7 @@ public enum CompatTools {
 
     /// Baixa no próprio Deck, confere o sha512 e só depois extrai; o tar fica fora do destino até acabar.
     public static func install(archive: GitHubAsset, checksum: GitHubAsset?, folderName: String, runner: any CommandRunner, onOutput: LocalProcess.Output? = nil) async throws -> Outcome {
-        guard isSafeName(folderName) else { throw DeckError.unexpectedState("Invalid tool name: \(folderName)") }
+        guard isSafeName(folderName) else { throw DeckError.unexpectedState("Invalid tool name: %@", folderName) }
         if try await installed(runner).contains(folderName) { return .alreadyInstalled }
         let home = try await RemoteFiles(runner: runner).home()
         let target = home + directorySuffix
@@ -57,7 +57,7 @@ public enum CompatTools {
     }
 
     public static func remove(_ name: String, runner: any CommandRunner) async throws -> Outcome {
-        guard isSafeName(name) else { throw DeckError.unexpectedState("Invalid tool name: \(name)") }
+        guard isSafeName(name) else { throw DeckError.unexpectedState("Invalid tool name: %@", name) }
         guard try await installed(runner).contains(name) else { return .notInstalled }
         let home = try await RemoteFiles(runner: runner).home()
         try await runner.check("rm -rf \(Shell.quote(home + directorySuffix + "/" + name))")

@@ -20,23 +20,36 @@ public struct RemoteCommand: Sendable, Equatable {
     }
 }
 
+/// `problem` guarda uma chave em inglês e os argumentos: o app traduz, o pacote não depende de UI.
 public enum DeckError: Error, Equatable, CustomStringConvertible {
     case unreachable(String)
     case authenticationFailed(String)
     case sudoRejected
     case sudoPasswordMissing
     case commandFailed(command: String, result: CommandResult)
-    case unexpectedState(String)
+    case problem(key: String, arguments: [String] = [])
+
+    public static func unexpectedState(_ key: String, _ arguments: String...) -> DeckError {
+        .problem(key: key, arguments: arguments)
+    }
+
+    /// Texto em inglês; `key` + `arguments` servem para traduzir.
+    public var message: (key: String, arguments: [String]) {
+        switch self {
+        case let .unreachable(m): ("Couldn't reach the Deck. Check that it's awake and on this network. %@", [m])
+        case let .authenticationFailed(m): ("The Deck refused the login. Pair it again. %@", [m])
+        case .sudoRejected: ("The Deck refused the password. Enter it again in Settings.", [])
+        case .sudoPasswordMissing: ("This action needs the deck password. Add it in Settings.", [])
+        case let .commandFailed(c, r): ("Command failed (%@): %@\n%@", [String(r.exitCode), String(c.prefix(120)), String(r.stderr.suffix(500))])
+        case let .problem(key, arguments): (key, arguments)
+        }
+    }
 
     public var description: String {
-        switch self {
-        case let .unreachable(m): "Couldn't reach the Deck: \(m)"
-        case let .authenticationFailed(m): "The Deck refused the login: \(m)"
-        case .sudoRejected: "The Deck refused the sudo password."
-        case .sudoPasswordMissing: "This action needs the password of the deck user."
-        case let .commandFailed(c, r):
-            "Command failed (\(r.exitCode)): \(c.prefix(120))\n\(r.stderr.suffix(500))"
-        case let .unexpectedState(m): m
+        let (key, arguments) = message
+        return arguments.reduce(key) { text, value in
+            guard let range = text.range(of: "%@") else { return text }
+            return text.replacingCharacters(in: range, with: value)
         }
     }
 }
@@ -75,7 +88,6 @@ public struct SSHConfig: Codable, Hashable, Sendable {
     public var user: String
     public var identityFile: String
     public var knownHostsFile: String
-
     public init(host: String, port: Int = 22, user: String = "deck",
                 identityFile: String, knownHostsFile: String) {
         self.host = host

@@ -42,7 +42,7 @@ public enum JobExecutor {
             case let .prepareEmulation(sd):
                 let paths = try await Emulation.paths(r, sdMount: sd)
                 let created = try await Emulation.prepare(r, paths: paths, systems: c.catalog.systems)
-                progress(100, "\(created) folders created in \(paths.root)")
+                progress(100, "Folders ready")
             case let .configureEmulator(id, overwrite, sd):
                 guard let emulator = c.catalog.emulator(id) else { return }
                 let paths = try await Emulation.paths(r, sdMount: sd)
@@ -51,7 +51,7 @@ public enum JobExecutor {
                 case .unchanged: progress(100, "Paths already set")
                 case .skippedEmuDeck: progress(100, "EmuDeck manages this emulator")
                 case .notConfigurable: progress(100, emulator.note ?? "Nothing to set")
-                case let .needsConfirmation(path): throw DeckError.unexpectedState("\(path) already exists.")
+                case let .needsConfirmation(path): throw DeckError.unexpectedState("%@ already exists.", path)
                 }
             case let .upload(local, remote):
                 try await Transfer.upload(URL(fileURLWithPath: local), to: remote, config: c.config, onProgress: transfer)
@@ -74,11 +74,11 @@ public enum JobExecutor {
             case let .backupSaves(local):
                 let paths = try await Emulation.paths(r)
                 let n = try await Saves.backup(paths: paths, emulators: c.catalog.emulators, to: URL(fileURLWithPath: local), config: c.config, runner: r, onProgress: transfer)
-                progress(100, "\(n) folders copied")
+                progress(100, "Done")
             case let .restoreSaves(local):
                 let paths = try await Emulation.paths(r)
                 let n = try await Saves.restore(paths: paths, emulators: c.catalog.emulators, from: URL(fileURLWithPath: local), config: c.config, runner: r, onProgress: transfer)
-                progress(100, "\(n) folders restored")
+                progress(100, "Done")
             case let .importBIOS(local, sd): try await importBIOS(local, sd, c, transfer)
             case let .quickAction(action): try await action.run(r, password: c.password)
             }
@@ -101,7 +101,7 @@ public enum JobExecutor {
     private static func importBIOS(_ local: String, _ sd: String?, _ c: JobContext, _ transfer: @escaping @Sendable (TransferProgress) -> Void) async throws {
         let sha1 = try await LocalHash.compute(local, algorithm: 1)
         guard let entry = BIOS.match(sha1: sha1, table: c.catalog.bios.entries) else {
-            throw DeckError.unexpectedState("\((local as NSString).lastPathComponent) doesn't match any known BIOS hash, so it wasn't copied.")
+            throw DeckError.unexpectedState("%@ doesn't match any known BIOS hash, so it wasn't copied.", (local as NSString).lastPathComponent)
         }
         let paths = try await Emulation.paths(c.runner, sdMount: sd)
         let target = "\(paths.bios)/\(entry.file)"
@@ -126,7 +126,7 @@ public enum JobExecutor {
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
                   let emulator = c.catalog.emulator(system.emulator) else { continue }
-            progress(nil, "Preparing \(emulator.name)")
+            progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
             var core: String?
             if let name = system.core { core = try await EmulatorSetup.ensureCore(name, runner: r) }
@@ -134,6 +134,6 @@ public enum JobExecutor {
         }
         progress(nil, "Writing shortcuts")
         let result = try await SteamControl(runner: r).addShortcuts(shortcuts, user: user)
-        progress(100, "\(result.added.count) shortcuts added")
+        progress(100, result.added.isEmpty ? "Already in Steam" : "Added to Steam")
     }
 }

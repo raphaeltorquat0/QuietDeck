@@ -5,6 +5,10 @@ options:
     macOS: "14.0"
   createIntermediateGroups: true
   developmentLanguage: en
+  fileTypes:
+    icon:
+      file: true
+      buildPhase: resources
 packages:
   QuietDeckKit:
     path: .

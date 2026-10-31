@@ -1,7 +1,9 @@
+import AppKit
 import DeckKit
 import DeckRemote
 import Foundation
 import Observation
+import SwiftUI
 
 struct DeckProfile: Codable, Hashable, Identifiable {
     var id = UUID()
@@ -9,13 +11,15 @@ struct DeckProfile: Codable, Hashable, Identifiable {
     var host: String
     var port = 22
     var user = "deck"
+    /// `nil` em perfis antigos: a ed25519 do pareamento por senha. Devkit usa a RSA.
+    var identityFile: String?
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
     case overview, emulators, library, decky, compatTools, saves
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
         case .overview: "Overview"
         case .emulators: "Emulators"
@@ -45,6 +49,12 @@ enum Paths {
         return dir
     }()
     static let key = NSHomeDirectory() + "/.ssh/quietdeck_ed25519"
+    static let devkitKey = NSHomeDirectory() + "/.ssh/quietdeck_devkit_rsa"
+    static let covers: URL = {
+        let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appending(path: "QuietDeck/covers")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
     static var knownHosts: String { support.appending(path: "known_hosts").path }
     static var work: URL { support.appending(path: "rom-work") }
 }
@@ -57,6 +67,7 @@ final class AppSettings {
     var syncFolders: [String] { didSet { d.set(syncFolders, forKey: "syncFolders") } }
     var savesFolder: String? { didSet { d.set(savesFolder, forKey: "savesFolder") } }
     var onboarded: Bool { didSet { d.set(onboarded, forKey: "onboarded") } }
+    var completionSound: Bool { didSet { d.set(completionSound, forKey: "completionSound") } }
 
     init() {
         d.register(defaults: ["showMenuBarExtra": true])
@@ -64,6 +75,7 @@ final class AppSettings {
         syncFolders = d.stringArray(forKey: "syncFolders") ?? []
         savesFolder = d.string(forKey: "savesFolder")
         onboarded = d.bool(forKey: "onboarded")
+        completionSound = d.bool(forKey: "completionSound")
     }
 }
 
@@ -78,6 +90,12 @@ final class AppModel {
     var selectedDeckID: UUID? { didSet { UserDefaults.standard.set(selectedDeckID?.uuidString, forKey: "selectedDeck") } }
     var section: AppSection? = .overview
     var showOnboarding = false
+    var showPalette = false
+    var openGame: Library.Game?
+    var toast: Toast?
+    /// Capas em voo da Biblioteca até a fila.
+    var flights: [CoverFlight] = []
+    let covers = CoverStore()
     private(set) var live: [UUID: LiveDeck] = [:]
     @ObservationIgnored private var queueStore = Paths.support.appending(path: "queue.json")
     @ObservationIgnored private(set) lazy var queue = JobQueue(storeURL: queueStore) { [weak self] job, progress in
@@ -86,12 +104,52 @@ final class AppModel {
         await self?.live[job.deckID]?.refresh()
     }
 
+    struct Toast: Identifiable, Equatable {
+        var id = UUID()
+        var title: String
+        var detail: String?
+        var isError: Bool
+    }
+
+    /// Traduz pela chave em inglês do pacote; o que não estiver no catálogo sai em inglês.
+    nonisolated func describe(_ error: Error) -> String {
+        guard let e = error as? DeckError else { return String(describing: error) }
+        let (key, arguments) = e.message
+        return arguments.reduce(Bundle.main.localizedString(forKey: key, value: key, table: nil)) { text, value in
+            guard let range = text.range(of: "%@") else { return text }
+            return text.replacingCharacters(in: range, with: value)
+        }
+    }
+
+    private func wireQueue() {
+        queue.describe = { [weak self] in self?.describe($0) ?? String(describing: $0) }
+        queue.onFinish = { [weak self] job in self?.finished(job) }
+    }
+
+    private func finished(_ job: Job) {
+        switch job.state {
+        case .succeeded:
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            if settings.completionSound { NSSound(named: "Glass")?.play() }
+        case let .failed(message):
+            Motion.run { toast = Toast(title: job.title, detail: message, isError: true) }
+        default: break
+        }
+    }
+
+    /// Dispara a capa até a fila, de onde o trabalho segue.
+    func launch(title: String, from frame: CGRect) {
+        guard !Motion.reduced else { return }
+        flights.append(CoverFlight(title: title, from: frame))
+    }
+
     init(catalog: Catalog) {
         self.catalog = catalog
         decks = (UserDefaults.standard.data(forKey: "decks")).flatMap { try? JSONDecoder().decode([DeckProfile].self, from: $0) } ?? []
         selectedDeckID = UserDefaults.standard.string(forKey: "selectedDeck").flatMap(UUID.init) ?? decks.first?.id
         for deck in decks { live[deck.id] = makeLive(deck) }
         showOnboarding = !settings.onboarded
+        wireQueue()
     }
 
     /// `--replay`/PressKit: um Deck que responde pelas fixtures.
@@ -102,15 +160,18 @@ final class AppModel {
         decks = [deck]
         selectedDeckID = deck.id
         live[deck.id] = LiveDeck(profile: deck, runner: runner, config: Self.config(deck), catalog: catalog)
+        wireQueue()
     }
 
     static func config(_ deck: DeckProfile) -> SSHConfig {
-        SSHConfig(host: deck.host, port: deck.port, user: deck.user, identityFile: Paths.key, knownHostsFile: Paths.knownHosts)
+        SSHConfig(host: deck.host, port: deck.port, user: deck.user, identityFile: deck.identityFile ?? Paths.key, knownHostsFile: Paths.knownHosts)
     }
 
     private func makeLive(_ deck: DeckProfile) -> LiveDeck {
         let config = Self.config(deck)
-        return LiveDeck(profile: deck, runner: Launch.wrap(SSHRunner(config: config)), config: config, catalog: catalog)
+        let live = LiveDeck(profile: deck, runner: Launch.wrap(SSHRunner(config: config)), config: config, catalog: catalog)
+        live.hasPassword = Keychain.password(for: deck.id.uuidString) != nil
+        return live
     }
 
     var current: LiveDeck? { selectedDeckID.flatMap { live[$0] } }
@@ -152,7 +213,10 @@ final class AppModel {
 
     /// Arquivos soltos que batem com a tabela de BIOS vão direto para `bios/`; o resto segue como ROM.
     func importBIOS(_ files: [String]) {
-        for path in files { enqueue("Import \((path as NSString).lastPathComponent)", .importBIOS(localPath: path, sdMount: nil)) }
+        for path in files {
+            let name = (path as NSString).lastPathComponent
+            enqueue(String(localized: "Import \(name)"), .importBIOS(localPath: path, sdMount: nil))
+        }
     }
 
     private func context(_ id: UUID) -> JobContext? {
@@ -184,6 +248,7 @@ final class LiveDeck: Identifiable {
     var plugins: [InstalledPlugin] = []
     var compatTools: [String] = []
     var steamUsers: [String] = []
+    var hasPassword = false
     private var refreshing = false
 
     init(profile: DeckProfile, runner: any CommandRunner, config: SSHConfig, catalog: Catalog) {

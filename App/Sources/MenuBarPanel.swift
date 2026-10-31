@@ -12,19 +12,19 @@ struct MenuBarPanel: View {
                 HStack {
                     Image(systemName: "gamecontroller").font(.title2).accessibilityHidden(true)
                     VStack(alignment: .leading) {
-                        Text(deck.profile.name).font(.headline)
-                        Text(state(deck)).font(.caption).foregroundStyle(.secondary)
+                        Text(verbatim: deck.profile.name).font(.headline)
+                        state(deck).font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 if let battery = deck.status.batteryPercent {
                     HStack {
-                        Label("\(battery)%", systemImage: batterySymbol(battery, deck.status.batteryState))
+                        Label { Text(verbatim: "\(battery)%").monospacedDigit() } icon: { Image(systemName: batterySymbol(battery, deck.status.batteryState)) }
                         ProgressView(value: Double(battery), total: 100)
                     }
                 }
-                Label(deck.updateCount == 1 ? "1 update available" : "\(deck.updateCount) updates available", systemImage: "arrow.down.circle")
+                Label("\(deck.updateCount) updates", systemImage: "arrow.down.circle")
             } else {
-                Text("No Deck yet").foregroundStyle(.secondary)
+                Text("No Deck").foregroundStyle(.secondary)
             }
             Divider()
             Button("Open QuietDeck") {
@@ -38,11 +38,11 @@ struct MenuBarPanel: View {
         .frame(width: 260)
     }
 
-    private func state(_ deck: LiveDeck) -> String {
+    private func state(_ deck: LiveDeck) -> Text {
         switch deck.connection {
-        case .connecting: "Connecting…"
-        case .failed: "Offline"
-        case .online: deck.status.mode == .desktop ? "Desktop Mode" : deck.status.mode == .game ? "Game Mode" : "Connected"
+        case .connecting: Text("Connecting…")
+        case .failed: Text("Offline")
+        case .online: Text(deck.status.mode.label)
         }
     }
 }

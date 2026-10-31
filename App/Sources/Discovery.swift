@@ -14,29 +14,40 @@ final class Discovery {
     }
 
     private(set) var found: [Found] = []
-    private var browser: NWBrowser?
+    /// Só Decks: o serviço devkit não existe em outras máquinas.
+    private(set) var devkit: [Found] = []
+    private var browsers: [NWBrowser] = []
 
     func start() {
-        guard browser == nil else { return }
+        guard browsers.isEmpty else { return }
         add(Found(name: "steamdeck", host: "steamdeck.local"), onlyIfResolves: true)
+        browse("_ssh._tcp") { [weak self] in self?.add($0, onlyIfResolves: false) }
+        browse("_steamos-devkit._tcp") { [weak self] item in
+            guard let self, !devkit.contains(item) else { return }
+            devkit.append(item)
+            add(item, onlyIfResolves: false)
+        }
+    }
+
+    private func browse(_ type: String, found: @escaping @MainActor (Found) -> Void) {
         let params = NWParameters()
         params.includePeerToPeer = false
-        let b = NWBrowser(for: .bonjour(type: "_ssh._tcp", domain: "local."), using: params)
-        b.browseResultsChangedHandler = { [weak self] results, _ in
+        let b = NWBrowser(for: .bonjour(type: type, domain: "local."), using: params)
+        b.browseResultsChangedHandler = { results, _ in
             let names: [String] = results.compactMap {
                 if case let .service(name, _, _, _) = $0.endpoint { name } else { nil }
             }
             Task { @MainActor in
-                for name in names { self?.add(Found(name: name, host: Self.hostName(for: name)), onlyIfResolves: false) }
+                for name in names { found(Found(name: name, host: Self.hostName(for: name))) }
             }
         }
         b.start(queue: .main)
-        browser = b
+        browsers.append(b)
     }
 
     func stop() {
-        browser?.cancel()
-        browser = nil
+        browsers.forEach { $0.cancel() }
+        browsers = []
     }
 
     /// O nome do serviço pode vir como "steamdeck [aa:bb:cc]"; o host mDNS é só a primeira palavra.

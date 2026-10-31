@@ -13,4 +13,6 @@ su deck -c '
   seed-shortcuts.py ~/.local/share/Steam/userdata/12345/config/shortcuts.vdf
   nohup gamescope-supervisor >/tmp/supervisor.log 2>&1 &
 '
+mkdir -p /home/nopass/.ssh && chown nopass /home/nopass/.ssh
+nohup python3 /usr/local/bin/devkit-service.py >/tmp/devkit.log 2>&1 &
 exec /usr/sbin/sshd -D -e
