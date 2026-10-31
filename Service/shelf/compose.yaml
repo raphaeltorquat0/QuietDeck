@@ -1,0 +1,14 @@
+services:
+  estante:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8766:8766"
+    environment:
+      QUIET_SHELF_TOKEN: ${QUIET_SHELF_TOKEN:?defina um token longo}
+      QUIET_SHELF_RESCAN_MINUTES: "60"
+    volumes:
+      - ${ACERVO:?caminho do acervo}:/acervo:ro
+      - estante-data:/data
+volumes:
+  estante-data:

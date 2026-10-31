@@ -104,6 +104,8 @@ extension ROMScanner {
 public struct ROMImportResult: Equatable, Sendable {
     public var remotePath: String
     public var skippedAsDuplicate: Bool
+    /// Tudo que este jogo ocupa no Deck, para poder remover depois.
+    public var files: [String] = []
 }
 
 public struct RomImporter: Sendable {
@@ -200,7 +202,7 @@ public struct RomImporter: Sendable {
         let hash = try await LocalHash.compute(path, algorithm: 256)
         if let existing = try await duplicate(of: hash, files: files, home: home) {
             progress(100, "Already on the Deck")
-            return ROMImportResult(remotePath: existing, skippedAsDuplicate: true)
+            return ROMImportResult(remotePath: existing, skippedAsDuplicate: true, files: [existing])
         }
 
         let work = workRoot.appendingPathComponent(hash)
@@ -244,7 +246,7 @@ public struct RomImporter: Sendable {
         let playlist = try await updatePlaylist(for: outputs[0].lastPathComponent, directory: directory)
         // Pastas de trabalho crescem como as ROMs: depois de confirmar no Deck, não servem mais.
         try? FileManager.default.removeItem(at: work)
-        return ROMImportResult(remotePath: playlist ?? main, skippedAsDuplicate: false)
+        return ROMImportResult(remotePath: playlist ?? main, skippedAsDuplicate: false, files: outputs.map { directory + "/" + $0.lastPathComponent })
     }
 
     /// Olha a pasta real: os discos podem ter chegado em trabalhos diferentes.

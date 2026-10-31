@@ -33,6 +33,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case importBIOS(localPath: String, sdMount: String?)
     case quickAction(QuickAction)
     case installQuietHome
+    case shelfInstall(item: ShelfItem, source: ShelfSource, sdMount: String?)
+    case shelfRemove(item: ShelfItem, user: String?)
     case applyTheme(user: String, model: String?)
     case restoreTheme(user: String)
     case importROM(localPath: String, systemID: String, sdMount: String?)

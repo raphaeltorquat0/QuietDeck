@@ -7,16 +7,25 @@ public struct JobContext: Sendable {
     var catalog: Catalog
     var password: String?
     var workRoot: URL
+    /// Credenciais da Estante: chave do servidor SSH e token do serviço.
+    var shelfKey: String?
+    var shelfToken: String?
+    /// Endereço do serviço visto pelo Deck, quando difere do visto pelo Mac.
+    var deckServiceURL: String?
     /// A senha do Keychain deixou de valer: o app apaga a cópia para pedir de novo.
     var onSudoRejected: @Sendable () async -> Void
 
     public init(runner: any CommandRunner, config: SSHConfig, catalog: Catalog, password: String?, workRoot: URL,
+                shelfKey: String? = nil, shelfToken: String? = nil, deckServiceURL: String? = nil,
                 onSudoRejected: @escaping @Sendable () async -> Void) {
         self.runner = runner
         self.config = config
         self.catalog = catalog
         self.password = password
         self.workRoot = workRoot
+        self.shelfKey = shelfKey
+        self.shelfToken = shelfToken
+        self.deckServiceURL = deckServiceURL
         self.onSudoRejected = onSudoRejected
     }
 
@@ -81,6 +90,11 @@ public enum JobExecutor {
                 progress(100, "Done")
             case let .importBIOS(local, sd): try await importBIOS(local, sd, c, transfer)
             case let .quickAction(action): try await action.run(r, password: c.password)
+            case let .shelfInstall(item, source, sd):
+                let paths = try await Emulation.paths(r, sdMount: sd)
+                _ = try await installer(c).install(item, from: source, paths: paths, progress: progress)
+            case let .shelfRemove(item, user):
+                try await installer(c).remove(item, user: user)
             case .installQuietHome:
                 let result = try await QuietHomePlugin.install(runner: r, password: c.requirePassword())
                 progress(100, result == .installed ? "Quiet Home installed" : "Already installed")
@@ -95,6 +109,11 @@ public enum JobExecutor {
             await c.onSudoRejected()
             throw DeckError.sudoRejected
         }
+    }
+
+    private static func installer(_ c: JobContext) -> ShelfInstaller {
+        ShelfInstaller(runner: c.runner, config: c.config, catalog: c.catalog, workRoot: c.workRoot,
+                       sshKey: c.shelfKey, token: c.shelfToken, deckServiceURL: c.deckServiceURL)
     }
 
     private static func note(_ outcome: Flatpaks.Outcome, _ progress: JobQueue.Progress) throws {

@@ -40,8 +40,17 @@ public enum CRC32 {
         (0..<8).reduce(UInt32(i)) { c, _ in c & 1 == 1 ? 0xEDB8_8320 ^ (c >> 1) : c >> 1 }
     }
 
-    public static func checksum(_ data: Data) -> UInt32 {
-        ~data.reduce(~UInt32(0)) { table[Int(($0 ^ UInt32($1)) & 0xFF)] ^ ($0 >> 8) }
+    public static func checksum(_ data: Data) -> UInt32 { ~update(~0, data) }
+
+    /// Em blocos: ROMs de vários GB não cabem numa `Data` só.
+    public static func update(_ crc: UInt32, _ data: Data) -> UInt32 {
+        var c = crc
+        data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+            table.withUnsafeBufferPointer { t in
+                for b in bytes { c = t[Int((c ^ UInt32(b)) & 0xFF)] ^ (c >> 8) }
+            }
+        }
+        return c
     }
 }
 

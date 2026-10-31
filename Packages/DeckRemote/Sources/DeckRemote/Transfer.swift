@@ -71,9 +71,15 @@ public enum Transfer {
         return result
     }
 
-    private static func clientQuotes() async -> Bool {
+    static func clientQuotes() async -> Bool {
         let v = try? await LocalProcess.run("/usr/bin/rsync", ["--version"], timeout: 5)
         return clientQuotesPaths(versionOutput: v?.stdout ?? "")
+    }
+
+    /// Puxa um arquivo de um servidor; falha com o stderr do rsync.
+    static func run(_ arguments: [String]) async throws {
+        let r = try await rsync(arguments, nil)
+        guard r.ok else { throw DeckError.commandFailed(command: "rsync", result: r) }
     }
 
     private static func rsync(_ arguments: [String], _ onProgress: (@Sendable (TransferProgress) -> Void)?) async throws -> CommandResult {

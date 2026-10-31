@@ -23,12 +23,22 @@ jobs:
         with:
           swift-version: "6.1"
       - name: Ferramentas do cliente
-        run: sudo apt-get update && sudo apt-get install -y rsync openssh-client mame-tools zip unzip
+        run: sudo apt-get update && sudo apt-get install -y rsync openssh-client mame-tools zip unzip cifs-utils
       - name: Deck simulado
         run: make harness
+      - name: Servidor de acervo
+        run: |
+          make shelf-harness
+          mkdir -p /tmp/qd-smb
+          for i in $(seq 1 20); do
+            sudo mount -t cifs //127.0.0.1/acervo /tmp/qd-smb -o port=4445,username=acervo,password=acervo-password,ro && break
+            sleep 0.5
+          done
+          mountpoint /tmp/qd-smb
       - name: Testes de integração
         run: |
           QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
+          QUIETDECK_TEST_SHELF=1 QUIETDECK_TEST_SMB=/tmp/qd-smb \
             swift test --filter Integration --no-parallel
       # O instalador oficial consulta github.com e a API do GitHub: pode falhar por limite de taxa do runner.
       - name: Instalador oficial do Decky
