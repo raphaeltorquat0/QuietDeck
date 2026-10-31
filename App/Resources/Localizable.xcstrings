@@ -1481,12 +1481,12 @@
     }
    }
   },
-  "Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": {
+  "Glass on the top and bottom bars, the home tabs, and the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
-      "value": "Vidro nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos."
+      "value": "Vidro nas barras superior e inferior, nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos."
      }
     }
    }

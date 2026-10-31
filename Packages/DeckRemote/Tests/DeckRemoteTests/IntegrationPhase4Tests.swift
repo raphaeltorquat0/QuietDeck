@@ -51,7 +51,7 @@ extension IntegrationTests {
         try await r.check("mkdir -p ~/homebrew/themes/Obsidian ~/homebrew/plugins; echo '{\"active\":true}' > ~/homebrew/themes/Obsidian/config_USER.json; rm -f ~/.local/share/quietdeck/quiet-tune.sha256")
         let translations = try await r.run("cat ~/homebrew/themes/css_translations.json 2>/dev/null").stdout
         defer { Task { [translations] in try? await RemoteFiles(runner: r).write(Data(translations.utf8), to: "/home/deck/homebrew/themes/css_translations.json") } }
-        try await RemoteFiles(runner: r).write(Data(#"{"a": ["quickaccessmenu_Container", "mainmenu_Container"]}"#.utf8), to: "/home/deck/homebrew/themes/css_translations.json")
+        try await RemoteFiles(runner: r).write(Data(#"{"a": ["header_Header", "footer_BasicFooter", "quickaccessmenu_QuickAccessMenu", "quickaccessmenu_Tab", "quickaccessmenu_Selected", "quickaccessmenu_Title", "mainmenu_Menu"]}"#.utf8), to: "/home/deck/homebrew/themes/css_translations.json")
         try await QuietTheme.applyGlass(r, password: Sim.password)
         #expect(try await QuietTheme.hasGlass(r))
         #expect(try await BundledPlugin.quietTune.isInstalled(r))

@@ -205,22 +205,20 @@ public enum QuietTheme {
             try await files.write(try Data(contentsOf: url), to: "\(home)/\(themes)/\(glassName)/\(name)")
         }
         try await runner.check(setStates([glassName: true]))
-        _ = try await BundledPlugin.quietTune.install(runner: runner, password: password)
-        try await runner.check(reloadCSSLoader)
+        // Instalar reinicia o Decky, e é aí que o CSS Loader relê os temas.
+        if try await BundledPlugin.quietTune.install(runner: runner, password: password) == .alreadyCurrent {
+            _ = try await reload(runner, password: password)
+        }
     }
 
     public static func removeGlass(_ runner: any CommandRunner, password: String) async throws {
         let home = try await RemoteFiles(runner: runner).home()
         try await runner.check(setStates([glassName: false]))
         try await runner.check("rm -rf \(Shell.quote("\(home)/\(themes)/\(glassName)"))")
-        if try await BundledPlugin.quietTune.isInstalled(runner) {
-            _ = try await Decky.removePlugin(name: BundledPlugin.quietTune.name, runner: runner, password: password)
+        if try await Decky.removePlugin(name: BundledPlugin.quietTune.name, runner: runner, password: password) == .notInstalled {
+            _ = try await reload(runner, password: password)
         }
-        try await runner.check(reloadCSSLoader)
     }
-
-    /// CSS Loader desligado não é erro: ele lê os temas quando subir.
-    static let reloadCSSLoader = "curl -s -m 10 -X POST -H 'Content-Type: application/json' -d '{\"method\":\"reset\",\"args\":{}}' http://127.0.0.1:35821/req >/dev/null || true"
 
     public static func hasGlass(_ runner: any CommandRunner) async throws -> Bool {
         try await runner.run("test -e ~/\(Shell.quote("\(themes)/\(glassName)/glass.css"))").ok

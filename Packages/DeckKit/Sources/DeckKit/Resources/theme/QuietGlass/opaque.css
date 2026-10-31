@@ -1,2 +1,3 @@
-/* Sem filtro: durante o jogo o menu não gasta GPU com o vidro. */
-.quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; }
+/* Sem filtro: durante o jogo as barras e os menus não gastam GPU com vidro, nem com o blur nativo do rodapé. */
+.header_Header, .footer_BasicFooter, .quickaccessmenu_QuickAccessMenu, .mainmenu_Menu { background: #0e1014 !important; backdrop-filter: none !important; }
+.quickaccessmenu_Tab:not(.quickaccessmenu_Selected), .quickaccessmenu_Title { background: transparent !important; }

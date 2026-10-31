@@ -13,11 +13,12 @@ import Testing
         let values = try #require(menus["values"] as? [String: [String: [String]]])
         #expect(menus["default"] as? String == "Vidro")
         // A chave é sensível a maiúsculas: `quickaccess` não casa com janela nenhuma e o tema não aparece.
-        #expect(values["Vidro"]?["glass.css"] == ["bigpictureoverlay"])
-        #expect(values["Opaco"]?["opaque.css"] == ["bigpictureoverlay"])
+        #expect(values["Vidro"]?["glass.css"] == ["bigpicture", "bigpictureoverlay"])
+        #expect(values["Opaco"]?["opaque.css"] == ["bigpicture", "bigpictureoverlay"])
         let opaque = try String(contentsOf: try #require(QuietTheme.resource("QuietGlass/opaque.css")), encoding: .utf8)
-        #expect(!opaque.replacingOccurrences(of: "/*", with: "\n").split(separator: "\n").last!.contains("backdrop-filter"))
+        #expect(opaque.contains("backdrop-filter: none") && !opaque.contains("blur("))
         let glass = try String(contentsOf: try #require(QuietTheme.resource("QuietGlass/glass.css")), encoding: .utf8)
+        #expect(Set(QuietTheme.selectors(css: opaque)).isSubset(of: QuietTheme.selectors(css: glass)))
         #expect(glass.contains("@supports not (backdrop-filter") && glass.contains("prefers-reduced-transparency"))
     }
 

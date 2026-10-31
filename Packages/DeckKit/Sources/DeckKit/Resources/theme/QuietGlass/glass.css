@@ -1,11 +1,13 @@
-/* Quiet Glass: menus fora de jogo. Em jogo o QuietTune troca para opaque.css, salvo se o usuário forçar o vidro. */
-.quickaccessmenu_Container, .mainmenu_Container {
+/* Quiet Glass: barras e menus fora de jogo. Em jogo o QuietTune troca para opaque.css, salvo se o usuário forçar o vidro.
+   O Steam já desfoca a tela atrás dos menus; só o painel recebe vidro, e o que há dentro dele fica transparente. */
+.header_Header, .footer_BasicFooter, .quickaccessmenu_QuickAccessMenu, .mainmenu_Menu {
   background: rgba(14, 16, 20, 0.72) !important;
-  backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%) !important;
 }
+.quickaccessmenu_Tab:not(.quickaccessmenu_Selected), .quickaccessmenu_Title { background: transparent !important; }
 @supports not (backdrop-filter: blur(1px)) {
-  .quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; }
+  .header_Header, .footer_BasicFooter, .quickaccessmenu_QuickAccessMenu, .mainmenu_Menu { background: #0e1014 !important; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .quickaccessmenu_Container, .mainmenu_Container { background: #0e1014 !important; backdrop-filter: none; }
+  .header_Header, .footer_BasicFooter, .quickaccessmenu_QuickAccessMenu, .mainmenu_Menu { background: #0e1014 !important; backdrop-filter: none !important; }
 }

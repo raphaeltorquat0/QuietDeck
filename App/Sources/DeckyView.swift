@@ -66,7 +66,7 @@ struct DeckyView: View {
                 }
             }
             Card(title: "Quiet Glass", symbol: "circle.lefthalf.filled") {
-                Text("Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.")
+                Text("Glass on the top and bottom bars, the home tabs, and the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.")
                     .font(.callout).foregroundStyle(.secondary)
                 if deck.hasQuietGlass {
                     Button("Remove Quiet Glass") { model.enqueue(String(localized: "Remove Quiet Glass"), .removeQuietGlass) }

@@ -153,7 +153,7 @@ Needs a collection on your network and a paired Deck. Nothing below has been run
 Nothing below has been run on a real Deck yet.
 
 - [ ] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart.
-- [ ] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred.
+- [ ] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred. The top and bottom bars are glass too.
 - [ ] Open a game, then the quick access menu. It's opaque. Close the game and it's glass again.
 - [ ] Turn on **Vidro sempre** in QuietTune. The menu stays glass in a game, and the choice survives a reboot.
 - [ ] Remove Quiet Glass. The theme and QuietTune are gone, and your other themes are as they were.

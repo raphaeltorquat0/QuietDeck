@@ -48,7 +48,7 @@ PT = {
 "When a game is in several sources, QuietDeck installs from the highest one that's online.": "Quando um jogo está em várias fontes, o QuietDeck instala pela mais alta que estiver online.",
 "%@ isn't available.": "%@ não está disponível.",
 "Couldn't download %@.": "Não foi possível baixar %@.",
-"Glass on the home tabs and on the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": "Vidro nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos.",
+"Glass on the top and bottom bars, the home tabs, and the Steam and quick access menus. While a game runs, QuietTune switches the menus to opaque.": "Vidro nas barras superior e inferior, nas abas da home e nos menus do Steam e de acesso rápido. Com um jogo aberto, o QuietTune deixa os menus opacos.",
 "Quiet Glass": "Quiet Glass",
 "Apply Quiet Glass": "Aplicar Quiet Glass",
 "Remove Quiet Glass": "Remover Quiet Glass",

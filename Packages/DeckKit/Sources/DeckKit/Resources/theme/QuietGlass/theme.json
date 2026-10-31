@@ -8,8 +8,8 @@
       "default": "Vidro",
       "type": "dropdown",
       "values": {
-        "Vidro": { "glass.css": ["bigpictureoverlay"] },
-        "Opaco": { "opaque.css": ["bigpictureoverlay"] }
+        "Vidro": { "glass.css": ["bigpicture", "bigpictureoverlay"] },
+        "Opaco": { "opaque.css": ["bigpicture", "bigpictureoverlay"] }
       }
     }
   }
