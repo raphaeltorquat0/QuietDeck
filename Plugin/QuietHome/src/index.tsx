@@ -1,20 +1,11 @@
-import { definePlugin, routerHook, toaster } from '@decky/api'
-import { QuietHome } from './QuietHome'
-import { loadTabs } from './steam'
+import { definePlugin, routerHook } from '@decky/api'
+import { homePatch } from './patch'
 
 const HOME = '/library/home'
 
-/** A home nativa só é trocada se os dados do cliente responderem; senão ela fica como está. */
+/** A home nativa fica por baixo: qualquer falha da nova volta para ela. Ver `Guard`. */
 export default definePlugin(() => {
-  const patch = routerHook.addPatch(HOME, (props: any) => {
-    const tabs = loadTabs()
-    if (tabs && tabs.some((t) => t.games.length > 0)) {
-      props.children = { ...props.children, type: QuietHome, props: { tabs } }
-    } else {
-      toaster.toast({ title: 'Quiet Home', body: 'Este cliente Steam mudou. A home nativa continua ativa.' })
-    }
-    return props
-  })
+  const patch = routerHook.addPatch(HOME, homePatch)
   return {
     name: 'Quiet Home',
     icon: <span>Q</span>,

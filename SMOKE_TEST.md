@@ -34,7 +34,9 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 | Applying Quiet Clean without a password, then rebooting | Passed: loaded by CSS Loader, including over a light artwork |
 | **Restore Valve Defaults** on the Deck | Not run: only on the simulated Deck |
 | TabMaster tabs and sounds | Not run: TabMaster and Audio Loader aren't installed, and installing them needs `sudo` |
-| Loja tile as the last item of the home row | Not working: the native row only shows recent games, so the tile stays in the library |
+| Quiet Home in memory: real data, D-pad left, right, up and down, L1 and R1, initial focus | Passed |
+| Quiet Home download indicator and Play button | Not run |
+| Loja tile inside Quiet Home | Rendered; opening it not run |
 | Boot video and screensaver on screen | Not confirmed |
 | microSD, OLED, BIOS import, artwork, CHD conversion on a real Deck | Not run |
 | App UI connected to a real Deck | Not run |
@@ -100,10 +102,11 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Install GE-Proton, and it appears in Steam's compatibility list after a restart
 - [ ] Back up saves and restore them
 
-## Quiet theme
+## Quiet Home
 
-- [ ] Apply the theme from Decky, then restart: the home shows one row of covers
-- [ ] The **Loja** tile is in the row and opens the Store in Game Mode
+- [ ] Install Quiet Home from Decky: the home shows the hero, one row of covers and the tabs
+- [ ] The **Loja** tile is the last item of the row and opens the Store in Game Mode
+- [ ] Removing the plugin brings the native home back
 - [ ] The download indicator appears during an update, and only then
 - [ ] Text keeps its contrast over three light artworks: snow, sky and a white background
 - [ ] Full D-pad pass on the home, with no stuck or invisible focus: left and right along the row, up to the header, down, and the Steam and `...` buttons

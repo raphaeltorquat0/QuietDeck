@@ -188,6 +188,19 @@ public enum QuietHomePlugin {
         try await Decky.plugins(runner).contains { $0.name == name }
     }
 
+    static func enableScript(settings: String) -> String {
+        let python = #"""
+        import json, os, sys
+        p, name = sys.argv[1:3]
+        if os.path.exists(p):
+            s = json.load(open(p))
+            if name in s.get("disabled_plugins", []):
+                s["disabled_plugins"].remove(name)
+                json.dump(s, open(p, "w"), indent=4)
+        """#
+        return "python3 -c \(Shell.quote(python)) \(Shell.quote(settings)) \(Shell.quote(name))"
+    }
+
     public enum Outcome: Equatable, Sendable { case installed, alreadyCurrent }
 
     /// O hash do zip decide: o `version` do plugin não muda a cada ajuste.
@@ -203,7 +216,8 @@ public enum QuietHomePlugin {
         if try await isInstalled(runner), current == hash { return .alreadyCurrent }
         let user = try await runner.check("id -un").trimmed
         try await runner.check(.sudo(Decky.installScript(name: name, url: "file://\(remote)", hash: hash, pluginsDir: home + "/homebrew/plugins", user: user), password: password, timeout: 120))
-        try await runner.check(.sudo("systemctl restart plugin_loader", password: password))
+        // O Decky guarda `disabled_plugins` em memória: a lista só muda com ele parado.
+        try await runner.check(.sudo("systemctl stop plugin_loader; \(enableScript(settings: home + "/homebrew/settings/loader.json")); systemctl start plugin_loader", password: password))
         try await files.write(Data(hash.utf8), to: "\(home)/\(marker)")
         return .installed
     }

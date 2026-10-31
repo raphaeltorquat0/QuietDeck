@@ -35,10 +35,13 @@ extension IntegrationTests {
 
     @Test(.enabled(if: Sim.hasHarness)) func quietHomeInstallsFromBundledZip() async throws {
         let r = try await Sim.runner()
-        try await r.check(.sudo("rm -rf /home/deck/homebrew/plugins /home/deck/.local/share/quietdeck/quiet-home.sha256; mkdir -p /home/deck/homebrew/plugins; chown deck /home/deck/homebrew/plugins", password: Sim.password))
+        try await r.check(.sudo("rm -rf /home/deck/homebrew/plugins /home/deck/.local/share/quietdeck/quiet-home.sha256; mkdir -p /home/deck/homebrew/plugins /home/deck/homebrew/settings; chown deck /home/deck/homebrew/plugins; echo '{\"disabled_plugins\": [\"Quiet Home\", \"Other\"]}' > /home/deck/homebrew/settings/loader.json", password: Sim.password))
         #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .installed)
         #expect(try await QuietHomePlugin.isInstalled(r))
         #expect(try await r.run("test -s ~/homebrew/plugins/QuietHome/dist/index.js").ok)
+        let settings = try await r.check("cat ~/homebrew/settings/loader.json").stdout
+        #expect(!settings.contains("Quiet Home") && settings.contains("Other"))
+        #expect(try await r.run("systemctl is-active plugin_loader").ok)
         #expect(try await QuietHomePlugin.install(runner: r, password: Sim.password) == .alreadyCurrent)
     }
 }
