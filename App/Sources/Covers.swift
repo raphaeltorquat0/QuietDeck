@@ -20,6 +20,14 @@ final class CoverStore {
 
     func image(_ title: String, kind: ArtKind = .portrait) -> NSImage? { images[key(title, kind)] }
 
+    /// Arte da Estante, sempre em PNG: o Steam vai receber este mesmo arquivo.
+    func store(_ remote: URL, title: String, kind: ArtKind) async {
+        guard let (data, _) = try? await URLSession.shared.data(from: remote), let image = NSImage(data: data),
+              let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return }
+        try? png.write(to: file(for: title, kind: kind))
+        images[key(title, kind)] = image
+    }
+
     func load(_ title: String, kind: ArtKind = .portrait) {
         let id = key(title, kind)
         guard images[id] == nil, pending.insert(id).inserted else { return }
@@ -42,6 +50,8 @@ struct CoverView: View {
     @Environment(AppModel.self) private var model
     var title: String
     var symbol = "gamecontroller"
+    /// Nome na capa gerada, quando difere do título que indexa a arte.
+    var label: String?
 
     var body: some View {
         ZStack {
@@ -51,7 +61,7 @@ struct CoverView: View {
                 LinearGradient(colors: [Color.accentColor.opacity(0.75), Color.accentColor.opacity(0.28)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 VStack(spacing: 8) {
                     Image(systemName: symbol).font(.title).foregroundStyle(.white.opacity(0.85))
-                    Text(verbatim: title).font(.callout.weight(.semibold)).foregroundStyle(.white)
+                    Text(verbatim: label ?? title).font(.callout.weight(.semibold)).foregroundStyle(.white)
                         .multilineTextAlignment(.center).lineLimit(4).padding(.horizontal, 8)
                 }
             }

@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Shelf**: a storefront over your own collection, from a folder, an SMB/NFS share, an SSH server or an optional container service. Incremental hashing, your own No-Intro/Redump DATs, deduplication, filters, details and one-click install and remove.
+- Direct server → Deck transfers when there's nothing to process on the Mac.
+- Descriptions and artwork from ScreenScraper and IGDB with your own credentials. QuietDeck never downloads game files from them.
+- **Free and Legal**: a catalog of homebrew with verified licenses, downloaded from official sources and checked by SHA-256 (see `CATALOG.md`).
+- Stocking Guide for dumping your own cartridges and discs.
+
 ## 0.1.0
 
 First release. Everything below has been tested against a simulated Deck. [SMOKE_TEST.md](SMOKE_TEST.md) lists what has also been checked on a real one.

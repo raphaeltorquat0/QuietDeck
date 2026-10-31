@@ -47,6 +47,17 @@ QuietDeck never downloads ROMs, BIOS or firmware, and never turns off SteamOS's 
 
 The screenshots use sample data, not a real library.
 
+### Shelf
+
+A storefront for the collection you already own, kept in a folder, on an SMB/NFS share, on an SSH server or behind an [optional container service](Service/shelf/README.md).
+
+- Browse by cover, filter and search, and check your files against the No-Intro or Redump DATs you supply.
+- Install or remove in one click, with the Steam shortcut and artwork. Direct server → Deck transfers skip the Mac when nothing needs processing.
+- Get descriptions and artwork from ScreenScraper or IGDB with your own credentials.
+- Try **Free and Legal**, a catalog of homebrew with verified licenses ([rules](CATALOG.md)), and read the Stocking Guide.
+
+QuietDeck never searches for, indexes or downloads commercial games from the internet.
+
 ## Install
 
 **Homebrew:**

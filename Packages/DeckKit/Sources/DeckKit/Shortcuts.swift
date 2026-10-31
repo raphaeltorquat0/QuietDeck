@@ -60,6 +60,8 @@ public enum ShortcutsFile {
         public var appID: UInt32?
         public var name: String
         public var exe: String
+        /// Epoch do último jogo; `0` nunca jogado.
+        public var lastPlayed: Int64 = 0
     }
 
     public static let emptyFile = VDFValue.map([("shortcuts", .map([]))])
@@ -77,7 +79,9 @@ public enum ShortcutsFile {
             func text(_ key: String) -> String {
                 if case let .string(s)? = entry.value[key] { s } else { "" }
             }
-            return Existing(appID: id, name: text("AppName"), exe: text("Exe"))
+            var played: Int64 = 0
+            if case let .int32(v)? = entry.value["LastPlayTime"] { played = Int64(UInt32(bitPattern: v)) }
+            return Existing(appID: id, name: text("AppName"), exe: text("Exe"), lastPlayed: played)
         }
     }
 

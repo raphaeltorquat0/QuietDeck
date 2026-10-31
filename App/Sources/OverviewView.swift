@@ -15,7 +15,7 @@ struct OverviewView: View {
             if let failure = deck.connection.detail {
                 InlineNote(text: "\(failure)", symbol: "exclamationmark.triangle", tint: .orange)
             }
-            Deck3DView(screenID: "\(deck.status.model ?? "")\(deck.status.osVersion ?? "")\(deck.status.mode.rawValue)") {
+            Deck3DView(screenID: [deck.status.model, deck.status.osVersion, deck.status.mode.rawValue].compactMap(\.self).joined()) {
                 ZStack {
                     LinearGradient(colors: [Color.accentColor.opacity(0.55), .black], startPoint: .top, endPoint: .bottom)
                     VStack(spacing: 8) {

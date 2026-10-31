@@ -16,7 +16,7 @@ struct DeckProfile: Codable, Hashable, Identifiable {
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case overview, emulators, library, decky, compatTools, saves
+    case overview, emulators, library, shelf, decky, compatTools, saves
     var id: String { rawValue }
 
     var title: LocalizedStringResource {
@@ -24,6 +24,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .overview: "Overview"
         case .emulators: "Emulators"
         case .library: "Library"
+        case .shelf: "Shelf"
         case .decky: "Decky"
         case .compatTools: "Compat Tools"
         case .saves: "Saves"
@@ -35,6 +36,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .overview: "gauge.with.dots.needle.33percent"
         case .emulators: "gamecontroller"
         case .library: "square.stack.3d.up"
+        case .shelf: "books.vertical"
         case .decky: "puzzlepiece.extension"
         case .compatTools: "wineglass"
         case .saves: "externaldrive.badge.timemachine"
@@ -68,6 +70,7 @@ final class AppSettings {
     var savesFolder: String? { didSet { d.set(savesFolder, forKey: "savesFolder") } }
     var onboarded: Bool { didSet { d.set(onboarded, forKey: "onboarded") } }
     var completionSound: Bool { didSet { d.set(completionSound, forKey: "completionSound") } }
+    var shelfSources: [ShelfSource] { didSet { d.set(try? JSONEncoder().encode(shelfSources), forKey: "shelfSources") } }
 
     init() {
         d.register(defaults: ["showMenuBarExtra": true])
@@ -76,6 +79,7 @@ final class AppSettings {
         savesFolder = d.string(forKey: "savesFolder")
         onboarded = d.bool(forKey: "onboarded")
         completionSound = d.bool(forKey: "completionSound")
+        shelfSources = d.data(forKey: "shelfSources").flatMap { try? JSONDecoder().decode([ShelfSource].self, from: $0) } ?? []
     }
 }
 
@@ -83,6 +87,9 @@ final class AppSettings {
 @MainActor @Observable
 final class AppModel {
     static let steamGridKeyAccount = "steamgriddb"
+    static let shelfTokenAccount = "shelf-service"
+    static let screenScraperAccount = "screenscraper"
+    static let igdbAccount = "igdb"
 
     let settings = AppSettings()
     let catalog: Catalog
@@ -96,6 +103,7 @@ final class AppModel {
     /// Capas em voo da Biblioteca até a fila.
     var flights: [CoverFlight] = []
     let covers = CoverStore()
+    let shelf = ShelfStore()
     private(set) var live: [UUID: LiveDeck] = [:]
     @ObservationIgnored private var queueStore = Paths.support.appending(path: "queue.json")
     @ObservationIgnored private(set) lazy var queue = JobQueue(storeURL: queueStore) { [weak self] job, progress in
@@ -226,7 +234,9 @@ final class AppModel {
     private func context(_ id: UUID) -> JobContext? {
         guard let deck = live[id] else { return nil }
         return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),
-                          workRoot: Paths.work) { Keychain.remove(for: id.uuidString) }
+                          workRoot: Paths.work, shelfKey: Paths.key, shelfToken: Keychain.password(for: Self.shelfTokenAccount)) {
+            Keychain.remove(for: id.uuidString)
+        }
     }
 }
 
@@ -251,6 +261,9 @@ final class LiveDeck: Identifiable {
     var decky: DeckyState?
     var plugins: [InstalledPlugin] = []
     var compatTools: [String] = []
+    /// O que a Estante instalou, conferido no Deck a cada leitura.
+    var shelfInstalled: [String: ShelfManifestEntry] = [:]
+    var shortcutsPlayed: [String: Int64] = [:]
     var steamUsers: [String] = []
     var hasPassword = false
     var themeInstalled = false
@@ -290,6 +303,8 @@ final class LiveDeck: Identifiable {
             bios = DeckRemote.BIOS.status(scanOutput: scan, table: catalog.bios.entries)
             games = Library.parse((try? await r.run(Library.listing(paths: p)).stdout) ?? "", systems: catalog.systems, paths: p)
         }
+        shelfInstalled = (try? await ShelfInstaller.installed(r)) ?? shelfInstalled
+        if let user = steamUsers.first { shortcutsPlayed = (try? await SteamControl(runner: r).lastPlayed(user: user)) ?? shortcutsPlayed }
         decky = try? await Decky.state(r)
         plugins = (try? await Decky.plugins(r)) ?? plugins
         compatTools = (try? await CompatTools.installed(r)) ?? compatTools

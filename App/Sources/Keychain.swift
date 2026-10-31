@@ -26,5 +26,10 @@ enum Keychain {
         SecItemAdd(q as CFDictionary, nil)
     }
 
+    /// Credenciais com mais de um campo ficam juntas num item só.
+    static func decoded<T: Decodable>(_ type: T.Type, for account: String) -> T? {
+        password(for: account).flatMap { try? JSONDecoder().decode(T.self, from: Data($0.utf8)) }
+    }
+
     static func remove(for account: String) { SecItemDelete(query(account) as CFDictionary) }
 }

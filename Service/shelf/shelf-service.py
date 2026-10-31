@@ -52,12 +52,18 @@ def hash_file(p, st, base, name):
     sha, crc = hashlib.sha1(), 0
     with open(p, "rb") as f:
         head = f.read(0x11000)
+        raw, skip = (hashlib.sha1(), 16) if head[:4] == b"NES\x1a" else (None, 0)
         chunk = head
         while chunk:
             sha.update(chunk)
             crc = zlib.crc32(chunk, crc)
+            if raw:
+                raw.update(chunk[skip:])
+                skip = 0
             chunk = f.read(1 << 20)
     r = {"path": p, "size": st.st_size, "mtime": int(st.st_mtime), "crc": "%08x" % (crc & 0xffffffff), "sha1": sha.hexdigest()}
+    if raw:
+        r["headerless"] = raw.hexdigest()
     if os.path.basename(base).lower() not in KNOWN:
         r["head"] = base64.b64encode(head).decode()
     if name.lower().rsplit(".", 1)[-1] in ("cue", "gdi"):

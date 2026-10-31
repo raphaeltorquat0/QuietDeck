@@ -31,12 +31,42 @@
     }
    }
   },
+  "%@ doesn't match the catalog checksum, so it wasn't installed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não confere com o hash do catálogo, então não foi instalado."
+     }
+    }
+   }
+  },
+  "%@ files fit more than one system. Move them into a system folder.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ arquivos servem em mais de um sistema. Mova-os para uma pasta de sistema."
+     }
+    }
+   }
+  },
   "%@ free": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "%@ livres"
+     }
+    }
+   }
+  },
+  "%@ free on %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ livres em %@"
      }
     }
    }
@@ -51,12 +81,42 @@
     }
    }
   },
+  "%@ isn't in a ROM folder, so it wasn't deleted.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não está numa pasta de ROMs, então não foi apagado."
+     }
+    }
+   }
+  },
   "%@ isn't there anymore. Check that the network share is mounted.": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "%@ não está mais lá. Confira se o compartilhamento de rede está montado."
+     }
+    }
+   }
+  },
+  "%@ quota reached. Try again later.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cota de %@ atingida. Tente mais tarde."
+     }
+    }
+   }
+  },
+  "%@ refused your credentials.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ recusou suas credenciais."
      }
     }
    }
@@ -101,12 +161,32 @@
     }
    }
   },
+  "A": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A"
+     }
+    }
+   }
+  },
   "A config file already exists. Only the ROM, BIOS and save paths change, and a backup is kept next to it.": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Já existe um arquivo de configuração. Só os caminhos de ROM, BIOS e saves mudam, e um backup fica ao lado dele."
+     }
+    }
+   }
+  },
+  "A folder on this Mac or a mounted SMB or NFS share, laid out as collection/system/files.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Uma pasta neste Mac ou um compartilhamento SMB ou NFS montado, no formato acervo/sistema/arquivos."
      }
     }
    }
@@ -187,6 +267,36 @@
      "stringUnit": {
       "state": "translated",
       "value": "Adicionar pasta…"
+     }
+    }
+   }
+  },
+  "Add SSH Server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar servidor SSH"
+     }
+    }
+   }
+  },
+  "Add Service": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar serviço"
+     }
+    }
+   }
+  },
+  "Add a Source…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionar fonte…"
      }
     }
    }
@@ -411,6 +521,16 @@
     }
    }
   },
+  "B": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "B"
+     }
+    }
+   }
+  },
   "Back": {
    "localizations": {
     "pt-BR": {
@@ -511,6 +631,16 @@
     }
    }
   },
+  "Cartridges": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cartuchos"
+     }
+    }
+   }
+  },
   "Charging": {
    "localizations": {
     "pt-BR": {
@@ -567,6 +697,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Limpar"
+     }
+    }
+   }
+  },
+  "Collection path on the server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Caminho do acervo no servidor"
      }
     }
    }
@@ -701,6 +841,16 @@
     }
    }
   },
+  "Copies": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Cópias"
+     }
+    }
+   }
+  },
   "Copies Emulation/saves and each emulator's save folders to this Mac. Nothing on the Deck is deleted.": {
    "localizations": {
     "pt-BR": {
@@ -717,6 +867,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Copiar"
+     }
+    }
+   }
+  },
+  "Couldn't reach %@.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível acessar %@."
      }
     }
    }
@@ -841,12 +1001,42 @@
     }
    }
   },
+  "Disc imaging tool.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ferramenta de imagem de disco."
+     }
+    }
+   }
+  },
+  "DiscImageCreator": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "DiscImageCreator"
+     }
+    }
+   }
+  },
   "Discharging": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Descarregando"
+     }
+    }
+   }
+  },
+  "Discs": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Discos"
      }
     }
    }
@@ -877,6 +1067,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Concluído"
+     }
+    }
+   }
+  },
+  "Downloading from the official source": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Baixando da fonte oficial"
+     }
+    }
+   }
+  },
+  "Downloading from the server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Baixando do servidor"
      }
     }
    }
@@ -1001,6 +1211,26 @@
     }
    }
   },
+  "Free Windows tool for reading discs to an image.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ferramenta gratuita para Windows que lê discos para uma imagem."
+     }
+    }
+   }
+  },
+  "Free and Legal": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Grátis e legal"
+     }
+    }
+   }
+  },
   "Full": {
    "localizations": {
     "pt-BR": {
@@ -1011,12 +1241,52 @@
     }
    }
   },
+  "GB Operator": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "GB Operator"
+     }
+    }
+   }
+  },
   "Game Mode": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Game Mode"
+     }
+    }
+   }
+  },
+  "Genre": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Gênero"
+     }
+    }
+   }
+  },
+  "Get IGDB credentials": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Obter credenciais do IGDB"
+     }
+    }
+   }
+  },
+  "Get ScreenScraper credentials": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Obter credenciais do ScreenScraper"
      }
     }
    }
@@ -1041,6 +1311,16 @@
     }
    }
   },
+  "Hash": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Hash"
+     }
+    }
+   }
+  },
   "Hold the Power button, choose **Switch to Desktop** and open **Konsole**. Then run:": {
    "localizations": {
     "pt-BR": {
@@ -1051,12 +1331,62 @@
     }
    }
   },
+  "Homebrew and freeware whose licenses allow redistribution. Each one downloads from its official source and is checked against the catalog hash.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Homebrew e freeware com licença que permite redistribuição. Cada um é baixado da fonte oficial e conferido com o hash do catálogo."
+     }
+    }
+   }
+  },
   "Host": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Host"
+     }
+    }
+   }
+  },
+  "IGDB Client ID": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Client ID do IGDB"
+     }
+    }
+   }
+  },
+  "IGDB Client Secret": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Client Secret do IGDB"
+     }
+    }
+   }
+  },
+  "INLretro": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "INLretro"
+     }
+    }
+   }
+  },
+  "ImgBurn": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "ImgBurn"
      }
     }
    }
@@ -1131,6 +1461,36 @@
     }
    }
   },
+  "Install and Add to Steam": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar e adicionar ao Steam"
+     }
+    }
+   }
+  },
+  "Install on Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar no Deck"
+     }
+    }
+   }
+  },
+  "Install on microSD": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar no microSD"
+     }
+    }
+   }
+  },
   "Installed": {
    "localizations": {
     "pt-BR": {
@@ -1167,6 +1527,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Interrompido ao fechar o app"
+     }
+    }
+   }
+  },
+  "Invalid file name: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nome de arquivo inválido: %@"
      }
     }
    }
@@ -1211,6 +1581,26 @@
     }
    }
   },
+  "License": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Licença"
+     }
+    }
+   }
+  },
+  "Look Up Missing Metadata": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Buscar metadados que faltam"
+     }
+    }
+   }
+  },
   "Looking for your Deck": {
    "localizations": {
     "pt-BR": {
@@ -1221,12 +1611,42 @@
     }
    }
   },
+  "Low-level disc dumper.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leitor de discos de baixo nível."
+     }
+    }
+   }
+  },
+  "Matches your DAT": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Confere com seu DAT"
+     }
+    }
+   }
+  },
   "Missing": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Faltando"
+     }
+    }
+   }
+  },
+  "Name": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nome"
      }
     }
    }
@@ -1361,12 +1781,52 @@
     }
    }
   },
+  "Not enough space, and nothing from the shelf can free it.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem espaço, e nada da Estante consegue liberar o suficiente."
+     }
+    }
+   }
+  },
+  "Not enough space. Least played: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sem espaço. Menos jogados: %@"
+     }
+    }
+   }
+  },
   "Not inserted": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Não inserido"
+     }
+    }
+   }
+  },
+  "Not installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não instalado"
+     }
+    }
+   }
+  },
+  "Nothing here": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nada por aqui"
      }
     }
    }
@@ -1381,12 +1841,32 @@
     }
    }
   },
+  "Official page": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Página oficial"
+     }
+    }
+   }
+  },
   "Offline": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Offline"
+     }
+    }
+   }
+  },
+  "On the Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "No Deck"
      }
     }
    }
@@ -1421,12 +1901,42 @@
     }
    }
   },
+  "Open Source Cartridge Reader": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Open Source Cartridge Reader"
+     }
+    }
+   }
+  },
   "Open pairing on the Deck": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Abra o pareamento no Deck"
+     }
+    }
+   }
+  },
+  "Open-source reader you build around an Arduino Mega; covers many cartridge systems.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leitor de código aberto montado sobre um Arduino Mega; cobre muitos sistemas de cartucho."
+     }
+    }
+   }
+  },
+  "Organize": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Organizar"
      }
     }
    }
@@ -1551,6 +2061,16 @@
     }
    }
   },
+  "Players": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Jogadores"
+     }
+    }
+   }
+  },
   "Plugin Store": {
    "localizations": {
     "pt-BR": {
@@ -1561,12 +2081,32 @@
     }
    }
   },
+  "Point QuietDeck at your own collection, on this Mac or on a server on your network.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aponte o QuietDeck para o seu acervo, neste Mac ou num servidor da sua rede."
+     }
+    }
+   }
+  },
   "Preparing the emulator": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Preparando o emulador"
+     }
+    }
+   }
+  },
+  "Programmer and dumper software and firmware.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Software e firmware para gravar e copiar cartuchos."
      }
     }
    }
@@ -1661,6 +2201,16 @@
     }
    }
   },
+  "Read discs on a computer with an optical drive. Keep every track together with its .cue file.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leia os discos num computador com drive óptico. Mantenha todas as faixas junto do arquivo .cue."
+     }
+    }
+   }
+  },
   "Ready to Send": {
    "localizations": {
     "pt-BR": {
@@ -1721,6 +2271,16 @@
     }
    }
   },
+  "Remove from Deck": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover do Deck"
+     }
+    }
+   }
+  },
   "Removed from Flathub (end of life). PlayStation games use the SwanStation core in RetroArch.": {
    "localizations": {
     "pt-BR": {
@@ -1771,6 +2331,16 @@
     }
    }
   },
+  "Restart Steam?": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Reiniciar o Steam?"
+     }
+    }
+   }
+  },
   "Restore": {
    "localizations": {
     "pt-BR": {
@@ -1801,12 +2371,52 @@
     }
    }
   },
+  "Retrode": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Retrode"
+     }
+    }
+   }
+  },
   "Running": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Em execução"
+     }
+    }
+   }
+  },
+  "SSH server": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Servidor SSH"
+     }
+    }
+   }
+  },
+  "SSH user": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuário SSH"
+     }
+    }
+   }
+  },
+  "STEAM": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "STEAM"
      }
     }
    }
@@ -1851,12 +2461,82 @@
     }
    }
   },
+  "Scan": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procurar"
+     }
+    }
+   }
+  },
+  "Scan Sources": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procurar nas fontes"
+     }
+    }
+   }
+  },
   "Scan Sync Folders": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Procurar nas pastas sincronizadas"
+     }
+    }
+   }
+  },
+  "Scan your sources, or change the filters.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Procure nas fontes ou mude os filtros."
+     }
+    }
+   }
+  },
+  "ScreenScraper developer ID": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "ID de desenvolvedor do ScreenScraper"
+     }
+    }
+   }
+  },
+  "ScreenScraper developer password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Senha de desenvolvedor do ScreenScraper"
+     }
+    }
+   }
+  },
+  "ScreenScraper password": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Senha do ScreenScraper"
+     }
+    }
+   }
+  },
+  "ScreenScraper user": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usuário do ScreenScraper"
      }
     }
    }
@@ -1877,6 +2557,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Buscar ações, jogos, emuladores e plugins"
+     }
+    }
+   }
+  },
+  "Section": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seção"
      }
     }
    }
@@ -1971,6 +2661,26 @@
     }
    }
   },
+  "Service address": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Endereço do serviço"
+     }
+    }
+   }
+  },
+  "Service token": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Token do serviço"
+     }
+    }
+   }
+  },
   "Set Password": {
    "localizations": {
     "pt-BR": {
@@ -2021,6 +2731,36 @@
     }
    }
   },
+  "Shelf": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Estante"
+     }
+    }
+   }
+  },
+  "Shelf Metadata": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Metadados da Estante"
+     }
+    }
+   }
+  },
+  "Shelf Sources": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Fontes da Estante"
+     }
+    }
+   }
+  },
   "Show in the menu bar": {
    "localizations": {
     "pt-BR": {
@@ -2051,12 +2791,32 @@
     }
    }
   },
+  "Sort": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ordenar"
+     }
+    }
+   }
+  },
   "Source code": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Código-fonte"
+     }
+    }
+   }
+  },
+  "Status": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Situação"
      }
     }
    }
@@ -2111,6 +2871,16 @@
     }
    }
   },
+  "Steam restarts to remove the shortcut, so any running game will close.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Steam reinicia para remover o atalho, então um jogo aberto será fechado."
+     }
+    }
+   }
+  },
   "Steam restarts to save the shortcuts, so any running game will close.": {
    "localizations": {
     "pt-BR": {
@@ -2147,6 +2917,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Passo %lld de 4"
+     }
+    }
+   }
+  },
+  "Stock your shelf with games you own. Copy your own cartridges and discs, then keep the files on this Mac or on your server. Laws vary, so check yours.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Abasteça a Estante com jogos que são seus. Copie seus cartuchos e discos e guarde os arquivos neste Mac ou no seu servidor. As leis variam, então confira as da sua região."
+     }
+    }
+   }
+  },
+  "Stocking Guide": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Guia de abastecimento"
      }
     }
    }
@@ -2401,6 +3191,16 @@
     }
    }
   },
+  "To check your files, put No-Intro or Redump DAT files you supply in this folder, then scan again:": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Para conferir seus arquivos, coloque nesta pasta DATs do No-Intro ou Redump obtidos por você e procure de novo:"
+     }
+    }
+   }
+  },
   "Try Again": {
    "localizations": {
     "pt-BR": {
@@ -2447,6 +3247,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Tipo"
+     }
+    }
+   }
+  },
+  "USB adapter. Its site says the Retrode3 can't be ordered yet.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adaptador USB. O site informa que o Retrode3 ainda não pode ser encomendado."
+     }
+    }
+   }
+  },
+  "USB reader for Game Boy, Game Boy Color and Game Boy Advance.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Leitor USB para Game Boy, Game Boy Color e Game Boy Advance."
      }
     }
    }
@@ -2541,6 +3361,26 @@
     }
    }
   },
+  "Use one folder per system, like snes/ or psx/. QuietDeck also reads file headers and extensions.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Use uma pasta por sistema, como snes/ ou psx/. O QuietDeck também lê cabeçalhos e extensões."
+     }
+    }
+   }
+  },
+  "Used only for descriptions and artwork, which stay cached on this Mac. QuietDeck never downloads game files from these services.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usadas só para descrições e artes, que ficam em cache neste Mac. O QuietDeck nunca baixa arquivos de jogo desses serviços."
+     }
+    }
+   }
+  },
   "Valve defaults restored": {
    "localizations": {
     "pt-BR": {
@@ -2587,6 +3427,76 @@
      "stringUnit": {
       "state": "translated",
       "value": "Sem a senha do deck, a mudança vale depois do próximo reinício."
+     }
+    }
+   }
+  },
+  "X": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "X"
+     }
+    }
+   }
+  },
+  "Y": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Y"
+     }
+    }
+   }
+  },
+  "Year": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ano"
+     }
+    }
+   }
+  },
+  "Your Collection": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Seu acervo"
+     }
+    }
+   }
+  },
+  "Your shelf is empty": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sua Estante está vazia"
+     }
+    }
+   }
+  },
+  "internal storage": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "armazenamento interno"
+     }
+    }
+   }
+  },
+  "psx/Game (Track 1).bin": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "psx/Game (Track 1).bin"
      }
     }
    }

@@ -105,6 +105,7 @@ struct RootView: View {
             case .overview: OverviewView(deck: deck)
             case .emulators: EmulatorsView(deck: deck)
             case .library: LibraryView(deck: deck)
+            case .shelf: ShelfView(deck: deck)
             case .decky: DeckyView(deck: deck)
             case .compatTools: CompatToolsView(deck: deck)
             case .saves: SavesView(deck: deck)

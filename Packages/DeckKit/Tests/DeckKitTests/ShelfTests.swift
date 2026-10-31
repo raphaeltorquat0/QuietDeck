@@ -75,3 +75,20 @@ import Testing
         #expect(~CRC32.update(CRC32.update(~0, a), b) == 0xCBF43926)
     }
 }
+
+/// A regra do catálogo vale para todo item, sem exceção: ver CATALOG.md.
+@Suite struct FreeCatalogTests {
+    @Test func everyItemHasAVerifiableLicenseAndOfficialDownload() throws {
+        let catalog = try Catalog.load()
+        #expect(!catalog.free.isEmpty)
+        #expect(Set(catalog.free.map(\.id)).count == catalog.free.count)
+        for g in catalog.free {
+            #expect(!g.license.isEmpty, "\(g.id)")
+            for url in [g.licenseURL, g.homepage, g.download] { #expect(url.hasPrefix("https://"), "\(g.id)") }
+            #expect(g.sha256.count == 64 && g.sha256.allSatisfy(\.isHexDigit), "\(g.id)")
+            #expect(catalog.system(g.system) != nil, "\(g.id)")
+            #expect(!g.license.uppercased().contains("-NC"), "\(g.id)")
+            if g.fileName.hasSuffix(".zip") { #expect(g.inner != nil, "\(g.id)") }
+        }
+    }
+}

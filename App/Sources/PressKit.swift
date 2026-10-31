@@ -19,12 +19,19 @@ import SwiftUI
     static func run(_ model: AppModel, to dir: URL) async {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         await model.current?.refresh()
+        model.shelf.showDemo(model.catalog)
         for appearance in [("dark", NSAppearance.Name.darkAqua), ("light", NSAppearance.Name.aqua)] {
             for section in AppSection.allCases {
                 model.section = section
                 await shot(RootView().environment(model), title: String(localized: section.title), size: NSSize(width: 1040, height: 700), appearance: appearance.1,
                            to: dir.appending(path: "\(section.rawValue)-\(appearance.0).png"))
             }
+            if let deck = model.current, let game = model.catalog.free.first(where: { $0.id == "240p-ps1" }) {
+                await shot(ShelfDetailPreview(deck: deck, game: game).environment(model), title: "Shelf", size: NSSize(width: 900, height: 560), appearance: appearance.1,
+                           to: dir.appending(path: "shelf-detail-\(appearance.0).png"))
+            }
+            await shot(ScrollView { ShelfGuide().padding(20) }.environment(model), title: "Shelf", size: NSSize(width: 900, height: 700), appearance: appearance.1,
+                       to: dir.appending(path: "shelf-guide-\(appearance.0).png"))
             model.showOnboarding = false
             await shot(PairingWizard().environment(model), title: "Add Deck", size: NSSize(width: 580, height: 560), appearance: appearance.1,
                        to: dir.appending(path: "onboarding-\(appearance.0).png"))

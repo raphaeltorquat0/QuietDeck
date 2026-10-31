@@ -87,6 +87,7 @@ public struct Catalog: Sendable {
     public var emulators: [Emulator]
     public var bios: BIOSTable
     public var compatTools: [CompatToolSource]
+    public var free: [FreeGame]
 
     public static func load(overrideDirectory: URL? = nil) throws -> Catalog {
         func decode<T: Decodable>(_ name: String) throws -> T {
@@ -98,7 +99,7 @@ public struct Catalog: Sendable {
             return try JSONDecoder().decode(T.self, from: Data(contentsOf: url))
         }
         return Catalog(systems: try decode("systems"), emulators: try decode("emulators"),
-                       bios: try decode("bios"), compatTools: try decode("compat-tools"))
+                       bios: try decode("bios"), compatTools: try decode("compat-tools"), free: try decode("free-catalog"))
     }
 
     public func system(_ id: String) -> GameSystem? { systems.first { $0.id == id } }

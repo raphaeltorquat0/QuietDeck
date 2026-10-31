@@ -29,8 +29,10 @@ public struct ScanRecord: Codable, Hashable, Sendable {
     public var head: String?
     /// Conteúdo de `.cue`/`.gdi`, para achar as faixas sem baixar nada.
     public var text: String?
+    /// SHA1 sem os 16 bytes do cabeçalho iNES: há DATs de NES que só listam a ROM crua.
+    public var headerless: String?
 
-    public init(path: String, size: Int64, mtime: Int64, crc: String, sha1: String, head: String? = nil, text: String? = nil) {
+    public init(path: String, size: Int64, mtime: Int64, crc: String, sha1: String, head: String? = nil, text: String? = nil, headerless: String? = nil) {
         self.path = path
         self.size = size
         self.mtime = mtime
@@ -38,6 +40,7 @@ public struct ScanRecord: Codable, Hashable, Sendable {
         self.sha1 = sha1
         self.head = head
         self.text = text
+        self.headerless = headerless
     }
 }
 
@@ -56,6 +59,43 @@ public struct ShelfItem: Codable, Hashable, Identifiable, Sendable {
 
     /// Nome que a Biblioteca e o atalho usam: vem do arquivo no Deck, não do DAT.
     public var deckTitle: String { ROMPlan.displayName((entry as NSString).lastPathComponent) }
+}
+
+/// Item do catálogo "Grátis e legal". Regras de entrada em CATALOG.md.
+public struct FreeGame: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var title: String
+    public var system: String
+    public var year: Int
+    public var author: String
+    public var version: String
+    public var license: String
+    public var licenseURL: String
+    public var homepage: String
+    public var download: String
+    public var sha256: String
+    public var size: Int64
+    /// Arquivo principal dentro do `.zip`.
+    public var inner: String?
+
+    public var fileName: String { (download as NSString).lastPathComponent }
+
+    /// Instalar e remover seguem o caminho da Estante. O prefixo evita colidir com um hash do acervo.
+    public var item: ShelfItem {
+        ShelfItem(id: "free:" + id, title: title, systemID: system, entry: inner ?? fileName, members: [], size: size, crc: "", verified: true, duplicates: [])
+    }
+}
+
+/// Metadados para a vitrine. Sem URLs: as do ScreenScraper carregam as credenciais do usuário.
+public struct ShelfMeta: Codable, Hashable, Sendable {
+    public var title: String?
+    public var summary: String?
+    public var year: Int?
+    public var developer: String?
+    public var players: String?
+    public var genres: [String] = []
+
+    public init() {}
 }
 
 /// Base de hashes dos DATs No-Intro/Redump que o usuário fornece.
@@ -154,6 +194,7 @@ public enum ShelfIndex {
             case .unknown: continue // Capa, manual, readme: não é jogo.
             }
             let match = dats.game(sha1: main.sha1, crc: main.crc, size: main.size)
+                ?? main.headerless.flatMap { dats.game(sha1: $0, crc: "", size: main.size - 16) }
             let key = main.sha1
             if var existing = items[key] {
                 existing.duplicates.append(r.path)

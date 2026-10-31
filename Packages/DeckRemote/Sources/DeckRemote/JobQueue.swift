@@ -35,6 +35,9 @@ public enum JobAction: Codable, Hashable, Sendable {
     case installQuietHome
     case shelfInstall(item: ShelfItem, source: ShelfSource, sdMount: String?)
     case shelfRemove(item: ShelfItem, user: String?)
+    case freeInstall(game: FreeGame, sdMount: String?)
+    /// Arte já baixada no Mac: a URL do ScreenScraper tem credenciais e não pode ir ao Deck nem à fila.
+    case applyArtFile(user: String, appID: UInt32, kind: ArtKind, localPath: String)
     case applyTheme(user: String, model: String?)
     case restoreTheme(user: String)
     case importROM(localPath: String, systemID: String, sdMount: String?)

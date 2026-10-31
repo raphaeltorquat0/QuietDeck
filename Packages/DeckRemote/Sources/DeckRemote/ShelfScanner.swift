@@ -38,9 +38,15 @@ public enum ShelfScanner {
             if !known.contains(url.deletingLastPathComponent().lastPathComponent.lowercased()) {
                 record.head = ROMScanner.prefix(url.path).prefix(headBytes).base64EncodedString()
             }
+            if ROMScanner.prefix(url.path).starts(with: [0x4E, 0x45, 0x53, 0x1A]) { record.headerless = try? await headerlessSHA1(url.path) }
             records.append(record)
         }
         return records
+    }
+
+    private static func headerlessSHA1(_ path: String) async throws -> String? {
+        let r = try await LocalProcess.run("/bin/sh", ["-c", "tail -c +17 \"$1\" | /usr/bin/shasum -a 1", "sh", path])
+        return r.ok ? r.stdout.split(separator: " ").first.map(String.init) : nil
     }
 
     static func crc32(_ url: URL) throws -> String {
@@ -71,14 +77,20 @@ public enum ShelfScanner {
                 sha, crc = hashlib.sha1(), 0
                 with open(p, "rb") as f:
                     head = f.read(0x11000)
+                    raw, skip = (hashlib.sha1(), 16) if head[:4] == b"NES\x1a" else (None, 0)
                     chunk = head
                     while chunk:
                         sha.update(chunk)
                         crc = zlib.crc32(chunk, crc)
+                        if raw:
+                            raw.update(chunk[skip:])
+                            skip = 0
                         chunk = f.read(1 << 20)
             except OSError:
                 continue
             r = {"path": p, "size": st.st_size, "mtime": int(st.st_mtime), "crc": "%08x" % (crc & 0xffffffff), "sha1": sha.hexdigest()}
+            if raw:
+                r["headerless"] = raw.hexdigest()
             if os.path.basename(base).lower() not in known:
                 r["head"] = base64.b64encode(head).decode()
             if name.lower().rsplit(".", 1)[-1] in ("cue", "gdi"):

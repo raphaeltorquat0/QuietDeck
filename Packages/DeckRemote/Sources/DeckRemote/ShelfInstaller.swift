@@ -98,6 +98,31 @@ public struct ShelfInstaller: Sendable {
         return manifest.filter { present.contains($0.key) }
     }
 
+    /// Só baixa da fonte oficial do catálogo e só instala se o SHA-256 bater.
+    public func installFree(_ game: FreeGame, paths: EmulationPaths, progress: @escaping Progress) async throws -> [String] {
+        let item = game.item
+        var manifest = try await Self.manifest(runner)
+        if let entry = manifest[item.id], try await allPresent(entry.files) {
+            progress(100, "Already on the Deck")
+            return entry.files
+        }
+        let directory = workRoot.appendingPathComponent("free/" + game.id)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let local = directory.appendingPathComponent(game.fileName).path
+        progress(nil, "Downloading from the official source")
+        let r = try await LocalProcess.run("/usr/bin/curl", ["-fsSL", "-o", local, game.download])
+        guard r.ok else { throw DeckError.commandFailed(command: "curl \(game.fileName)", result: r) }
+        guard try await LocalHash.compute(local, algorithm: 256) == game.sha256 else {
+            throw DeckError.unexpectedState("%@ doesn't match the catalog checksum, so it wasn't installed.", game.title)
+        }
+        let importer = RomImporter(runner: runner, config: config, catalog: catalog, workRoot: workRoot)
+        let files = try await importer.importGame(path: local, systemID: game.system, paths: paths, progress: progress).files
+        manifest[item.id] = ShelfManifestEntry(title: game.title, systemID: game.system, files: files, size: game.size)
+        try await save(manifest)
+        return files
+    }
+
     private func allPresent(_ files: [String]) async throws -> Bool {
         try await runner.run(files.map { "test -e \(Shell.quote($0))" }.joined(separator: " && ")).ok
     }

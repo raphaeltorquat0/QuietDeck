@@ -108,6 +108,27 @@ struct IntegrationShelfTests {
         try await install.remove(item, user: nil)
     }
 
+    /// Fonte oficial trocada por `file://`, para o teste rodar sem rede. Inclui zip com cue que vira CHD.
+    @Test(.enabled(if: Fixtures.available)) func freeCatalogInstallsVerifiesAndRemoves() async throws {
+        try await Self.seeded.value
+        let deck = try await Sim.runner()
+        let paths = try await Emulation.paths(deck)
+        var game = try #require(try catalog().free.first { $0.id == "240p-ps1" })
+        game.download = Fixtures.file(game.fileName).absoluteString
+        let install = try installer(deck)
+        let files = try await install.installFree(game, paths: paths) { _, _ in }
+        #expect(files.allSatisfy { $0.contains("/roms/") })
+        #expect(try await ShelfInstaller.installed(deck)[game.item.id]?.files == files)
+        try await install.remove(game.item, user: nil)
+        #expect(try await ShelfInstaller.installed(deck)[game.item.id] == nil)
+
+        var tampered = try #require(try catalog().free.first { $0.id == "144p-gb" })
+        tampered.download = Fixtures.file(tampered.fileName).absoluteString
+        tampered.sha256 = String(repeating: "0", count: 64)
+        await #expect(throws: DeckError.self) { try await install.installFree(tampered, paths: paths) { _, _ in } }
+        #expect(try await deck.run("ls \(Shell.quote(paths.roms))/gb 2>/dev/null | grep -c gb240p; true").trimmed == "0")
+    }
+
     /// Compartilhamento montado pelo sistema: `make shelf-mount` ou o passo do CI, em `QUIETDECK_TEST_SMB`.
     @Test(.enabled(if: ProcessInfo.processInfo.environment["QUIETDECK_TEST_SMB"] != nil))
     func installsFromMountedShare() async throws {

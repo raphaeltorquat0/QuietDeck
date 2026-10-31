@@ -72,6 +72,10 @@ public enum JobExecutor {
             case let .applyArt(user, appID, kind, url):
                 let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
                 try await r.check(RemoteCommand(Art.script(url: url, kind: kind, appID: appID, gridDirectory: dir), timeout: 120))
+            case let .applyArtFile(user, appID, kind, local):
+                let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
+                let data = try Data(contentsOf: URL(fileURLWithPath: local))
+                try await RemoteFiles(runner: r).write(data, to: dir + "/" + kind.fileName(appID: appID))
             case .installDecky: try await Decky.install(r, password: c.requirePassword(), onOutput: live)
             case let .installPlugin(name, version):
                 _ = try await Decky.installPlugin(name: name, version: version, runner: r, password: c.requirePassword())
@@ -93,6 +97,9 @@ public enum JobExecutor {
             case let .shelfInstall(item, source, sd):
                 let paths = try await Emulation.paths(r, sdMount: sd)
                 _ = try await installer(c).install(item, from: source, paths: paths, progress: progress)
+            case let .freeInstall(game, sd):
+                let paths = try await Emulation.paths(r, sdMount: sd)
+                _ = try await installer(c).installFree(game, paths: paths, progress: progress)
             case let .shelfRemove(item, user):
                 try await installer(c).remove(item, user: user)
             case .installQuietHome:

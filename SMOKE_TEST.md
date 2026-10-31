@@ -128,3 +128,17 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 
 - [ ] Remove anything personal from `recordings/*.json`, such as game names and your Steam ID
 - [ ] Copy one to `Packages/DeckRemote/Tests/DeckRemoteTests/Fixtures/` and run `make test`
+
+## Shelf (Phase 8)
+
+Needs a collection on your network and a paired Deck. Nothing below has been run on a real Deck yet.
+
+- [ ] Add a source in Settings › Shelf Sources (folder, SMB/NFS mount, SSH server or the service), then Scan. Your games show up with the right systems, and copies count as one.
+- [ ] Add ScreenScraper or IGDB credentials and scan again. Descriptions, covers and hero art show up.
+- [ ] With a DAT in the folder shown in the Stocking Guide, a matching game shows **Matches your DAT**.
+- [ ] Install 3 games from the collection, with **Add to Steam** on: one cartridge, one multi-track disc and one over the direct server → Deck path.
+- [ ] In Game Mode, each of the 3 has its shortcut and artwork, and it opens.
+- [ ] Remove all 3. Files, shortcuts and any `.m3u` are gone, and the Shelf shows them as not installed.
+- [ ] Try a game larger than the free space. The warning names what to remove, and Install stays off.
+- [ ] Install one item from **Free and Legal**. The license and official page links open.
+- [ ] Service only: stop the Mac, restart the container and confirm that a Deck install started before still finished, and that `/index` answers 401 without the token.

@@ -78,6 +78,13 @@ public struct SteamControl: Sendable {
         return WriteResult(added: added, backup: edited.path)
     }
 
+    /// Nome do atalho → último jogo, para sugerir o que remover quando faltar espaço.
+    public func lastPlayed(user: String) async throws -> [String: Int64] {
+        let path = try await configDirectory(user: user) + "/shortcuts.vdf"
+        let root = try ShortcutsFile.parse(try await RemoteFiles(runner: runner).read(path) ?? Data())
+        return Dictionary(ShortcutsFile.existing(in: root).map { ($0.name, $0.lastPlayed) }, uniquingKeysWith: max)
+    }
+
     public func removeShortcuts(names: [String], user: String) async throws -> Bool {
         try await edit(user: user) { root in
             let result = ShortcutsFile.remove(names: names, from: root)
