@@ -34,12 +34,12 @@ Steam Deck LCD, SteamOS 3.9.5 (build 20261023.100), 2026-10-31, through `QUIETDE
 | Applying Quiet Clean without a password, then rebooting | Passed: loaded by CSS Loader, including over a light artwork |
 | **Restore Valve Defaults** on the Deck | Not run: only on the simulated Deck |
 | TabMaster tabs and sounds | Not run: TabMaster and Audio Loader aren't installed, and installing them needs `sudo` |
-| Quiet Home after a real Steam restart: lands on the new home, real data, achievements, brand and focus ring, no error screen | Passed |
+| Quiet Home after a real Steam restart: lands on the new home, real data, achievements on nine games, brand and focus ring, no error screen | Passed |
 | Quiet Home D-pad left, right, up and down, L1 and R1, row scrolling | Passed with simulated input; physical controller not confirmed |
 | Quiet Home download indicator and Play button | Not run |
 | Loja tile inside Quiet Home | Rendered; opening it not run |
 | Boot video and screensaver on screen | Not confirmed |
-| microSD | Not run: the test Deck's card failed with I/O errors before this work began |
+| microSD through the app | Not run: the test Deck's card failed with I/O errors before this work began, and came back at 14:16 on 2026-10-31 |
 | OLED, BIOS import, artwork, CHD conversion on a real Deck | Not run |
 | App UI connected to a real Deck | Not run |
 

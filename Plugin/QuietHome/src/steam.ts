@@ -93,12 +93,28 @@ export function achievements(appid: number): string | null {
   }
 }
 
-/** Os detalhes só chegam enquanto há registro: cancelar logo depois de pedir descarta a resposta. */
+/** Os detalhes só chegam enquanto há registro, e as conquistas vêm depois deles: pedir uma vez só,
+ *  cedo demais, perde a resposta. Repete até chegar, enquanto o jogo estiver em foco. */
 export function watchDetails(appid: number, changed: () => void): () => void {
   try {
     const registration = appDetailsStore.RegisterForAppData(appid, changed)
-    appDetailsStore.GetAchievements?.(appid)
-    return () => registration?.unregister?.()
+    const ask = () => {
+      if (appDetailsStore.GetAppDetails(appid)?.achievements?.nTotal) {
+        clearInterval(timer)
+        changed()
+        return
+      }
+      appDetailsStore.GetAchievements?.(appid)
+      appDetailsStore.RequestAchievements?.(appid)
+    }
+    const timer = setInterval(ask, 700)
+    const stop = setTimeout(() => clearInterval(timer), 15000)
+    ask()
+    return () => {
+      clearInterval(timer)
+      clearTimeout(stop)
+      registration?.unregister?.()
+    }
   } catch {
     return () => {}
   }
