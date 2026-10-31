@@ -137,7 +137,7 @@ struct IntegrationShelfTests {
         let deck = try await Sim.runner()
         let systems = try catalog().systems
         let records = try await ShelfScanner.scanFolder(URL(fileURLWithPath: mount), systems: systems, cache: [:])
-        let item = try #require(try items(records).first { $0.title == "Alpha" })
+        let item = try #require(try items(records).first { $0.title == "Alpha" }, "\(records.map(\.path))")
         let install = try installer(deck)
         let files = try await install.install(item, from: .folder(path: mount), paths: try await Emulation.paths(deck)) { _, _ in }
         #expect(try await deck.run("sha1sum \(Shell.quote(files[0]))").stdout.hasPrefix(item.id))

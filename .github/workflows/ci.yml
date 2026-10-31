@@ -9,6 +9,8 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
+      - name: Homebrew dos testes
+        run: scripts/fetch-fixtures.sh
       - name: Testes
         run: make test
       - name: Build
@@ -33,10 +35,11 @@ jobs:
           make shelf-harness
           mkdir -p /tmp/qd-smb
           for i in $(seq 1 20); do
-            sudo mount -t cifs //127.0.0.1/acervo /tmp/qd-smb -o port=4445,username=acervo,password=acervo-password,ro && break
+            sudo mount -t cifs //127.0.0.1/acervo /tmp/qd-smb -o port=4445,username=acervo,password=acervo-password,ro,uid=$(id -u),gid=$(id -g) && break
             sleep 0.5
           done
           mountpoint /tmp/qd-smb
+          ls -la /tmp/qd-smb /tmp/qd-smb/gba
       - name: Testes de integração
         run: |
           QUIETDECK_TEST_HOST=127.0.0.1 QUIETDECK_TEST_PORT=2222 QUIETDECK_TEST_PASSWORD=deck-password \
