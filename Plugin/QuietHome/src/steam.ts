@@ -1,0 +1,119 @@
+// Leitura dos dados do cliente Steam. Tudo aqui é opcional: um cliente novo pode mudar esses objetos,
+// e quem chama trata `null` caindo para a home nativa.
+
+export interface Game {
+  appid: number
+  name: string
+  lastPlayed: number
+  minutes: number
+  portrait?: string
+  /** Em ordem de preferência; o CSS usa a primeira que carregar. */
+  heroes: string[]
+  nonSteam: boolean
+}
+
+export interface Tab {
+  id: string
+  title: string
+  games: Game[]
+}
+
+type Overview = any
+declare const collectionStore: any
+declare const appStore: any
+declare const appDetailsStore: any
+declare const downloadsStore: any
+declare const SteamClient: any
+
+const NON_STEAM = 1073741824
+
+function toGame(o: Overview): Game {
+  let portrait: string | undefined
+  const heroes: string[] = []
+  try {
+    portrait = appStore.GetVerticalCapsuleURLForApp(o)
+  } catch {}
+  try {
+    heroes.push(...(appStore.GetCustomHeroImageURLs?.(o) ?? []))
+  } catch {}
+  if (o.app_type !== NON_STEAM) heroes.push(`https://shared.steamstatic.com/store_item_assets/steam/apps/${o.appid}/library_hero.jpg`)
+  return {
+    appid: o.appid,
+    name: o.display_name,
+    lastPlayed: o.rt_last_time_played ?? 0,
+    minutes: o.minutes_playtime_forever ?? 0,
+    portrait,
+    heroes,
+    nonSteam: o.app_type === NON_STEAM,
+  }
+}
+
+function list(collection: any, limit = 30): Game[] {
+  const apps: Overview[] = collection?.visibleApps ?? collection?.allApps ?? []
+  return [...apps].sort((a, b) => (b.rt_last_time_played ?? 0) - (a.rt_last_time_played ?? 0)).slice(0, limit).map(toGame)
+}
+
+/** Instalados, Favoritos, Emuladores (só com atalhos não-Steam) e Todos. `null` se o cliente mudou. */
+export function loadTabs(): Tab[] | null {
+  try {
+    const installed = list(collectionStore.localGamesCollection)
+    const all = list(collectionStore.allGamesCollection)
+    let favorites: Game[] = []
+    try {
+      favorites = list(collectionStore.GetCollection('favorite'))
+    } catch {}
+    const emulators = list({ visibleApps: (collectionStore.allGamesCollection.visibleApps ?? []).filter((o: Overview) => o.app_type === NON_STEAM) })
+    const tabs: Tab[] = [{ id: 'installed', title: 'Instalados', games: installed }, { id: 'favorites', title: 'Favoritos', games: favorites }]
+    if (emulators.length > 0) tabs.push({ id: 'emulators', title: 'Emuladores', games: emulators })
+    tabs.push({ id: 'all', title: 'Todos', games: all })
+    return tabs
+  } catch {
+    return null
+  }
+}
+
+/** "Jogado há 2 dias · 14 h". */
+export function playedLine(g: Game, now = Date.now() / 1000): string {
+  const hours = Math.round(g.minutes / 60)
+  const total = hours > 0 ? `${hours} h` : g.minutes > 0 ? `${g.minutes} min` : ''
+  if (!g.lastPlayed) return total ? `Nunca jogado neste Deck · ${total}` : 'Ainda não jogado'
+  const days = Math.floor((now - g.lastPlayed) / 86400)
+  const when = days <= 0 ? 'Jogado hoje' : days === 1 ? 'Jogado ontem' : `Jogado há ${days} dias`
+  return total ? `${when} · ${total}` : when
+}
+
+/** Conquistas, nunca "progresso". `null` quando o jogo não tem ou o Steam ainda não trouxe. */
+export function achievements(appid: number): string | null {
+  try {
+    const a = appDetailsStore.GetAppDetails(appid)?.achievements
+    if (!a?.nTotal) return null
+    return `${Math.round((a.nAchieved / a.nTotal) * 100)}% das conquistas`
+  } catch {
+    return null
+  }
+}
+
+export function requestDetails(appid: number) {
+  try {
+    appDetailsStore.RequestAppDetails?.(appid)
+  } catch {}
+}
+
+/** Percentual do download ativo. `null` sem fila: o indicador só existe com fila ativa. */
+export function downloadPercent(): number | null {
+  try {
+    const d = downloadsStore?.m_DownloadOverview
+    if (!d?.update_appid || !d.update_bytes_to_download) return null
+    return Math.round(((d.update_bytes_processed ?? d.update_bytes_downloaded ?? 0) / d.update_bytes_to_download) * 100)
+  } catch {
+    return null
+  }
+}
+
+export function play(appid: number) {
+  SteamClient.Apps.RunGame(String(appid), '', -1, 100)
+}
+
+export function openStore() {
+  SteamClient.URL.ExecuteSteamURL('steam://store')
+}

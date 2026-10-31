@@ -1,0 +1,11 @@
+{
+  "name": "Quiet Home",
+  "author": "Raphael Torquato",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["ui"],
+    "description": "A quieter home for Game Mode.",
+    "image": "https://raw.githubusercontent.com/raphaeltorquat0/QuietDeck/main/docs/screenshots/overview-dark.png"
+  }
+}
