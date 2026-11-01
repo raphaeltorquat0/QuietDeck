@@ -152,7 +152,7 @@ Needs a collection on your network and a paired Deck. Nothing below has been run
 
 Nothing below has been run on a real Deck yet, except where marked.
 
-- [ ] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart. The Decky service restarts, so the Steam side menus reload.
+- [x] Apply Quiet Glass from Decky. Your other themes stay on and Steam doesn't restart. The Decky service restarts, so the Steam side menus reload. Applied from the app on an LCD Deck, SteamOS 3.9.5.
 - [x] Open the Steam menu and the quick access menu outside a game. Both show the theme, and the art behind them is blurred. The top and bottom bars are glass too. Checked with the theme copied by hand on an LCD Deck, SteamOS 3.9.5.
 - [ ] Turn on **Vidro sempre** in QuietTune. The menu stays glass in a game, and the choice survives a reboot.
 - [ ] Remove Quiet Glass. The theme and QuietTune are gone, and your other themes are as they were.
@@ -161,17 +161,17 @@ Nothing below has been run on a real Deck yet, except where marked.
 
 Read the active patch from CSS Loader after each step, not from the screen. `gamescopectl screenshot` only captures the game's plane while a game runs.
 
-- [ ] Open a Steam game. The patch goes to `Opaco`. Close it and it's back to `Vidro`.
-- [ ] Repeat with a non-Steam shortcut (emulator or QuietDeck shortcut).
+- [x] Open a Steam game. The patch goes to `Opaco`. Close it and it's back to `Vidro`. 1.7 s and 0.5 s on an LCD Deck, SteamOS 3.9.5, ReStory Playtest.
+- [x] Repeat with a non-Steam shortcut (emulator or QuietDeck shortcut). 1.6 s and 3.8 s, RetroArch.
 - [ ] Open a game, suspend the Deck, resume. The patch stays `Opaco`, and goes back to `Vidro` when you close the game.
 - [ ] With a game open, run `sudo systemctl restart plugin_loader`. The patch is `Opaco` when Decky is back.
-- [ ] Kill the game process (`kill -9` on the `.exe`, not on `reaper`). Steam removes it from the running list and the patch returns to `Vidro`.
+- [x] Kill the game process (`kill -9` on the `.exe`, not on `reaper`). Steam removes it from the running list and the patch returns to `Vidro`. 3.3 s on the real Deck, killing `reaper` too, so a game that hangs without exiting is still untested.
 
 ## Performance defaults
 
-- [ ] In QuietTune set TDP to 8 W and a fixed GPU clock of 1000 MHz. `power1_cap` reads 8000000 and `pp_od_clk_voltage` reads 1000 Mhz twice.
+- [x] In QuietTune set TDP to 8 W and a fixed GPU clock of 1000 MHz. `power1_cap` reads 8000000 and `pp_od_clk_voltage` reads 1000 Mhz twice. Run through the Decky call on an LCD Deck, not the panel.
 - [ ] Open a game. After a few seconds the profile is still there, even if Steam overwrote it.
-- [ ] Press **Restaurar padrão**. TDP is 15 W and the GPU level is `auto`.
+- [x] Press **Restaurar padrão**. TDP is 15 W and the GPU level is `auto`. Run through the Decky call, not the panel. 16 W, 2 W and 1700 MHz were refused without touching sysfs.
 - [ ] Write an out-of-range value in `~/homebrew/settings/QuietTune/performance.json` and restart Decky. The plugin restores the defaults and deletes the file.
 - [ ] With a profile set, remove QuietTune from the app and again from the Decky store. Both restore the defaults.
 
