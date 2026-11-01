@@ -12,7 +12,7 @@ ROOT, OUT = sys.argv[1], sys.argv[2]
 SKIP = 5  # Segundos descartados no começo: sobra da transição.
 DIM = 30000
 HOME_DIM = 5000  # A home compara décimos de watt, então só vale o mesmo nível de brilho.
-NAMES = {"pesado": "Solasta II", "leve": "ReStory Playtest", "nao-steam": "RetroArch (atalho não-Steam)", "travado30": "Alone in the Dark (extra, travado a 30 FPS)"}
+NAMES = {"pesado": "Solasta II (VSync duplo, 22 FPS)", "leve": "ReStory Playtest", "nao-steam": "RetroArch (atalho não-Steam)", "travado30": "Alone in the Dark (extra, travado a 30 FPS)"}
 CONDITIONS = {"fechado": "Menu fechado", "menu-opaco": "Menu aberto, opaco", "menu-vidro": "Menu aberto, vidro"}
 
 rows = collections.defaultdict(list)
@@ -99,19 +99,20 @@ for game, title in NAMES.items():
         fps = []
         for rep in (1, 2):
             label = f"{game}/{condition}/{rep}"
-            p, f = power(label), frames(label)
+            # O RetroArch não deixa a tela escurecer: vale o bloco todo, e a referência dele é a APU.
+            p, f = power(label, 65536 if game == "nao-steam" else DIM), frames(label)
             fps.append(f["fps"] if f else None)
             totals.setdefault(condition, []).append((f, p))
             lines.append(f"| {name} | {rep} | {number(f and f['fps'])} | {number(f and f['low'])} | {number(p['w'], 2)} | {number(p['apu'], 2)} | {number(p['cpu'])} | {number(p['gpu'])} | {f['frames'] if f else 0} |")
-    averages = {c: {"fps": mean([f["fps"] for f, _ in v if f]), "low": mean([f["low"] for f, _ in v if f]), "w": mean([p["w"] for _, p in v])} for c, v in totals.items()}
+    averages = {c: {"fps": mean([f["fps"] for f, _ in v if f]), "low": mean([f["low"] for f, _ in v if f]), "w": mean([p["w"] for _, p in v]), "apu": mean([p["apu"] for _, p in v])} for c, v in totals.items()}
     summary.append((title, averages))
     lines.append("")
 
-lines += ["## Vidro contra opaco com o menu aberto em jogo", "", "| Jogo | FPS opaco | FPS vidro | Diferença | 1% low opaco | 1% low vidro | W opaco | W vidro | Diferença (W) |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+lines += ["## Vidro contra opaco com o menu aberto em jogo", "", "| Jogo | FPS opaco | FPS vidro | Diferença | 1% low opaco | 1% low vidro | W opaco | W vidro | Diferença (W) | Diferença na APU (W) |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
 for title, a in summary:
     o, v = a["menu-opaco"], a["menu-vidro"]
     change = (v["fps"] - o["fps"]) / o["fps"] * 100 if o["fps"] and v["fps"] else None
-    lines.append(f"| {title} | {number(o['fps'])} | {number(v['fps'])} | {number(change)}% | {number(o['low'])} | {number(v['low'])} | {number(o['w'], 2)} | {number(v['w'], 2)} | {number((v['w'] or 0) - (o['w'] or 0), 2)} |")
+    lines.append(f"| {title} | {number(o['fps'])} | {number(v['fps'])} | {number(change)}% | {number(o['low'])} | {number(v['low'])} | {number(o['w'], 2)} | {number(v['w'], 2)} | {number((v['w'] or 0) - (o['w'] or 0), 2)} | {number(v['apu'] - o['apu'], 2)} |")
 lines.append("")
 if os.path.exists(os.path.join(ROOT, "conclusion.md")):
     lines += open(os.path.join(ROOT, "conclusion.md")).read().splitlines() + [""]

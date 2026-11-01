@@ -70,8 +70,10 @@ async function setMenu(open) {
 let sampled = 0
 async function condition(label, duration, game) {
   await sleep(5000 * Math.min(SCALE * 50, 1))
-  // Com o foco no Steam o mangoapp não grava nada. Melhor parar agora que descobrir ao fim do bloco.
+  // Foco no Steam com o menu fechado é jogo sem janela. Melhor parar agora que descobrir ao fim do bloco.
   if (game && !label.includes('/menu-') && ssh(`DISPLAY=:0 xprop -root GAMESCOPE_FOCUSED_APP 2>/dev/null | sed 's/.*= //'`) === '769') throw new Error('foco no Steam, sem o jogo')
+  // O Steam reescreve o mangohud.config ao abrir jogo e apaga a pasta de saída, então ela volta aqui, com o jogo aberto.
+  if (game) ssh(`grep -q qd-mango ${config} || printf 'output_folder=/tmp/qd-mango\\nlog_interval=0\\nlog_versioning=0\\n' >> ${config}; sleep 1`)
   ssh(`echo '${label}' > ${REMOTE}/label${game ? `; mangohudctl set log_session 1` : ''}`)
   await sleep(duration)
   const samples = Number(ssh(`wc -l < ${REMOTE}/samples.csv`))
@@ -87,7 +89,8 @@ async function dimmed() {
     if (Number(ssh('cat /sys/class/backlight/amdgpu_bl0/brightness')) < DIM) return
     await sleep(10000)
   }
-  throw new Error('a tela não escureceu')
+  // De dia o sensor de luz pode manter o brilho alto. O consumo total sai n/d no relatório, mas FPS e APU não dependem da tela.
+  log('tela não escureceu, seguindo')
 }
 
 async function start(gameId, appId, settle) {
@@ -143,8 +146,7 @@ const config = ssh('ls /run/user/1000/gamescope.*/mangohud.config').split('\n')[
 // QD_RESUME pula as etapas já medidas e mantém o que está em /tmp/qd-bench.
 const done = (process.env.QD_RESUME ?? '').split(',')
 const fresh = !process.env.QD_RESUME
-ssh(`${fresh ? `rm -rf ${REMOTE} /tmp/qd-mango; mkdir -p ${REMOTE}; cp ${config} ${REMOTE}/mangohud.bak; ` : ''}mkdir -p /tmp/qd-mango; echo pausa > ${REMOTE}/label
-grep -q qd-mango ${config} || printf 'output_folder=/tmp/qd-mango\\nlog_interval=0\\nlog_versioning=0\\n' >> ${config}
+ssh(`${fresh ? `rm -rf ${REMOTE} /tmp/qd-mango; ` : ''}mkdir -p ${REMOTE} /tmp/qd-mango; [ -e ${REMOTE}/mangohud.bak ] || cp ${config} ${REMOTE}/mangohud.bak; echo pausa > ${REMOTE}/label
 systemctl --user stop qd-sampler 2>/dev/null; systemctl --user reset-failed qd-sampler 2>/dev/null
 systemd-run --user --quiet --unit=qd-sampler python3 /tmp/qd-sampler.py ${REMOTE}/samples.csv ${REMOTE}/label`)
 // O SteamOS encerra o que sobra da sessão SSH: sem amostras não há medição.
