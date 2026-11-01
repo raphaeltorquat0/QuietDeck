@@ -183,12 +183,13 @@ Read the active patch from CSS Loader after each step, not from the screen. `gam
 2. For each game, with MangoHud logging to a file (`mangohudctl set log_session 1`): 3 minutes with the quick access menu closed, 1 minute open in opaque mode, 1 minute open forcing glass. Run all of it twice.
 3. Measure the idle home for 5 minutes each in the order glass, opaque, opaque, glass, in one block. Battery voltage falls during the run, so the order has to be symmetrical.
 4. Power is battery current times voltage, because the Deck has no `power_now`, so samples only count while discharging. Keep the charger out.
-   Only samples with the screen dimmed count: Steam dims it by itself after a few minutes and that alone changes the draw by almost 2 W, more than what's being measured. Each block waits for the dim.
+   Only samples with the screen dimmed count: Steam dims it by itself after a few minutes and that alone changes the draw by almost 2 W, more than what's being measured. Each game waits up to about 10 minutes for the dim and carries on without it, since FPS and APU power don't depend on the screen.
+   Steam rewrites `mangohud.config` when a game opens and drops `output_folder`, so the run adds it back before each block, with the game open.
    Opening a game doesn't reset Steam's 15-minute idle timer on battery. At that point it suspends, or turns the screen off if suspend is inhibited, and with no screen there are no frames. The run raises `system_idle_suspend_battery_sec` and puts it back at the end, even after a failure.
    The idle home needs 10 minutes of rest first: right after use it draws up to 1.3 W more with the same patch.
 5. Pass: glass on the home and menus outside games costs no more than 0.3 W at idle. With the menu open in a game, record the FPS drop that justifies opaque as the default.
 
-Status: partial, see `docs/perf/quiet-glass.md`. The idle home passed. MangoHud stopped recording once gamescope's focus stuck on Steam (`769`), and the cause is still open, so the heavy game, the light game and the non-Steam shortcut are missing. Run them on a charged Deck.
+Status: done, see `docs/perf/quiet-glass.md`. The idle home passed. No game lost FPS with the menu open, but Solasta II stayed capped at 22 FPS, so the run doesn't rule out a small cost in a game without VSync.
 
 Without a controller on the Deck the games stay on their title screens. The menu is opened through Steam's own API and checked with `GetOpenSideMenu()` and gamescope's input focus, since screenshots don't show it. Look at the Deck once during a run to confirm the menu is on screen.
 
