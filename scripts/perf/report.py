@@ -10,7 +10,9 @@ import sys
 
 ROOT, OUT = sys.argv[1], sys.argv[2]
 SKIP = 5  # Segundos descartados no começo: sobra da transição.
-NAMES = {"pesado": "Alone in the Dark", "leve": "ReStory Playtest", "nao-steam": "RetroArch (atalho não-Steam)"}
+DIM = 30000
+HOME_DIM = 5000  # A home compara décimos de watt, então só vale o mesmo nível de brilho.
+NAMES = {"pesado": "Solasta II", "leve": "ReStory Playtest", "nao-steam": "RetroArch (atalho não-Steam)", "travado30": "Alone in the Dark (extra, travado a 30 FPS)"}
 CONDITIONS = {"fechado": "Menu fechado", "menu-opaco": "Menu aberto, opaco", "menu-vidro": "Menu aberto, vidro"}
 
 rows = collections.defaultdict(list)
@@ -20,9 +22,10 @@ with open(os.path.join(ROOT, "samples.csv")) as f:
             rows[row["label"]].append(row)
 
 
-def power(label):
+def power(label, limit=DIM):
     samples = rows[label][SKIP:]
-    valid = [s for s in samples if s["status"] == "Discharging" and float(s["watts"]) > 0]
+    # Só tela escurecida: o brilho pesa quase 2 W e o Steam o muda sozinho.
+    valid = [s for s in samples if s["status"] == "Discharging" and float(s["watts"]) > 0 and int(s["brightness"]) < limit]
     return {
         "w": statistics.mean(float(s["watts"]) for s in valid) if valid else None,
         "apu": statistics.mean(float(s["apu_watts"]) for s in samples),
@@ -75,17 +78,21 @@ home = {}
 for patch, title in (("vidro", "Vidro"), ("opaco", "Opaco")):
     home[patch] = []
     for rep in (1, 2):
-        p = power(f"home/{patch}/{rep}")
+        p = power(f"home/{patch}/{rep}", HOME_DIM)
         home[patch].append(p["w"])
         lines.append(f"| {title} | {rep} | {number(p['w'], 2)} | {number(p['apu'], 2)} | {number(p['cpu'])} | {number(p['gpu'])} | {number(p['fan'], 0)} | {p['valid']}/{p['seconds']} |")
 delta = mean(home["vidro"]) - mean(home["opaco"])
+apu = mean([power(f"home/vidro/{r}")["apu"] for r in (1, 2)]) - mean([power(f"home/opaco/{r}")["apu"] for r in (1, 2)])
 per_block = [v - o for v, o in zip(home["vidro"], home["opaco"])]
 verdict = "aprovado" if delta <= 0.3 else "reprovado"
-lines += ["", f"**Vidro menos opaco: {number(delta, 2)} W em média** (por bloco: {', '.join(number(d, 2) for d in per_block)} W). Limite: 0,3 W. **Resultado: {verdict}.**", ""]
+lines += ["", f"**Vidro menos opaco: {number(delta, 2)} W em média** (por bloco: {', '.join(number(d, 2) for d in per_block)} W). Limite: 0,3 W. **Resultado: {verdict}.** Só a APU, que não depende do brilho: {number(apu, 2)} W.", ""]
 
 lines += ["## Jogos", ""]
 summary = []
 for game, title in NAMES.items():
+    # Medição parcial: jogo sem as três condições não entra na tabela.
+    if not all(f"{game}/{condition}/1" in rows for condition in CONDITIONS):
+        continue
     lines += [f"### {title}", "", "| Condição | Rodada | FPS médio | 1% low | Consumo (W) | APU (W) | CPU (°C) | GPU (°C) | Quadros |", "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
     totals = {}
     for condition, name in CONDITIONS.items():

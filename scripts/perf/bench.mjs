@@ -9,6 +9,8 @@ const OUT = process.argv[2]
 const SSH = process.env.QD_SSH
 const SCALE = Number(process.env.QD_SCALE ?? 1) // 0.02 para ensaiar o roteiro em segundos.
 const REMOTE = '/tmp/qd-bench'
+const DIM = 30000
+const IDLE = 'system_idle_suspend_battery_sec'
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const minutes = (n) => n * 60000 * SCALE
 const log = (...items) => console.log(new Date().toISOString().slice(11, 19), ...items)
@@ -68,6 +70,8 @@ async function setMenu(open) {
 let sampled = 0
 async function condition(label, duration, game) {
   await sleep(5000 * Math.min(SCALE * 50, 1))
+  // Com o foco no Steam o mangoapp não grava nada. Melhor parar agora que descobrir ao fim do bloco.
+  if (game && !label.includes('/menu-') && ssh(`DISPLAY=:0 xprop -root GAMESCOPE_FOCUSED_APP 2>/dev/null | sed 's/.*= //'`) === '769') throw new Error('foco no Steam, sem o jogo')
   ssh(`echo '${label}' > ${REMOTE}/label${game ? `; mangohudctl set log_session 1` : ''}`)
   await sleep(duration)
   const samples = Number(ssh(`wc -l < ${REMOTE}/samples.csv`))
@@ -75,6 +79,15 @@ async function condition(label, duration, game) {
   sampled = samples
   ssh(`echo pausa > ${REMOTE}/label${game ? `; mangohudctl set log_session 0; sleep 1; mkdir -p ${REMOTE}/mango/${label}; mv /tmp/qd-mango/*.csv ${REMOTE}/mango/${label}/` : ''}`)
   log('feito', label)
+}
+
+/** A tela escurece sozinha e isso muda o consumo em quase 2 W, mais que o que está sendo medido. */
+async function dimmed() {
+  for (let i = 0; i < 48; i++) {
+    if (Number(ssh('cat /sys/class/backlight/amdgpu_bl0/brightness')) < DIM) return
+    await sleep(10000)
+  }
+  throw new Error('a tela não escureceu')
 }
 
 async function start(gameId, appId, settle) {
@@ -94,6 +107,7 @@ async function stop(gameId, appId) {
 async function measureGame(name, gameId, appId, settle) {
   await start(gameId, appId, settle)
   ssh(`XDG_RUNTIME_DIR=/run/user/1000 gamescopectl screenshot ${REMOTE}/${name}.png >/dev/null 2>&1 || true`)
+  if (SCALE === 1) await dimmed()
   for (const rep of [1, 2]) {
     await setPatch('Opaco')
     await condition(`${name}/fechado/${rep}`, minutes(3), true)
@@ -109,8 +123,13 @@ async function measureGame(name, gameId, appId, settle) {
   await stop(gameId, appId)
 }
 
-async function home(rep, order) {
-  for (const patch of order) {
+/** Bloco único e simétrico: a tensão da bateria cai ao longo da medição. */
+async function home() {
+  if (SCALE === 1) {
+    await dimmed()
+    await sleep(minutes(10)) // Logo depois de usar o Deck a home gasta até 1,3 W a mais, com o mesmo patch.
+  }
+  for (const [patch, rep] of [['Vidro', 1], ['Opaco', 1], ['Opaco', 2], ['Vidro', 2]]) {
     await setPatch(patch)
     await sleep(10000 * Math.min(SCALE * 50, 1))
     await condition(`home/${patch === 'Vidro' ? 'vidro' : 'opaco'}/${rep}`, minutes(5), false)
@@ -132,6 +151,18 @@ systemd-run --user --quiet --unit=qd-sampler python3 /tmp/qd-sampler.py ${REMOTE
 await sleep(3000)
 if (Number(ssh(`wc -l < ${REMOTE}/samples.csv`)) < 2) throw new Error('o coletor não está gravando')
 
+// Abrir jogo não zera a ociosidade: aos 15 minutos o Steam suspende ou, com inibidor, apaga a tela, e sem tela não há quadros.
+// Fica no valor original ao terminar, mesmo com falha.
+const idle = await shared.ev(`settingsStore.GetClientSetting('${IDLE}')[0]`)
+const setIdle = async (seconds) => {
+  await shared.ev(`settingsStore.GetClientSetting('${IDLE}')[1](${seconds})`)
+  await sleep(1000)
+  const now = await shared.ev(`settingsStore.GetClientSetting('${IDLE}')[0]`)
+  if (now !== seconds) throw new Error(`ociosidade ${now}, esperado ${seconds}`)
+}
+log('ociosidade original', idle)
+await setIdle(14400)
+
 const shortcut = await shared.ev(`SteamClient.Apps.AddShortcut("QuietDeck Bench","/usr/bin/flatpak","/usr/bin","")`)
 let failure
 try {
@@ -140,9 +171,8 @@ try {
   await shared.ev(`SteamClient.Apps.SetShortcutLaunchOptions(${shortcut},"run org.libretro.RetroArch")`)
   await sleep(1500)
   const shortcutGame = await shared.ev(`appStore.GetAppOverviewByAppID(${shortcut}).GetGameID()`)
-  if (!done.includes('home1')) await home(1, ['Vidro', 'Opaco'])
-  if (!done.includes('pesado')) await measureGame('pesado', '1310410', 1310410, 75000 * Math.min(SCALE * 50, 1))
-  if (!done.includes('home2')) await home(2, ['Opaco', 'Vidro'])
+  if (!done.includes('home')) await home()
+  if (!done.includes('pesado')) await measureGame('pesado', '2975950', 2975950, 75000 * Math.min(SCALE * 50, 1))
   if (!done.includes('leve')) await measureGame('leve', process.env.QD_LIGHT ?? '4146670', Number(process.env.QD_LIGHT ?? 4146670), 40000 * Math.min(SCALE * 50, 1))
   if (!done.includes('nao-steam')) await measureGame('nao-steam', shortcutGame, shortcut, 20000)
 } catch (error) {
@@ -159,6 +189,12 @@ try {
   await setPatch('Vidro')
 } catch (error) {
   log('limpeza incompleta', error.message)
+}
+try {
+  await setIdle(idle)
+  log('ociosidade restaurada', idle)
+} catch (error) {
+  log('RESTAURAR À MÃO', IDLE, idle, error.message)
 }
 // Dados primeiro: uma queda de rede aqui não pode custar a medição, que fica em /tmp no Deck.
 try {
