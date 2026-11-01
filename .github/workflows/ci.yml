@@ -14,7 +14,7 @@ jobs:
       - name: QuietTune
         run: |
           python3 -I Plugin/QuietTune/tests/test_performance.py
-          cd Plugin/QuietTune && npm ci --ignore-scripts --legacy-peer-deps && node --test tests/
+          cd Plugin/QuietTune && npm ci --ignore-scripts --legacy-peer-deps && node --test tests/*.mjs
       - name: Testes
         run: make test
       - name: Build
