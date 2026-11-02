@@ -43,6 +43,20 @@ enum Real {
         #expect(try await Real.names().contains("QuietDeck Teste"))
     }
 
+    /// Perfis de controle e vídeo do Dolphin pelo mesmo código do atalho. Não mexe em jogo aberto:
+    /// o Dolphin regrava a configuração ao fechar.
+    @Test(.enabled(if: Real.step("dolphin-profiles"))) func dolphinProfiles() async throws {
+        let r = Real.runner
+        #expect(try await !r.run("pgrep -x dolphin-emu").ok, "Feche o jogo antes")
+        let dolphin = try #require(try Catalog.load().emulator("dolphin"))
+        _ = try await EmulatorSetup.applyProfiles(dolphin, runner: r)
+        let dir = "~/.var/app/org.DolphinEmu.dolphin-emu/config/dolphin-emu"
+        let gfx = try await r.check("cat \(dir)/GFX.ini").stdout
+        #expect(gfx.contains("InternalResolution = 2") && gfx.contains("wideScreenHack = True"))
+        #expect(try await r.check("cat \(dir)/Dolphin.ini").stdout.contains("Fullscreen = True"))
+        #expect(try await EmulatorSetup.applyProfiles(dolphin, runner: r) == 0)
+    }
+
     @Test(.enabled(if: Real.step("switch-clean"))) func switchClean() async throws {
         let r = Real.runner
         let paths = try await Emulation.paths(r, sdMount: nil)

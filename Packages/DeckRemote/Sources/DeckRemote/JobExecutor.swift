@@ -167,7 +167,7 @@ public enum JobExecutor {
                   let emulator = c.catalog.emulator(system.emulator) else { continue }
             progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
-            if !paths.isEmuDeck { _ = try await EmulatorSetup.applyController(emulator, runner: r) }
+            if !paths.isEmuDeck { _ = try await EmulatorSetup.applyProfiles(emulator, runner: r) }
             if system.id == "switch" { try await SwitchKeys.send(config: c.config, runner: r) }
             // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria.
             if paths.roms.hasPrefix("/run/media/") {

@@ -261,15 +261,28 @@ import Testing
     }
 
     @Test func controllerProfileRespectsManualMapping() throws {
-        let profile = try #require(try Catalog.load().emulator("dolphin")?.controller)
+        let profile = try #require(try Catalog.load().emulator("dolphin")?.profiles?.first { $0.path.hasSuffix("GCPadNew.ini") })
         let factory = "[GCPad1]\nDevice = XInput2/0/Virtual core pointer\nButtons/A = `X`\nMain Stick/Calibration = 100.00\n"
-        let written = try #require(EmulatorSetup.patchedController(profile, current: factory))
+        let written = try #require(EmulatorSetup.patched(profile, current: factory))
         #expect(written.contains("Device = SDL/0/Steam Deck Controller"))
         #expect(written.contains("Buttons/A = `Button S`"))
         #expect(written.contains("Main Stick/Calibration = 100.00"))
         #expect(!written.contains("XInput2"))
-        #expect(EmulatorSetup.patchedController(profile, current: written) == nil)
-        #expect(EmulatorSetup.patchedController(profile, current: "[GCPad1]\nDevice = SDL/0/Outro\n[GCPad2]\nDevice = XInput2/0/Virtual core pointer\n") == nil)
+        #expect(EmulatorSetup.patched(profile, current: written) == nil)
+        #expect(EmulatorSetup.patched(profile, current: "[GCPad1]\nDevice = SDL/0/Outro\n[GCPad2]\nDevice = XInput2/0/Virtual core pointer\n") == nil)
+    }
+
+    @Test func videoProfileOnlyFillsMissingKeys() throws {
+        let profiles = try #require(try Catalog.load().emulator("dolphin")?.profiles)
+        let gfx = try #require(profiles.first { $0.path.hasSuffix("GFX.ini") })
+        let fresh = try #require(EmulatorSetup.patched(gfx, current: ""))
+        #expect(fresh.contains("[Settings]\nInternalResolution = 2\nwideScreenHack = True\nAspectRatio = 3"))
+        // Quem voltou para 1x no emulador continua em 1x; só o que falta é acrescentado.
+        let chosen = try #require(EmulatorSetup.patched(gfx, current: "[Settings]\nInternalResolution = 1\n"))
+        #expect(chosen.contains("InternalResolution = 1") && !chosen.contains("InternalResolution = 2"))
+        #expect(EmulatorSetup.patched(gfx, current: fresh) == nil)
+        let main = try #require(profiles.first { $0.path.hasSuffix("Dolphin.ini") })
+        #expect(try #require(EmulatorSetup.patched(main, current: "[General]\nISOPaths = 2\n")).hasSuffix("[Display]\nFullscreen = True\n"))
     }
 
     @Test func keysAreValidatedAndPrivate() throws {

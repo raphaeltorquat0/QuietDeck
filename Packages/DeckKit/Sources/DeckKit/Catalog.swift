@@ -28,6 +28,8 @@ public struct ConfigEntry: Codable, Hashable, Sendable {
 
 public struct EmulatorConfig: Codable, Hashable, Sendable {
     public var untouched: String?
+    /// Só grava as chaves que ainda não existem: o que o usuário escolheu no emulador fica.
+    public var onlyMissing: Bool?
     public var path: String
     public var format: String
     public var entries: [ConfigEntry]
@@ -42,8 +44,8 @@ public struct Emulator: Codable, Hashable, Identifiable, Sendable {
     public var note: String?
     public var launch: String?
     public var config: EmulatorConfig?
-    /// Perfil do controle do Deck. Só entra enquanto o arquivo tiver `untouched`, o padrão de fábrica.
-    public var controller: EmulatorConfig?
+    /// Controle e vídeo para o Deck, aplicados ao criar atalho. Cada um respeita `untouched` ou `onlyMissing`.
+    public var profiles: [EmulatorConfig]?
     public var saves: [String]?
 
     public var isAvailable: Bool { available ?? true }

@@ -179,6 +179,13 @@ public enum ConfigPatcher {
         }
     }
 
+    public static func has(_ text: String, section: String?, key: String) -> Bool {
+        let lines = text.components(separatedBy: "\n")
+        let (start, end) = sectionRange(section, lines: lines)
+        guard let start else { return false }
+        return (start..<end).contains { keyOf(lines[$0]) == key }
+    }
+
     private static func keyOf(_ line: String) -> String? {
         let t = line.trimmingCharacters(in: .whitespaces)
         guard !t.hasPrefix("#"), !t.hasPrefix(";"), let eq = t.firstIndex(of: "=") else { return nil }
@@ -219,23 +226,31 @@ public enum EmulatorSetup {
         return .written
     }
 
-    /// Mapeamento feito à mão não é tocado. Devolve se gravou.
-    public static func applyController(_ emulator: Emulator, runner: any CommandRunner) async throws -> Bool {
-        guard let config = emulator.controller else { return false }
+    /// Perfis do Deck (controle, vídeo). Mapeamento feito à mão não é tocado. Devolve quantos arquivos gravou.
+    public static func applyProfiles(_ emulator: Emulator, runner: any CommandRunner) async throws -> Int {
         let files = RemoteFiles(runner: runner)
-        let path = try await files.home() + "/" + config.path
-        let current = try await files.read(path).map { String(decoding: $0, as: UTF8.self) }
-        guard let after = patchedController(config, current: current) else { return false }
-        if current != nil {
-            try await runner.check("cp -n \(Shell.quote(path)) \(Shell.quote(path + ".quietdeck-backup"))")
+        var written = 0
+        for config in emulator.profiles ?? [] {
+            let path = try await files.home() + "/" + config.path
+            let current = try await files.read(path).map { String(decoding: $0, as: UTF8.self) }
+            guard let after = patched(config, current: current) else { continue }
+            if current != nil {
+                try await runner.check("cp -n \(Shell.quote(path)) \(Shell.quote(path + ".quietdeck-backup"))")
+            }
+            try await files.write(Data(after.utf8), to: path)
+            written += 1
         }
-        try await files.write(Data(after.utf8), to: path)
-        return true
+        return written
     }
 
-    static func patchedController(_ config: EmulatorConfig, current: String?) -> String? {
+    static func patched(_ config: EmulatorConfig, current: String?) -> String? {
         if let current, let marker = config.untouched, !current.contains(marker) { return nil }
-        let after = ConfigPatcher.apply(current ?? "", format: config.format, entries: config.entries)
+        var entries = config.entries
+        if config.onlyMissing == true, let current {
+            entries = entries.filter { !ConfigPatcher.has(current, section: $0.section, key: $0.key) }
+        }
+        guard !entries.isEmpty else { return nil }
+        let after = ConfigPatcher.apply(current ?? "", format: config.format, entries: entries)
         return after == current ? nil : after
     }
 
