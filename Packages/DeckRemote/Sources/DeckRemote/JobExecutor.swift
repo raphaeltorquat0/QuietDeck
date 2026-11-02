@@ -118,7 +118,9 @@ public enum JobExecutor {
                 let paths = try await Emulation.paths(r)
                 if !paths.isEmuDeck {
                     let installed = Set(try await Flatpaks.installed(r).map(\.appID))
-                    for emulator in c.catalog.emulators where emulator.profiles != nil && installed.contains(emulator.flatpak) {
+                    for emulator in c.catalog.emulators where installed.contains(emulator.flatpak) {
+                        try await EmulatorSetup.allowShaderCache(emulator, runner: r)
+                        if emulator.profiles == nil { continue }
                         if try await EmulatorSetup.isOpen(emulator, runner: r) { continue }
                         _ = try await EmulatorSetup.applyProfiles(emulator, runner: r)
                     }
@@ -257,6 +259,7 @@ public enum JobExecutor {
             progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
             if !paths.isEmuDeck { _ = try await EmulatorSetup.applyProfiles(emulator, runner: r) }
+            try await EmulatorSetup.allowShaderCache(emulator, runner: r)
             if system.id == "switch" { try await SwitchKeys.send(config: c.config, runner: r) }
             if emulator.id == "eden" { try await SwitchKeys.prepareEden(runner: r) }
             // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria. O Eden nem a pessoal.

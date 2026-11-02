@@ -297,6 +297,12 @@ public enum EmulatorSetup {
         return written
     }
 
+    /// O Steam aponta `MESA_SHADER_CACHE_DIR` para `steamapps/shadercache/<appid>`, que o flatpak só vê
+    /// para leitura: o Mesa desliga o cache e o jogo recompila tudo a cada abertura. Libera só essa pasta.
+    public static func allowShaderCache(_ emulator: Emulator, runner: any CommandRunner) async throws {
+        try await runner.check("flatpak override --user --filesystem=\"$HOME/.local/share/Steam/steamapps/shadercache\" \(Shell.quote(emulator.flatpak))")
+    }
+
     public static func isOpen(_ emulator: Emulator, runner: any CommandRunner) async throws -> Bool {
         try await runner.check("flatpak ps --columns=application").stdout.split(whereSeparator: \.isNewline)
             .contains { $0.trimmingCharacters(in: .whitespaces) == emulator.flatpak }
