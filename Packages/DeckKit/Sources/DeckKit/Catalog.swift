@@ -35,6 +35,14 @@ public struct EmulatorConfig: Codable, Hashable, Sendable {
     public var path: String
     public var format: String
     public var entries: [ConfigEntry]
+
+    public init(path: String, format: String, entries: [ConfigEntry], untouched: String? = nil, onlyMissing: Bool? = nil) {
+        self.path = path
+        self.format = format
+        self.entries = entries
+        self.untouched = untouched
+        self.onlyMissing = onlyMissing
+    }
 }
 
 public struct Emulator: Codable, Hashable, Identifiable, Sendable {

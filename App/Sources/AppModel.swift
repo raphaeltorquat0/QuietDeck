@@ -87,6 +87,7 @@ final class AppSettings {
 @MainActor @Observable
 final class AppModel {
     static let steamGridKeyAccount = "steamgriddb"
+    static let retroAchievementsAccount = "retroachievements"
     static let screenScraperAccount = "screenscraper"
     static let igdbAccount = "igdb"
 
@@ -217,6 +218,19 @@ final class AppModel {
         }
     }
 
+    /// Login no servidor, só o token no Keychain, e já grava nos emuladores do Deck.
+    func signInRetroAchievements(username: String, password: String) async throws {
+        let account = try await RetroAchievements.login(username: username, password: password)
+        let data = try JSONEncoder().encode(account)
+        Keychain.set(String(decoding: data, as: UTF8.self), for: Self.retroAchievementsAccount)
+        enqueue(String(localized: "Turn on achievements"), .applyAchievements(signedIn: true))
+    }
+
+    func signOutRetroAchievements() {
+        Keychain.remove(for: Self.retroAchievementsAccount)
+        enqueue(String(localized: "Turn off achievements"), .applyAchievements(signedIn: false))
+    }
+
     func enqueue(_ title: String, _ action: JobAction) {
         guard let id = selectedDeckID else { return }
         queue.enqueue(Job(deckID: id, title: title, action: action))
@@ -244,7 +258,8 @@ final class AppModel {
     private func context(_ id: UUID) -> JobContext? {
         guard let deck = live[id] else { return nil }
         return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),
-                          workRoot: Paths.work, shelfClient: { ShelfStore.client($0) }) {
+                          workRoot: Paths.work, shelfClient: { ShelfStore.client($0) },
+                          achievements: Keychain.decoded(RetroAchievementsAccount.self, for: Self.retroAchievementsAccount)) {
             Keychain.remove(for: id.uuidString)
         }
     }

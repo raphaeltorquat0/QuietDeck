@@ -243,6 +243,32 @@ public enum EmulatorSetup {
         return written
     }
 
+    /// Conta do RetroAchievements no emulador (`nil` desliga). Com o emulador aberto não grava:
+    /// ele regrava a configuração ao fechar e desfaria a mudança. Devolve se gravou.
+    public static func applyAchievements(_ emulator: Emulator, account: RetroAchievementsAccount?, runner: any CommandRunner) async throws -> Bool {
+        let profiles = RetroAchievements.profiles(for: emulator, account: account)
+        guard !profiles.isEmpty else { return false }
+        if try await isOpen(emulator, runner: runner) {
+            throw DeckError.unexpectedState("Close %@ first: it rewrites its settings when it exits.", emulator.name)
+        }
+        let files = RemoteFiles(runner: runner)
+        var written = false
+        for config in profiles {
+            let path = try await files.home() + "/" + config.path
+            let current = try await files.read(path).map { String(decoding: $0, as: UTF8.self) } ?? ""
+            let after = ConfigPatcher.apply(current, format: config.format, entries: config.entries)
+            guard after != current else { continue }
+            try await files.write(Data(after.utf8), to: path)
+            written = true
+        }
+        return written
+    }
+
+    public static func isOpen(_ emulator: Emulator, runner: any CommandRunner) async throws -> Bool {
+        try await runner.check("flatpak ps --columns=application").stdout.split(whereSeparator: \.isNewline)
+            .contains { $0.trimmingCharacters(in: .whitespaces) == emulator.flatpak }
+    }
+
     static func patched(_ config: EmulatorConfig, current: String?) -> String? {
         if let current, let marker = config.untouched, !current.contains(marker) { return nil }
         var entries = config.entries

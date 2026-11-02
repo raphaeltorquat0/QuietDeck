@@ -11,12 +11,15 @@ public struct JobContext: Sendable {
     var shelfClient: (@Sendable (LibrarySource) -> SourceClient)?
     /// Endereço do serviço visto pelo Deck, quando difere do visto pelo Mac.
     var deckServiceURL: String?
+    /// Conta do RetroAchievements lida do Keychain na hora: o token não passa pela fila.
+    public var achievements: RetroAchievementsAccount?
     /// A senha do Keychain deixou de valer: o app apaga a cópia para pedir de novo.
     var onSudoRejected: @Sendable () async -> Void
 
     public init(runner: any CommandRunner, config: SSHConfig, catalog: Catalog, password: String?, workRoot: URL,
                 shelfClient: (@Sendable (LibrarySource) -> SourceClient)? = nil, deckServiceURL: String? = nil,
-                onSudoRejected: @escaping @Sendable () async -> Void) {
+                achievements: RetroAchievementsAccount? = nil, onSudoRejected: @escaping @Sendable () async -> Void) {
+        self.achievements = achievements
         self.runner = runner
         self.config = config
         self.catalog = catalog
@@ -106,6 +109,13 @@ public enum JobExecutor {
             case .removeQuietGlass:
                 try await QuietTheme.removeGlass(r, password: c.requirePassword())
                 progress(100, "Quiet Glass removed")
+            case let .applyAchievements(signedIn):
+                let installed = Set(try await Flatpaks.installed(r).map(\.appID))
+                let account = signedIn ? c.achievements : nil
+                for emulator in c.catalog.emulators where installed.contains(emulator.flatpak) {
+                    _ = try await EmulatorSetup.applyAchievements(emulator, account: account, runner: r)
+                }
+                progress(100, signedIn ? "Achievements on" : "Achievements off")
             case .installQuietHome:
                 let result = try await BundledPlugin.quietHome.install(runner: r, password: c.requirePassword())
                 progress(100, result == .installed ? "Quiet Home installed" : "Already installed")
@@ -162,9 +172,11 @@ public enum JobExecutor {
         let listing = try await r.check(Library.listing(paths: paths)).stdout
         let games = Library.parse(listing, systems: c.catalog.systems, paths: paths)
         var shortcuts: [Shortcut] = []
+        var emulators: [Emulator] = []
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
                   let emulator = c.catalog.emulator(system.emulator) else { continue }
+            if !emulators.contains(emulator) { emulators.append(emulator) }
             progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
             if !paths.isEmuDeck { _ = try await EmulatorSetup.applyProfiles(emulator, runner: r) }
@@ -184,6 +196,16 @@ public enum JobExecutor {
             while try await steam.gameOpen() {
                 progress(nil, "Waiting for the game to close")
                 try await Task.sleep(for: .seconds(15))
+            }
+        }
+        if let account = c.achievements, !paths.isEmuDeck {
+            for emulator in emulators {
+                // Emulador aberto com jogo antigo: grava na próxima vez, sem derrubar o atalho.
+                if try await EmulatorSetup.isOpen(emulator, runner: r) {
+                    progress(nil, "Achievements wait until the emulator is closed")
+                    continue
+                }
+                _ = try await EmulatorSetup.applyAchievements(emulator, account: account, runner: r)
             }
         }
         progress(nil, "Writing shortcuts")

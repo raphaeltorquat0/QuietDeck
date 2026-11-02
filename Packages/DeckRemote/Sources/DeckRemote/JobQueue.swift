@@ -33,6 +33,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case importBIOS(localPath: String, sdMount: String?)
     case quickAction(QuickAction)
     case installQuietHome
+    /// Grava (ou apaga, com `false`) a conta do RetroAchievements nos emuladores instalados.
+    case applyAchievements(signedIn: Bool)
     case applyQuietGlass
     case removeQuietGlass
     case shelfInstall(item: ShelfItem, source: LibrarySource, sdMount: String?)

@@ -331,6 +331,46 @@
     }
    }
   },
+  "Achievements for games on RetroArch and Dolphin, turned on in every game you send. Your password goes only to RetroAchievements; QuietDeck keeps just the sign-in token.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conquistas para jogos no RetroArch e no Dolphin, ligadas em todo jogo que você enviar. Sua senha vai só ao RetroAchievements; o QuietDeck guarda apenas o token de acesso."
+     }
+    }
+   }
+  },
+  "Achievements off": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conquistas desligadas"
+     }
+    }
+   }
+  },
+  "Achievements on": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conquistas ligadas"
+     }
+    }
+   }
+  },
+  "Achievements wait until the emulator is closed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "As conquistas esperam o emulador fechar"
+     }
+    }
+   }
+  },
   "Add %@ to Steam?": {
    "localizations": {
     "pt-BR": {
@@ -861,6 +901,16 @@
     }
    }
   },
+  "Close %@ first: it rewrites its settings when it exits.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Feche o %@ antes: ele regrava as configurações ao sair."
+     }
+    }
+   }
+  },
   "Collection path on the server": {
    "localizations": {
     "pt-BR": {
@@ -1097,6 +1147,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Criar pastas de emulação"
+     }
+    }
+   }
+  },
+  "Create a free account": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Criar uma conta grátis"
      }
     }
    }
@@ -2811,6 +2871,36 @@
     }
    }
   },
+  "RetroAchievements": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "RetroAchievements"
+     }
+    }
+   }
+  },
+  "RetroAchievements refused the login: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O RetroAchievements recusou o login: %@"
+     }
+    }
+   }
+  },
+  "RetroAchievements sent an unexpected answer. Try again later.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O RetroAchievements respondeu algo inesperado. Tente mais tarde."
+     }
+    }
+   }
+  },
   "Retrode": {
    "localizations": {
     "pt-BR": {
@@ -3287,6 +3377,46 @@
      "stringUnit": {
       "state": "translated",
       "value": "Desligar"
+     }
+    }
+   }
+  },
+  "Sign In": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Entrar"
+     }
+    }
+   }
+  },
+  "Sign Out": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Sair"
+     }
+    }
+   }
+  },
+  "Signed in as": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Conectado como"
+     }
+    }
+   }
+  },
+  "Signing In…": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Entrando…"
      }
     }
    }
@@ -3841,12 +3971,32 @@
     }
    }
   },
+  "Turn off achievements": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Desligar conquistas"
+     }
+    }
+   }
+  },
   "Turn on Developer Mode": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Ative o Modo de Desenvolvedor"
+     }
+    }
+   }
+  },
+  "Turn on achievements": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Ligar conquistas"
      }
     }
    }

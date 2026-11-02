@@ -12,6 +12,11 @@ struct SettingsView: View {
     @State private var scraper = Keychain.decoded(ScreenScraper.Credentials.self, for: AppModel.screenScraperAccount)
         ?? ScreenScraper.Credentials(devID: "", devPassword: "", user: "", password: "")
     @State private var igdb = Keychain.decoded(IGDB.Credentials.self, for: AppModel.igdbAccount) ?? IGDB.Credentials(clientID: "", secret: "")
+    @State private var raAccount = Keychain.decoded(RetroAchievementsAccount.self, for: AppModel.retroAchievementsAccount)
+    @State private var raUser = ""
+    @State private var raPassword = ""
+    @State private var raBusy = false
+    @State private var raError: String?
 
     var body: some View {
         @Bindable var settings = model.settings
@@ -22,6 +27,24 @@ struct SettingsView: View {
                 SecureField("API key", text: $apiKey)
                     .onChange(of: apiKey) { Keychain.set(apiKey, for: AppModel.steamGridKeyAccount) }
                 Link("Get a key at steamgriddb.com", destination: URL(string: "https://www.steamgriddb.com/profile/preferences/api")!)
+            }
+            Section("RetroAchievements") {
+                if let raAccount {
+                    LabeledContent("Signed in as", value: raAccount.username)
+                    Button("Sign Out") {
+                        model.signOutRetroAchievements()
+                        self.raAccount = nil
+                    }
+                } else {
+                    TextField("User", text: $raUser)
+                    SecureField("Password", text: $raPassword)
+                    Button(raBusy ? "Signing In…" : "Sign In") { signIn() }
+                        .disabled(raUser.isEmpty || raPassword.isEmpty || raBusy)
+                    Link("Create a free account", destination: URL(string: "https://retroachievements.org/createaccount.php")!)
+                }
+                if let raError { Text(verbatim: raError).font(.callout).foregroundStyle(.orange) }
+                Text("Achievements for games on RetroArch and Dolphin, turned on in every game you send. Your password goes only to RetroAchievements; QuietDeck keeps just the sign-in token.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
             Section("Sync Folders") {
                 ForEach(settings.syncFolders, id: \.self) { path in
@@ -101,6 +124,21 @@ struct SettingsView: View {
             if let url = try? result.get(), !settings.syncFolders.contains(url.path) { settings.syncFolders.append(url.path) }
         }
         .sheet(isPresented: $addingSource) { SourceWizard() }
+    }
+
+    private func signIn() {
+        raBusy = true
+        raError = nil
+        Task {
+            defer { raBusy = false }
+            do {
+                try await model.signInRetroAchievements(username: raUser, password: raPassword)
+                raAccount = Keychain.decoded(RetroAchievementsAccount.self, for: AppModel.retroAchievementsAccount)
+                raPassword = ""
+            } catch {
+                raError = model.describe(error)
+            }
+        }
     }
 
     private func save(_ credentials: some Encodable, _ account: String) {

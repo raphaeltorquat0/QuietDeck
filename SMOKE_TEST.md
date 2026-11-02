@@ -99,6 +99,9 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Drag a patch for another version: the job fails saying so, and nothing reaches the Deck
 - [ ] Drag an extracted PS4 game folder (`CUSA…`): it shows the game title, arrives as `roms/ps4/Title [CUSA…]/` and opens fullscreen in shadPS4 from the home
 - [ ] Drag a PS4 `.pkg`: the job fails asking for the extracted folder
+- [ ] Settings › RetroAchievements: a wrong password shows the server's message; the right one shows "Signed in as" and a job turns achievements on in RetroArch and Dolphin
+- [ ] Open a supported game from the home: the RetroAchievements login toast appears in the emulator
+- [ ] Sign Out: achievements are off in both emulators and the token is gone from their settings
 - [ ] Drag a file of an unknown format: the Library names it instead of ignoring it
 - [ ] Send a Switch game with update, no game open: one shortcut, clean name, first on Quiet Home with focus
 - [ ] Send with a game open: the game stays open, and the job finishes after it closes
