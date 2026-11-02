@@ -357,7 +357,15 @@
   "systems": [
    "ps3"
   ],
-  "launch": "run net.rpcs3.RPCS3 --no-gui --fullscreen {rom}"
+  "launch": "run net.rpcs3.RPCS3 --no-gui --fullscreen {rom}",
+  "profiles": [
+   {
+    "path": ".var/app/net.rpcs3.RPCS3/config/rpcs3/input_configs/global/Default.yml",
+    "format": "yaml",
+    "entries": [],
+    "create": "Player 1 Input:\n  Handler: SDL\n  Device: Steam Deck Controller 1\n"
+   }
+  ]
  },
  {
   "id": "shadps4",

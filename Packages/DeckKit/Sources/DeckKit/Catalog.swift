@@ -42,6 +42,8 @@ public struct EmulatorConfig: Codable, Hashable, Sendable {
     public var untouched: String?
     /// Só grava as chaves que ainda não existem: o que o usuário escolheu no emulador fica.
     public var onlyMissing: Bool?
+    /// Arquivo inteiro, gravado só quando ainda não existe (RPCS3: o perfil de controle nasce na interface dele).
+    public var create: String?
     public var path: String
     public var format: String
     public var entries: [ConfigEntry]

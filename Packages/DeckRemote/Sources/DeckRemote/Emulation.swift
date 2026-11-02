@@ -303,6 +303,7 @@ public enum EmulatorSetup {
     }
 
     static func patched(_ config: EmulatorConfig, current: String?) -> String? {
+        if let create = config.create { return current == nil ? create : nil }
         // JSON: o marcador é `caminho=valor`, porque cada emulador formata o arquivo do seu jeito.
         if config.format == "json" {
             guard let current else { return nil }

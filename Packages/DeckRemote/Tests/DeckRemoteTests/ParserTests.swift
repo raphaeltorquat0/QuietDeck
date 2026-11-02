@@ -390,6 +390,12 @@ import Testing
         #expect(try PS3Install.packageTitleID(pkg) == "BCES00791")
     }
 
+    @Test func rpcs3PadProfileOnlyWhenMissing() throws {
+        let profile = try #require(try Catalog.load().emulator("rpcs3")?.profiles?.first)
+        #expect(EmulatorSetup.patched(profile, current: nil) == "Player 1 Input:\n  Handler: SDL\n  Device: Steam Deck Controller 1\n")
+        #expect(EmulatorSetup.patched(profile, current: "Player 1 Input:\n  Handler: Keyboard\n") == nil)
+    }
+
     @Test func keysAreValidatedAndPrivate() throws {
         let dir = try tempDir(), home = dir.appendingPathComponent("home")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
