@@ -357,7 +357,7 @@
   "systems": [
    "ps3"
   ],
-  "launch": "run net.rpcs3.RPCS3 --no-gui {rom}"
+  "launch": "run net.rpcs3.RPCS3 --no-gui --fullscreen {rom}"
  },
  {
   "id": "shadps4",
