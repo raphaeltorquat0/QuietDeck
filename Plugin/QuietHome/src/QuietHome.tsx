@@ -1,6 +1,6 @@
 import { Focusable, GamepadButton, Navigation } from '@decky/ui'
 import { useEffect, useRef, useState } from 'react'
-import { achievements, downloadPercent, Game, loadTabs, openStore, play, playedLine, Tab, watchDetails } from './steam'
+import { achievements, downloadPercent, Game, hue, loadTabs, openStore, play, playedLine, Tab, watchDetails } from './steam'
 
 const styles = `
 .qh { position: absolute; inset: 0; background: #0b0d10; color: #fff; overflow: hidden; overflow: clip; display: flex; flex-direction: column; }
@@ -22,10 +22,16 @@ const styles = `
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .qh-tab.on { color: #fff; font-weight: 600; border-bottom-color: #fff; }
 .qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(14,16,20,.55); backdrop-filter: blur(18px) saturate(140%); border-radius: 6px; padding: 3px 9px; }
+.qh-tile.qh-gen { align-items: flex-end; justify-content: flex-start; text-align: left; padding: 8px; font-size: 13px; font-weight: 700; line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,.5); overflow: hidden; }
 @supports not (backdrop-filter: blur(1px)) { .qh-tabs, .qh-download { background: #0e1014; } }
 @media (prefers-reduced-transparency: reduce) { .qh-tabs, .qh-download { background: #0e1014; backdrop-filter: none; } }
 @media (prefers-reduced-motion: reduce) { .qh-tile { transition: none; } }
 `
+
+const gradient = (name: string) => {
+  const h = hue(name)
+  return `linear-gradient(150deg, hsl(${h} 70% 46%) 0%, hsl(${(h + 40) % 360} 65% 18%) 100%)`
+}
 
 /** Linha de capas, tile Loja no fim, abas com L1/R1. Foco inicial na primeira capa. */
 export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
@@ -120,6 +126,7 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     <div className="qh" ref={root}>
       <style>{styles}</style>
       {focused && focused.heroes.length > 0 && <div className="qh-art" style={{ backgroundImage: focused.heroes.map((u) => `url("${u}")`).join(', ') }} />}
+      {focused && focused.heroes.length === 0 && <div className="qh-art" style={{ background: gradient(focused.name) }} />}
       <div className="qh-scrim" />
       {download !== null && <div className="qh-download">↓ {download}%</div>}
       <Focusable className="qh-body" onButtonDown={onButtonDown}>
@@ -139,8 +146,8 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
               key={g.appid}
               navRef={i === 0 ? firstTile : undefined}
               focusable
-              className="qh-tile"
-              style={{ backgroundImage: g.portrait ? `url("${g.portrait}")` : undefined }}
+              className={g.portrait ? 'qh-tile' : 'qh-tile qh-gen'}
+              style={g.portrait ? { backgroundImage: `url("${g.portrait}")` } : { background: gradient(g.name) }}
               onGamepadFocus={() => setFocused(g)}
               onActivate={() => Navigation.Navigate(`/library/app/${g.appid}`)}
               onOKActionDescription="Detalhes"

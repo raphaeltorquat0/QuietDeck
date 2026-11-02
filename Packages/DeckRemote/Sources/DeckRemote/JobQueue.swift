@@ -7,10 +7,13 @@ import Observation
 public struct GameRef: Codable, Hashable, Sendable {
     public var systemID: String
     public var title: String
+    /// Arte já pronta no Mac (SteamGridDB ou gerada), gravada no Deck antes de o Steam reiniciar.
+    public var art: [ArtKind: String]?
 
-    public init(systemID: String, title: String) {
+    public init(systemID: String, title: String, art: [ArtKind: String]? = nil) {
         self.systemID = systemID
         self.title = title
+        self.art = art
     }
 }
 

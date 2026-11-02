@@ -231,6 +231,18 @@ final class AppModel {
         enqueue(String(localized: "Turn off achievements"), .applyAchievements(signedIn: false))
     }
 
+    /// Prepara a arte de cada jogo e só então enfileira: a capa precisa chegar antes de o Steam reiniciar.
+    func addToSteam(_ refs: [GameRef], user: String, sdMount: String?) {
+        Task {
+            var games: [GameRef] = []
+            for var ref in refs {
+                if let system = catalog.system(ref.systemID) { ref.art = await ArtMaker.prepare(title: ref.title, system: system) }
+                games.append(ref)
+            }
+            enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: games, sdMount: sdMount))
+        }
+    }
+
     func enqueue(_ title: String, _ action: JobAction) {
         guard let id = selectedDeckID else { return }
         queue.enqueue(Job(deckID: id, title: title, action: action))

@@ -177,12 +177,28 @@ public enum JobExecutor {
         try await Transfer.upload(copy, to: folder, config: c.config, onProgress: transfer)
     }
 
+    /// Antes do reinício do Steam, para a capa já aparecer. Arte que o usuário escolheu (qualquer extensão)
+    /// não é trocada: só entra o que falta.
+    static func writeArt(_ art: [(appID: UInt32, kind: ArtKind, file: String)], user: String, runner r: any CommandRunner) async throws {
+        let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
+        let existing = Set(try await r.check("mkdir -p \(Shell.quote(dir)) && ls -1 \(Shell.quote(dir))").stdout
+            .split(whereSeparator: \.isNewline).map { ($0 as NSString).deletingPathExtension })
+        let files = RemoteFiles(runner: r)
+        for item in art {
+            let name = item.kind.fileName(appID: item.appID)
+            guard !existing.contains((name as NSString).deletingPathExtension) else { continue }
+            let data = try Data(contentsOf: URL(fileURLWithPath: item.file))
+            try await files.write(data, to: dir + "/" + name)
+        }
+    }
+
     private static func addToSteam(_ user: String, _ refs: [GameRef], _ sd: String?, _ c: JobContext, _ progress: JobQueue.Progress) async throws {
         let r = c.runner
         let paths = try await Emulation.paths(r, sdMount: sd)
         let listing = try await r.check(Library.listing(paths: paths)).stdout
         let games = Library.parse(listing, systems: c.catalog.systems, paths: paths)
         var shortcuts: [Shortcut] = []
+        var art: [(appID: UInt32, kind: ArtKind, file: String)] = []
         var emulators: [Emulator] = []
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
@@ -198,7 +214,10 @@ public enum JobExecutor {
             }
             var core: String?
             if let name = system.core { core = try await EmulatorSetup.ensureCore(name, runner: r) }
-            if let s = Library.shortcut(name: ref.title, romPath: game.path, system: system, catalog: c.catalog, corePath: core) { shortcuts.append(s) }
+            if let s = Library.shortcut(name: ref.title, romPath: game.path, system: system, catalog: c.catalog, corePath: core) {
+                shortcuts.append(s)
+                for (kind, file) in ref.art ?? [:] { art.append((s.appID, kind, file)) }
+            }
         }
         guard !shortcuts.isEmpty else { throw DeckError.unexpectedState("The game isn't on the Deck in this location, so no shortcut was created.") }
         let steam = SteamControl(runner: r)
@@ -218,6 +237,10 @@ public enum JobExecutor {
                 }
                 _ = try await EmulatorSetup.applyAchievements(emulator, account: account, runner: r)
             }
+        }
+        if !art.isEmpty {
+            progress(nil, "Adding artwork")
+            try await writeArt(art, user: user, runner: r)
         }
         progress(nil, "Writing shortcuts")
         let result = try await steam.addShortcuts(shortcuts, user: user)

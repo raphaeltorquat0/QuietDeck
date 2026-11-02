@@ -30,9 +30,13 @@ const NON_STEAM = 1073741824
 function toGame(o: Overview): Game {
   let portrait: string | undefined
   const heroes: string[] = []
+  // Atalho não tem capa na loja: a URL padrão aponta para um arquivo que não existe e o tile ficava vazio.
+  // Só a arte personalizada (a que o QuietDeck grava em grid/) vale; sem ela, a home desenha o tile.
   try {
-    portrait = appStore.GetVerticalCapsuleURLForApp(o)
-  } catch {}
+    portrait = o.app_type === NON_STEAM ? appStore.GetCustomVerticalCapsuleURLs?.(o)?.[0] : appStore.GetVerticalCapsuleURLForApp(o)
+  } catch (e) {
+    console.error('[Quiet Home] capa', o.appid, e)
+  }
   try {
     heroes.push(...(appStore.GetCustomHeroImageURLs?.(o) ?? []))
   } catch {}
@@ -56,6 +60,13 @@ function list(collection: any, limit = 30): Game[] {
 }
 
 /** Instalados, Favoritos, Emuladores (só com atalhos não-Steam) e Todos. `null` se o cliente mudou. */
+/** Matiz estável por nome, para o tile desenhado de um jogo sem capa. */
+export function hue(name: string): number {
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360
+  return h
+}
+
 export function loadTabs(): Tab[] | null {
   try {
     // `allGamesCollection` e `localGamesCollection` não trazem atalhos; `myGamesCollection` traz.

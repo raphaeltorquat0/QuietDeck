@@ -267,7 +267,7 @@ struct LibraryView: View {
             refs.append(GameRef(systemID: id, title: item.title))
         }
         if addToSteam, let user = deck.steamUsers.first {
-            model.enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: Array(Set(refs)), sdMount: sd))
+            model.addToSteam(Array(Set(refs)), user: user, sdMount: sd)
         }
         Motion.run { candidates.removeAll { $0.systemID != nil } }
     }
@@ -375,7 +375,7 @@ struct GameDetail: View {
 
     private func add() {
         guard let user = deck.steamUsers.first else { return }
-        model.enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: [GameRef(systemID: game.systemID, title: title)], sdMount: deck.sdMount.flatMap { game.path.hasPrefix($0 + "/") ? $0 : nil }))
+        model.addToSteam([GameRef(systemID: game.systemID, title: title)], user: user, sdMount: deck.sdMount.flatMap { game.path.hasPrefix($0 + "/") ? $0 : nil })
     }
 
     private func apply() {

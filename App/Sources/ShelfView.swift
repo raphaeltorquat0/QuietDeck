@@ -447,7 +447,7 @@ struct ShelfDetail: View {
         } else { return }
         guard addToSteam, let user = deck.steamUsers.first, let system = model.catalog.system(item.systemID) else { return }
         let title = item.deckTitle
-        model.enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: [GameRef(systemID: item.systemID, title: title)], sdMount: sd))
+        model.addToSteam([GameRef(systemID: item.systemID, title: title)], user: user, sdMount: sd)
         // O id do atalho não depende da ROM, só do emulador e do nome.
         guard let appID = Library.shortcut(name: title, romPath: "", system: system, catalog: model.catalog, corePath: nil)?.appID else { return }
         for kind in [ArtKind.portrait, .hero] where FileManager.default.fileExists(atPath: model.covers.file(for: title, kind: kind).path) {
