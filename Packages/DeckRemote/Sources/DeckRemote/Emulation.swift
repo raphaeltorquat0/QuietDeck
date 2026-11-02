@@ -155,6 +155,7 @@ public enum ConfigPatcher {
     /// Só muda as chaves pedidas; todo o resto do arquivo fica como estava.
     public static func apply(_ text: String, format: String, entries: [ConfigEntry]) -> String {
         if format == "json" { return applyJSON(text, entries: entries) }
+        if format == "yaml" { return applyYAML(text, entries: entries) }
         var lines = text.components(separatedBy: "\n")
         if lines.last == "" { lines.removeLast() }
         for entry in entries {
@@ -192,6 +193,21 @@ public enum ConfigPatcher {
         }
         guard let data = try? JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) else { return text }
         return String(decoding: data, as: UTF8.self) + "\n"
+    }
+
+    /// YAML do RPCS3: troca o valor de chaves que já existem, mantendo a indentação. Não cria chave:
+    /// o arquivo nasce do próprio emulador com todas elas.
+    static func applyYAML(_ text: String, entries: [ConfigEntry]) -> String {
+        var lines = text.components(separatedBy: "\n")
+        for entry in entries {
+            for i in lines.indices {
+                let trimmed = lines[i].drop { $0 == " " }
+                guard trimmed.hasPrefix(entry.key + ":") else { continue }
+                let indent = lines[i].prefix(lines[i].count - trimmed.count)
+                lines[i] = "\(indent)\(entry.key): \(entry.value)"
+            }
+        }
+        return lines.joined(separator: "\n")
     }
 
     /// Valor num caminho `a.0.b` de um JSON, como texto (`true`, `WindowKeyboard`, `1`).

@@ -364,6 +364,17 @@
     "format": "yaml",
     "entries": [],
     "create": "Player 1 Input:\n  Handler: SDL\n  Device: Steam Deck Controller 1\n"
+   },
+   {
+    "path": ".var/app/net.rpcs3.RPCS3/config/rpcs3/config.yml",
+    "format": "yaml",
+    "untouched": "Shader Mode: Async Recompiler with Shader Interpreter",
+    "entries": [
+     {
+      "key": "Shader Mode",
+      "value": "Async Recompiler (multi-threaded)"
+     }
+    ]
    }
   ]
  },

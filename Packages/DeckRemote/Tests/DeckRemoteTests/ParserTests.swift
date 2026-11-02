@@ -394,6 +394,10 @@ import Testing
         let profile = try #require(try Catalog.load().emulator("rpcs3")?.profiles?.first)
         #expect(EmulatorSetup.patched(profile, current: nil) == "Player 1 Input:\n  Handler: SDL\n  Device: Steam Deck Controller 1\n")
         #expect(EmulatorSetup.patched(profile, current: "Player 1 Input:\n  Handler: Keyboard\n") == nil)
+        let video = try #require(try Catalog.load().emulator("rpcs3")?.profiles?.last)
+        let factory = "Video:\n  Renderer: Vulkan\n  Shader Mode: Async Recompiler with Shader Interpreter\n  Shader Precision: High\n"
+        #expect(EmulatorSetup.patched(video, current: factory) == "Video:\n  Renderer: Vulkan\n  Shader Mode: Async Recompiler (multi-threaded)\n  Shader Precision: High\n")
+        #expect(EmulatorSetup.patched(video, current: factory.replacingOccurrences(of: "Async Recompiler with Shader Interpreter", with: "Shader Interpreter only")) == nil)
     }
 
     @Test func keysAreValidatedAndPrivate() throws {
