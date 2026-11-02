@@ -211,7 +211,10 @@ final class AppModel {
     func start() {
         Task {
             while !Task.isCancelled {
-                for deck in live.values { await deck.refresh() }
+                for deck in live.values {
+                    await deck.refresh()
+                    fillArtwork(deck)
+                }
                 for id in live.keys where live[id]?.connection == .online { queue.resume(deckID: id) }
                 try? await Task.sleep(for: .seconds(30))
             }
@@ -229,6 +232,36 @@ final class AppModel {
     func signOutRetroAchievements() {
         Keychain.remove(for: Self.retroAchievementsAccount)
         enqueue(String(localized: "Turn off achievements"), .applyAchievements(signedIn: false))
+    }
+
+    /// Uma vez por abertura do app: atalhos de emulador criados antes da arte automática (ou com ela apagada)
+    /// ganham a que falta. Só imagens; o job não toca no Steam nem nos emuladores.
+    @ObservationIgnored private var artworkChecked = Set<UUID>()
+
+    private func fillArtwork(_ deck: LiveDeck) {
+        guard deck.connection == .online, !artworkChecked.contains(deck.id), let user = deck.steamUsers.first, !deck.games.isEmpty else { return }
+        artworkChecked.insert(deck.id)
+        let shortcuts = Set(deck.shortcutsPlayed.keys)
+        var seen = Set<String>()
+        let games = deck.games.compactMap { game -> (String, GameSystem)? in
+            let title = ROMPlan.displayName(game.name)
+            guard shortcuts.contains(title) || shortcuts.contains(ROMPlan.shortcutName(title)), seen.insert(title).inserted,
+                  let system = catalog.system(game.systemID) else { return nil }
+            return (title, system)
+        }
+        Task {
+            var items: [ArtItem] = []
+            for (title, system) in games {
+                for (kind, file) in await ArtMaker.prepare(title: title, system: system) {
+                    items.append(ArtItem(names: [ROMPlan.shortcutName(title), title], kind: kind, file: file))
+                }
+            }
+            // Arte antes da limpeza: se a limpeza reiniciar o Steam, as capas já aparecem.
+            if !items.isEmpty {
+                queue.enqueue(Job(deckID: deck.id, title: String(localized: "Artwork for emulator games"), action: .applyArtwork(user: user, items: items)))
+            }
+            queue.enqueue(Job(deckID: deck.id, title: String(localized: "Tidy up game shortcuts"), action: .tidyShortcuts(user: user)))
+        }
     }
 
     /// Prepara a arte de cada jogo e só então enfileira: a capa precisa chegar antes de o Steam reiniciar.

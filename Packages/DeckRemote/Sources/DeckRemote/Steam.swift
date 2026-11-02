@@ -94,6 +94,29 @@ public struct SteamControl: Sendable {
         } != nil
     }
 
+    /// Atalhos do QuietDeck com ROM apagada saem e o resto ganha o nome limpo. Sem mudança, o Steam
+    /// nem é tocado; com jogo aberto, fica para a próxima vez (reiniciar o Steam fecharia o jogo).
+    public func tidyShortcuts(user: String) async throws -> (removed: Int, renamed: Int)? {
+        let path = try await configDirectory(user: user) + "/shortcuts.vdf"
+        let all = ShortcutsFile.existing(in: try ShortcutsFile.parse(try await RemoteFiles(runner: runner).read(path) ?? Data()))
+        let roms = all.filter(\.isEmulatorGame).compactMap(\.romPath)
+        guard !roms.isEmpty else { return (0, 0) }
+        let check = roms.map { "[ -e \(Shell.quote($0)) ] || printf '%s\\n' \(Shell.quote($0))" }.joined(separator: "; ")
+        let missing = Set(try await runner.check(check).stdout.split(whereSeparator: \.isNewline).map(String.init))
+        let plan = ShortcutsFile.tidyPlan(all, missing: missing)
+        guard !plan.remove.isEmpty || !plan.rename.isEmpty else { return (0, 0) }
+        if try await gameOpen() { return nil }
+        var removed = 0, renamed = 0
+        _ = try await edit(user: user) { root in
+            let r = ShortcutsFile.remove(names: plan.remove, from: root)
+            let n = ShortcutsFile.rename(plan.rename, in: r.root)
+            removed = r.removed
+            renamed = n.renamed
+            return removed + renamed == 0 ? nil : n.root
+        }
+        return (removed, renamed)
+    }
+
     private func currentNames(user: String) async throws -> Set<String> {
         let path = try await configDirectory(user: user) + "/shortcuts.vdf"
         guard let data = try await RemoteFiles(runner: runner).read(path) else {

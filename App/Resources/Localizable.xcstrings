@@ -541,6 +541,16 @@
     }
    }
   },
+  "Adding artwork": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Adicionando capas"
+     }
+    }
+   }
+  },
   "Address": {
    "localizations": {
     "pt-BR": {
@@ -707,6 +717,36 @@
      "stringUnit": {
       "state": "translated",
       "value": "Artes"
+     }
+    }
+   }
+  },
+  "Artwork added": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Capas adicionadas"
+     }
+    }
+   }
+  },
+  "Artwork already there": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "As capas já estavam lá"
+     }
+    }
+   }
+  },
+  "Artwork for emulator games": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Capas dos jogos de emulador"
      }
     }
    }
@@ -3411,6 +3451,36 @@
     }
    }
   },
+  "Shortcuts already tidy": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atalhos já organizados"
+     }
+    }
+   }
+  },
+  "Shortcuts tidied": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Atalhos organizados"
+     }
+    }
+   }
+  },
+  "Shortcuts wait until the game is closed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Os atalhos esperam o jogo fechar"
+     }
+    }
+   }
+  },
   "Show in the menu bar": {
    "localizations": {
     "pt-BR": {
@@ -3977,6 +4047,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Este patch é aplicado antes do envio. Seus arquivos originais não mudam."
+     }
+    }
+   }
+  },
+  "Tidy up game shortcuts": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Organizar atalhos de jogos"
      }
     }
    }

@@ -62,6 +62,16 @@ public enum ShortcutsFile {
         public var exe: String
         /// Epoch do último jogo; `0` nunca jogado.
         public var lastPlayed: Int64 = 0
+        public var launchOptions = ""
+
+        /// Atalho criado pelo QuietDeck: `flatpak run` com uma ROM em `roms/`.
+        public var isEmulatorGame: Bool { exe == "\"/usr/bin/flatpak\"" && launchOptions.contains("/roms/") }
+
+        /// Último argumento entre aspas, que é a ROM no comando que o QuietDeck monta.
+        public var romPath: String? {
+            guard let end = launchOptions.lastIndex(of: "\""), let start = launchOptions[..<end].lastIndex(of: "\"") else { return nil }
+            return String(launchOptions[launchOptions.index(after: start)..<end])
+        }
     }
 
     public static let emptyFile = VDFValue.map([("shortcuts", .map([]))])
@@ -81,7 +91,7 @@ public enum ShortcutsFile {
             }
             var played: Int64 = 0
             if case let .int32(v)? = entry.value["LastPlayTime"] { played = Int64(UInt32(bitPattern: v)) }
-            return Existing(appID: id, name: text("AppName"), exe: text("Exe"), lastPlayed: played)
+            return Existing(appID: id, name: text("AppName"), exe: text("Exe"), lastPlayed: played, launchOptions: text("LaunchOptions"))
         }
     }
 
@@ -93,9 +103,13 @@ public enum ShortcutsFile {
         var slot = pairs.firstIndex { $0.key.caseInsensitiveCompare("shortcuts") == .orderedSame }
         if let i = slot, case let .map(current) = pairs[i].value { entries = current }
         var known = Set(existing(in: root).map { key($0.name, $0.exe) })
+        // O mesmo jogo com outro nome (atalho antigo, de antes do nome limpo) não ganha um segundo atalho.
+        var commands = Set(existing(in: root).map { $0.exe + "\u{0}" + $0.launchOptions })
         var nextIndex = (entries.compactMap { Int($0.key) }.max() ?? -1) + 1
         var added: [Shortcut] = []
-        for shortcut in shortcuts where known.insert(key(shortcut.name, shortcut.exe)).inserted {
+        for shortcut in shortcuts where !commands.contains(shortcut.exe + "\u{0}" + shortcut.launchOptions)
+            && known.insert(key(shortcut.name, shortcut.exe)).inserted {
+            commands.insert(shortcut.exe + "\u{0}" + shortcut.launchOptions)
             entries.append((String(nextIndex), .map(shortcut.vdf)))
             nextIndex += 1
             added.append(shortcut)
@@ -122,6 +136,41 @@ public enum ShortcutsFile {
             return (pair.key, .map(kept.enumerated().map { (String($0.offset), $0.element.value) }))
         }
         return (.map(pairs), removed)
+    }
+
+    /// Manutenção dos atalhos do QuietDeck: o que aponta para ROM que sumiu sai, e o resto ganha o nome limpo
+    /// quando ele não colide com outro atalho. Atalhos de terceiros não entram.
+    public static func tidyPlan(_ shortcuts: [Existing], missing: Set<String>) -> (remove: [String], rename: [String: String]) {
+        let ours = shortcuts.filter(\.isEmulatorGame)
+        let remove = ours.filter { $0.romPath.map(missing.contains) ?? false }.map(\.name)
+        let kept = shortcuts.filter { !remove.contains($0.name) }
+        var taken = Set(kept.map { $0.name.lowercased() })
+        var rename: [String: String] = [:]
+        let wanted = Dictionary(grouping: kept.filter(\.isEmulatorGame), by: { ROMPlan.shortcutName($0.name).lowercased() })
+        for s in kept where s.isEmulatorGame {
+            let clean = ROMPlan.shortcutName(s.name)
+            // Dois jogos com o mesmo nome curto (versões do mesmo jogo) ficam com o nome longo.
+            guard clean != s.name, wanted[clean.lowercased()]?.count == 1, !taken.contains(clean.lowercased()) else { continue }
+            taken.remove(s.name.lowercased())
+            taken.insert(clean.lowercased())
+            rename[s.name] = clean
+        }
+        return (remove, rename)
+    }
+
+    /// Troca só o `AppName`: o `appid` fica, e com ele o tempo de jogo e a arte em `grid/`.
+    public static func rename(_ names: [String: String], in root: VDFValue) -> (root: VDFValue, renamed: Int) {
+        guard case let .map(top) = root else { return (root, 0) }
+        var renamed = 0
+        let pairs = top.map { pair -> (key: String, value: VDFValue) in
+            guard pair.key.caseInsensitiveCompare("shortcuts") == .orderedSame, case let .map(entries) = pair.value else { return pair }
+            return (pair.key, .map(entries.map { entry in
+                guard case let .string(name)? = entry.value["AppName"], let new = names[name], case let .map(fields) = entry.value else { return entry }
+                renamed += 1
+                return (entry.key, .map(fields.map { $0.key.caseInsensitiveCompare("AppName") == .orderedSame ? ($0.key, .string(new)) : $0 }))
+            }))
+        }
+        return (.map(pairs), renamed)
     }
 
     private static func key(_ name: String, _ exe: String) -> String { name.lowercased() + "\u{0}" + exe }

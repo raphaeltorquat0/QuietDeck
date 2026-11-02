@@ -109,6 +109,15 @@ public enum JobExecutor {
             case .removeQuietGlass:
                 try await QuietTheme.removeGlass(r, password: c.requirePassword())
                 progress(100, "Quiet Glass removed")
+            case let .tidyShortcuts(user):
+                if let done = try await SteamControl(runner: r).tidyShortcuts(user: user) {
+                    progress(100, done.removed + done.renamed == 0 ? "Shortcuts already tidy" : "Shortcuts tidied")
+                } else {
+                    progress(100, "Shortcuts wait until the game is closed")
+                }
+            case let .applyArtwork(user, items):
+                let n = try await writeArt(items, user: user, runner: r)
+                progress(100, n == 0 ? "Artwork already there" : "Artwork added")
             case let .installSwitchMod(local):
                 _ = try await Flatpaks.install(SwitchMods.flatpak, runner: r)
                 _ = try await SwitchMods.install(URL(fileURLWithPath: local), config: c.config, runner: r,
@@ -179,17 +188,28 @@ public enum JobExecutor {
 
     /// Antes do reinício do Steam, para a capa já aparecer. Arte que o usuário escolheu (qualquer extensão)
     /// não é trocada: só entra o que falta.
-    static func writeArt(_ art: [(appID: UInt32, kind: ArtKind, file: String)], user: String, runner r: any CommandRunner) async throws {
+    @discardableResult
+    static func writeArt(_ art: [ArtItem], user: String, runner r: any CommandRunner) async throws -> Int {
         let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
         let existing = Set(try await r.check("mkdir -p \(Shell.quote(dir)) && ls -1 \(Shell.quote(dir))").stdout
             .split(whereSeparator: \.isNewline).map { ($0 as NSString).deletingPathExtension })
         let files = RemoteFiles(runner: r)
+        var ids: [String: UInt32] = [:]
+        if art.contains(where: { !$0.names.isEmpty }) {
+            let path = try await SteamControl(runner: r).configDirectory(user: user) + "/shortcuts.vdf"
+            for s in ShortcutsFile.existing(in: try ShortcutsFile.parse(try await files.read(path) ?? Data())) { ids[s.name] = s.appID }
+        }
+        var written = 0
         for item in art {
-            let name = item.kind.fileName(appID: item.appID)
+            // Atalho que já existe manda: o id dele está no arquivo, e o calculado seria de um atalho novo.
+            guard let appID = item.names.lazy.compactMap({ ids[$0] }).first ?? item.appID else { continue }
+            let name = item.kind.fileName(appID: appID)
             guard !existing.contains((name as NSString).deletingPathExtension) else { continue }
             let data = try Data(contentsOf: URL(fileURLWithPath: item.file))
             try await files.write(data, to: dir + "/" + name)
+            written += 1
         }
+        return written
     }
 
     private static func addToSteam(_ user: String, _ refs: [GameRef], _ sd: String?, _ c: JobContext, _ progress: JobQueue.Progress) async throws {
@@ -198,7 +218,7 @@ public enum JobExecutor {
         let listing = try await r.check(Library.listing(paths: paths)).stdout
         let games = Library.parse(listing, systems: c.catalog.systems, paths: paths)
         var shortcuts: [Shortcut] = []
-        var art: [(appID: UInt32, kind: ArtKind, file: String)] = []
+        var art: [ArtItem] = []
         var emulators: [Emulator] = []
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
@@ -214,9 +234,12 @@ public enum JobExecutor {
             }
             var core: String?
             if let name = system.core { core = try await EmulatorSetup.ensureCore(name, runner: r) }
-            if let s = Library.shortcut(name: ref.title, romPath: game.path, system: system, catalog: c.catalog, corePath: core) {
+            // Nome limpo na home; duas versões do mesmo jogo ficam com o nome longo para não se confundirem.
+            let clean = ROMPlan.shortcutName(ref.title)
+            let collides = games.contains { $0.systemID == ref.systemID && ROMPlan.displayName($0.name) != ref.title && ROMPlan.shortcutName(ROMPlan.displayName($0.name)) == clean }
+            if let s = Library.shortcut(name: collides ? ref.title : clean, romPath: game.path, system: system, catalog: c.catalog, corePath: core) {
                 shortcuts.append(s)
-                for (kind, file) in ref.art ?? [:] { art.append((s.appID, kind, file)) }
+                for (kind, file) in ref.art ?? [:] { art.append(ArtItem(appID: s.appID, names: [s.name, ref.title], kind: kind, file: file)) }
             }
         }
         guard !shortcuts.isEmpty else { throw DeckError.unexpectedState("The game isn't on the Deck in this location, so no shortcut was created.") }

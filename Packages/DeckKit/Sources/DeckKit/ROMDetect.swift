@@ -168,6 +168,15 @@ public enum ROMPlan {
         return t
     }
 
+    /// Nome do atalho no Steam: o da capa sem etiqueta de mod, tradução ou dump (`[…]`).
+    /// Quem chama mantém o nome longo quando dois jogos ficariam com o mesmo nome curto.
+    public static func shortcutName(_ title: String) -> String {
+        let tags = #"(?i)\s*(\([^)]*\b(mod|mods|translation|translated|tradu[cç][aã]o|traduzido|patch|patched|hack|dub|dubbed|dublado)\b[^)]*\)|\[[^\]]*\])"#
+        let clean = coverTitle(title).replacingOccurrences(of: tags, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"\s{2,}"#, with: " ", options: .regularExpression).trimmingCharacters(in: .whitespaces)
+        return clean.isEmpty ? title : clean
+    }
+
     /// Title ID do Switch: jogo base termina em `000`; update (`800`) e DLC não abrem sozinhos.
     public static func isSwitchAddon(_ fileName: String) -> Bool {
         guard let id = fileName.range(of: #"\[[0-9A-Fa-f]{16}\]"#, options: .regularExpression) else { return false }

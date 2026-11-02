@@ -17,6 +17,23 @@ public struct GameRef: Codable, Hashable, Sendable {
     }
 }
 
+/// Uma imagem do Mac para `grid/<appID><sufixo>.png` no Deck.
+public struct ArtItem: Codable, Hashable, Sendable {
+    /// Conhecido ao criar o atalho; para atalho já existente vem `nil` e o id sai do `shortcuts.vdf` por `names`.
+    public var appID: UInt32?
+    /// Nomes possíveis do atalho, na ordem: o limpo e o longo.
+    public var names: [String]
+    public var kind: ArtKind
+    public var file: String
+
+    public init(appID: UInt32? = nil, names: [String] = [], kind: ArtKind, file: String) {
+        self.appID = appID
+        self.names = names
+        self.kind = kind
+        self.file = file
+    }
+}
+
 public enum JobAction: Codable, Hashable, Sendable {
     case upload(localPath: String, remoteDirectory: String)
     case installEmulator(appID: String)
@@ -38,6 +55,10 @@ public enum JobAction: Codable, Hashable, Sendable {
     case installQuietHome
     /// Tradução ou mod de Switch em LayeredFS (`<TitleID>/romfs`), pasta ou `.zip`.
     case installSwitchMod(localPath: String)
+    /// Arte que falta em atalhos já criados; a que existe não é trocada.
+    case applyArtwork(user: String, items: [ArtItem])
+    /// Remove atalhos com ROM apagada e limpa os nomes, sem tocar no Steam se não houver mudança.
+    case tidyShortcuts(user: String)
     /// Firmware do Switch do próprio console, pasta ou `.zip` com os `.nca`.
     case installSwitchFirmware(localPath: String)
     /// Grava (ou apaga, com `false`) a conta do RetroAchievements nos emuladores instalados.
