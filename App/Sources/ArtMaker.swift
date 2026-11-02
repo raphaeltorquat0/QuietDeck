@@ -63,7 +63,7 @@ enum ArtMaker {
         let renderer = ImageRenderer(content: GeneratedArt(title: title, system: system, kind: kind).frame(width: size.width, height: size.height))
         renderer.scale = 1
         guard let png = pngData(renderer.nsImage) else { return nil }
-        let file = folder.appending(path: name(title, kind, "generated"))
+        let file = folder.appending(path: name(title, kind, "generated-2"))
         return (try? png.write(to: file)) != nil ? file : nil
     }
 }
@@ -106,7 +106,7 @@ struct GeneratedArt: View {
                     Text(verbatim: system.name.uppercased())
                         .font(.system(size: tall ? 26 : 22, weight: .semibold)).tracking(3)
                         .foregroundStyle(.white.opacity(0.75))
-                    Text(verbatim: ROMPlan.coverTitle(title))
+                    Text(verbatim: ROMPlan.shortcutName(title))
                         .font(.system(size: tall ? 64 : 52, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white).lineLimit(tall ? 5 : 2).minimumScaleFactor(0.5)
                         .shadow(color: .black.opacity(0.35), radius: 8, y: 4)

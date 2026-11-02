@@ -6,7 +6,8 @@ export interface Game {
   name: string
   lastPlayed: number
   minutes: number
-  portrait?: string
+  /** Camadas de CSS: o Steam lista `.jpg` e `.png` da arte personalizada, e só uma existe. */
+  portraits: string[]
   /** Em ordem de preferência; o CSS usa a primeira que carregar. */
   heroes: string[]
   nonSteam: boolean
@@ -28,12 +29,12 @@ declare const SteamClient: any
 const NON_STEAM = 1073741824
 
 function toGame(o: Overview): Game {
-  let portrait: string | undefined
+  let portraits: string[] = []
   const heroes: string[] = []
   // Atalho não tem capa na loja: a URL padrão aponta para um arquivo que não existe e o tile ficava vazio.
   // Só a arte personalizada (a que o QuietDeck grava em grid/) vale; sem ela, a home desenha o tile.
   try {
-    portrait = o.app_type === NON_STEAM ? appStore.GetCustomVerticalCapsuleURLs?.(o)?.[0] : appStore.GetVerticalCapsuleURLForApp(o)
+    portraits = o.app_type === NON_STEAM ? appStore.GetCustomVerticalCapsuleURLs?.(o) ?? [] : [appStore.GetVerticalCapsuleURLForApp(o)].filter(Boolean)
   } catch (e) {
     console.error('[Quiet Home] capa', o.appid, e)
   }
@@ -46,7 +47,7 @@ function toGame(o: Overview): Game {
     name: o.display_name,
     lastPlayed: o.rt_last_time_played ?? 0,
     minutes: o.minutes_playtime_forever ?? 0,
-    portrait,
+    portraits,
     heroes,
     nonSteam: o.app_type === NON_STEAM,
   }

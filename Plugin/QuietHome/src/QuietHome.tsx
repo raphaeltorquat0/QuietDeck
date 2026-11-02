@@ -146,13 +146,14 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
               key={g.appid}
               navRef={i === 0 ? firstTile : undefined}
               focusable
-              className={g.portrait ? 'qh-tile' : 'qh-tile qh-gen'}
-              style={g.portrait ? { backgroundImage: `url("${g.portrait}")` } : { background: gradient(g.name) }}
+              className={g.portraits.length ? 'qh-tile' : 'qh-tile qh-gen'}
+              // Camada que não carrega fica transparente; o gradiente por baixo cobre a falta de todas.
+              style={{ backgroundImage: [...g.portraits.map((u) => `url("${u}")`), gradient(g.name)].join(', ') }}
               onGamepadFocus={() => setFocused(g)}
               onActivate={() => Navigation.Navigate(`/library/app/${g.appid}`)}
               onOKActionDescription="Detalhes"
             >
-              {g.portrait ? null : g.name}
+              {g.portraits.length ? null : g.name}
             </Focusable>
           ))}
           <Focusable className="qh-tile" onActivate={openStore} onOKActionDescription="Abrir a Loja">Loja</Focusable>
