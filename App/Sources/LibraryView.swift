@@ -233,7 +233,7 @@ struct LibraryView: View {
                 model.importBIOS(bios)
                 let known = Set(candidates.map(\.path))
                 let unknown = found.filter { $0.detection == .unknown }.map(\.path)
-                let keys = unknown.filter { ($0 as NSString).lastPathComponent.lowercased() == "prod.keys" }
+                let keys = unknown.filter { SwitchKeys.files.contains(($0 as NSString).lastPathComponent.lowercased()) }
                 model.importSwitchKeys(keys)
                 var added: [Candidate] = found.filter { !known.contains($0.path) }.compactMap { c in
                     switch c.detection {

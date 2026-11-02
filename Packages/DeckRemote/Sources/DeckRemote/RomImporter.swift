@@ -34,28 +34,40 @@ public enum LocalTools {
     }
 }
 
-/// `prod.keys` vem do console do usuário: o app nunca baixa. Fica onde o `nsz` procura, só para o dono.
+/// Chaves do console do usuário: o app nunca baixa. `prod.keys` (o `nsz` procura em `~/.switch`) e
+/// `title.keys` (jogos sem ticket), guardadas só para o dono e copiadas ao Ryubing.
 public enum SwitchKeys {
+    public static let files = ["prod.keys", "title.keys"]
+
+    /// O que identifica cada arquivo: `header_key` no `prod.keys`, pares `rights id = title key` no `title.keys`.
+    static func isValid(_ text: String, name: String) -> Bool {
+        let pattern = name == "title.keys" ? #"(?m)^\s*[0-9a-fA-F]{32}\s*=\s*[0-9a-fA-F]{32}\s*$"# : #"(?m)^\s*header_key\s*=\s*[0-9a-fA-F]{64}\s*$"#
+        return text.range(of: pattern, options: .regularExpression) != nil
+    }
+
     public static func install(from source: URL, home: URL = FileManager.default.homeDirectoryForCurrentUser) throws {
+        let name = source.lastPathComponent.lowercased()
         let data = try Data(contentsOf: source)
-        guard String(decoding: data, as: UTF8.self).range(of: #"(?m)^\s*header_key\s*=\s*[0-9a-fA-F]{64}\s*$"#, options: .regularExpression) != nil else {
+        guard files.contains(name), isValid(String(decoding: data, as: UTF8.self), name: name) else {
             throw DeckError.unexpectedState("%@ isn't a Switch keys file.", source.lastPathComponent)
         }
         let directory = home.appendingPathComponent(".switch")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-        let target = directory.appendingPathComponent("prod.keys")
+        let target = directory.appendingPathComponent(name)
         try data.write(to: target, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: target.path)
     }
 
     /// Sem chaves no Mac, o emulador pode já ter as dele: não é falha.
     public static func send(config: SSHConfig, runner: any CommandRunner, home: URL = FileManager.default.homeDirectoryForCurrentUser) async throws {
-        let local = home.appendingPathComponent(".switch/prod.keys")
-        guard FileManager.default.fileExists(atPath: local.path) else { return }
+        let local = files.map { home.appendingPathComponent(".switch/" + $0) }.filter { FileManager.default.fileExists(atPath: $0.path) }
+        guard !local.isEmpty else { return }
         let directory = try await RemoteFiles(runner: runner).home() + "/" + deckDirectory
         try await runner.check("mkdir -p \(Shell.quote(directory)) && chmod 700 \(Shell.quote(directory))")
-        try await Transfer.upload(local, to: directory, config: config) { _ in }
-        try await runner.check("chmod 600 \(Shell.quote(directory + "/prod.keys"))")
+        for file in local {
+            try await Transfer.upload(file, to: directory, config: config) { _ in }
+            try await runner.check("chmod 600 \(Shell.quote(directory + "/" + file.lastPathComponent))")
+        }
     }
 
     static let deckDirectory = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/system"

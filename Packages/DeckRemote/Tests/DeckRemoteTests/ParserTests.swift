@@ -328,5 +328,12 @@ import Testing
         try SwitchKeys.install(from: good, home: home)
         let mode = try FileManager.default.attributesOfItem(atPath: target.path)[.posixPermissions] as? NSNumber
         #expect(mode?.intValue == 0o600)
+        // title.keys: pares rights id = title key; um prod.keys renomeado não passa.
+        let titles = dir.appendingPathComponent("title.keys")
+        try ("header_key = " + String(repeating: "0", count: 64) + "\n").write(to: titles, atomically: true, encoding: .utf8)
+        #expect(throws: DeckError.self) { try SwitchKeys.install(from: titles, home: home) }
+        try (String(repeating: "a", count: 32) + " = " + String(repeating: "b", count: 32) + "\n").write(to: titles, atomically: true, encoding: .utf8)
+        try SwitchKeys.install(from: titles, home: home)
+        #expect(FileManager.default.fileExists(atPath: home.appendingPathComponent(".switch/title.keys").path))
     }
 }
