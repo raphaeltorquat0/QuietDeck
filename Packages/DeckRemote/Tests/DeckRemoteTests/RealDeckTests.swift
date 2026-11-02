@@ -88,6 +88,18 @@ enum Real {
         try await r.check("rm -rf \(dir)")
     }
 
+    /// Perfis do Ryubing pelo mesmo código do atalho, com o emulador fechado.
+    @Test(.enabled(if: Real.step("ryubing-profiles"))) func ryubingProfiles() async throws {
+        let r = Real.runner
+        let ryubing = try #require(try Catalog.load().emulator("ryubing"))
+        #expect(try await !EmulatorSetup.isOpen(ryubing, runner: r), "Feche o jogo antes")
+        _ = try await EmulatorSetup.applyProfiles(ryubing, runner: r)
+        let text = try await r.check("cat ~/.var/app/io.github.ryubing.Ryujinx/config/Ryujinx/Config.json").stdout
+        #expect(ConfigPatcher.jsonValue(text, path: "input_config.0.backend") == "GamepadSDL2")
+        #expect(ConfigPatcher.jsonValue(text, path: "start_fullscreen") == "true")
+        #expect(try await EmulatorSetup.applyProfiles(ryubing, runner: r) == 0)
+    }
+
     @Test(.enabled(if: Real.step("switch-clean"))) func switchClean() async throws {
         let r = Real.runner
         let paths = try await Emulation.paths(r, sdMount: nil)

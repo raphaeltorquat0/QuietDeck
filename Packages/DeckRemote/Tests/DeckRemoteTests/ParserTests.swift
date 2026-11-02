@@ -276,7 +276,8 @@ import Testing
         let profiles = try #require(try Catalog.load().emulator("ryubing")?.profiles)
         let factory = #"{"version": 70, "start_fullscreen": false, "docked_mode": true, "res_scale": 1, "input_config": [{"backend": "WindowKeyboard", "id": "0"}]}"#
         let input = try #require(EmulatorSetup.patched(profiles[0], current: factory))
-        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.backend") == "GamepadSDL3")
+        // O Ryubing 1.3.3 do Flathub só conhece GamepadSDL2; GamepadSDL3 faz ele descartar o arquivo inteiro.
+        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.backend") == "GamepadSDL2")
         #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.id") == "0-00000003-28de-0000-ff11-000001000000")
         #expect(ConfigPatcher.jsonValue(input, path: "res_scale") == "1")
         #expect(EmulatorSetup.patched(profiles[0], current: input) == nil)
@@ -285,7 +286,7 @@ import Testing
         #expect(ConfigPatcher.jsonValue(screen, path: "docked_mode") == "false")
         // Quem voltou ao modo dock no Ryubing não é desfeito no próximo atalho.
         #expect(EmulatorSetup.patched(profiles[1], current: screen.replacingOccurrences(of: #""docked_mode" : false"#, with: #""docked_mode" : true"#)) == nil)
-        #expect(EmulatorSetup.patched(profiles[0], current: #"{"input_config": [{"backend": "GamepadSDL3", "id": "1-outro"}]}"#) == nil)
+        #expect(EmulatorSetup.patched(profiles[0], current: #"{"input_config": [{"backend": "GamepadSDL2", "id": "1-outro"}]}"#) == nil)
         #expect(EmulatorSetup.patched(profiles[0], current: nil) == nil)
     }
 
@@ -331,6 +332,14 @@ import Testing
         let listing = "10\tswitch/.quietdeck-partial/RE0.nsp\n10\tswitch/.RE0.nsp.kaKvW8\n10\tswitch/RE0.nsp\n"
         let games = Library.parse(listing, systems: catalog.systems, paths: EmulationPaths(root: "/home/deck/Emulation"))
         #expect(games.map(\.path) == ["/home/deck/Emulation/roms/switch/RE0.nsp"])
+    }
+
+    @Test func newestSwitchUpdateIsChosen() {
+        func g(_ n: String) -> Library.Game { Library.Game(systemID: "switch", name: n, path: "/r/" + n, size: 1) }
+        let games = [g("Mario [010099C022B96000][v0].nsp"), g("Mario [010099C022B96800][v327680].nsp"),
+                     g("Mario [010099C022B96800][v65536].nsp"), g("Zelda [01006BB00C6F0800][v131072].nsp")]
+        #expect(SwitchUpdates.latest(games) == ["010099c022b96000": "/r/Mario [010099C022B96800][v327680].nsp",
+                                                "01006bb00c6f0000": "/r/Zelda [01006BB00C6F0800][v131072].nsp"])
     }
 
     @Test func keysAreValidatedAndPrivate() throws {

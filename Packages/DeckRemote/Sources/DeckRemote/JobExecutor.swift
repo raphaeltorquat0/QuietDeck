@@ -123,6 +123,12 @@ public enum JobExecutor {
                         _ = try await EmulatorSetup.applyProfiles(emulator, runner: r)
                     }
                 }
+                // Updates de Switch que chegaram depois do atalho (ou antes desta versão do app).
+                var switchGames: [Library.Game] = []
+                for location in [paths] + (try await sdLocations(r, paths: paths)) {
+                    switchGames += Library.parse(try await r.check(Library.listing(paths: location)).stdout, systems: c.catalog.systems, paths: location)
+                }
+                _ = try await SwitchUpdates.register(switchGames, runner: r)
                 if let done = try await SteamControl(runner: r).tidyShortcuts(user: user) {
                     progress(100, done.removed + done.renamed == 0 ? "Shortcuts already tidy" : "Shortcuts tidied")
                 } else {
@@ -199,6 +205,14 @@ public enum JobExecutor {
         try await Transfer.upload(copy, to: folder, config: c.config, onProgress: transfer)
     }
 
+    /// Pastas de jogos no microSD, quando há cartão montado.
+    static func sdLocations(_ r: any CommandRunner, paths: EmulationPaths) async throws -> [EmulationPaths] {
+        guard !paths.isEmuDeck else { return [] }
+        var status = DeviceStatus()
+        DeviceProbe.parseDisks(try await r.run(DeviceProbe.disks).stdout, into: &status)
+        return status.sdCard.map { [EmulationPaths(root: $0.mountPoint + "/Emulation")] } ?? []
+    }
+
     /// Antes do reinício do Steam, para a capa já aparecer. Arte que o usuário escolheu (qualquer extensão)
     /// não é trocada: só entra o que falta.
     @discardableResult
@@ -256,6 +270,7 @@ public enum JobExecutor {
             }
         }
         guard !shortcuts.isEmpty else { throw DeckError.unexpectedState("The game isn't on the Deck in this location, so no shortcut was created.") }
+        if refs.contains(where: { $0.systemID == "switch" }) { _ = try await SwitchUpdates.register(games, runner: r) }
         let steam = SteamControl(runner: r)
         let known = try await steam.lastPlayed(user: user)
         if shortcuts.contains(where: { known[$0.name] == nil }) {

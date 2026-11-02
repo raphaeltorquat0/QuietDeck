@@ -73,6 +73,49 @@ public enum SwitchKeys {
     static let deckDirectory = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/system"
 }
 
+/// Update de Switch no Deck passa a valer no Ryubing: `games/<TitleID base>/updates.json`, o mesmo arquivo
+/// que a janela "Gerenciar atualizações" grava (`TitleUpdatesHelper.cs` da 1.3.3), com o mais novo escolhido.
+public enum SwitchUpdates {
+    static let gamesDirectory = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/games"
+
+    /// Title ID base → caminho do update de maior `[vN]`.
+    static func latest(_ games: [Library.Game]) -> [String: String] {
+        var best: [String: (Int, String)] = [:]
+        for game in games where game.systemID == "switch" {
+            guard let id = game.name.range(of: #"\[[0-9A-Fa-f]{16}\]"#, options: .regularExpression).map({ game.name[$0].dropFirst().dropLast().lowercased() }),
+                  id.hasSuffix("800") else { continue }
+            let version = game.name.range(of: #"\[v[0-9]+\]"#, options: .regularExpression).flatMap { Int(game.name[$0].dropFirst(2).dropLast()) } ?? 0
+            let base = String(id.dropLast(3)) + "000"
+            if (best[base]?.0 ?? -1) < version { best[base] = (version, game.path) }
+        }
+        return best.mapValues(\.1)
+    }
+
+    /// Mantém os caminhos que o usuário já tinha e escolhe o mais novo. Devolve quantos jogos mudaram.
+    public static func register(_ games: [Library.Game], runner: any CommandRunner) async throws -> Int {
+        let updates = latest(games)
+        guard !updates.isEmpty else { return 0 }
+        let files = RemoteFiles(runner: runner)
+        let base = try await files.home() + "/" + gamesDirectory
+        var changed = 0
+        for (id, path) in updates {
+            let file = "\(base)/\(id)/updates.json"
+            var paths: [String] = []
+            var selected = ""
+            if let data = try await files.read(file), let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                paths = json["paths"] as? [String] ?? []
+                selected = json["selected"] as? String ?? ""
+            }
+            guard selected != path || !paths.contains(path) else { continue }
+            if !paths.contains(path) { paths.append(path) }
+            let out = try JSONSerialization.data(withJSONObject: ["selected": path, "paths": paths], options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+            try await files.write(out, to: file)
+            changed += 1
+        }
+        return changed
+    }
+}
+
 public struct ROMCandidate: Equatable, Sendable {
     public var path: String
     public var size: Int64
