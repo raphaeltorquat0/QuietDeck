@@ -46,7 +46,7 @@ import Testing
         let catalog = try Catalog.load()
         let s = try #require(Library.shortcut(name: "Golden Sun", romPath: "/r/Golden Sun.gba", system: catalog.system("gba")!, catalog: catalog, corePath: "/c/mgba_libretro.so"))
         #expect(s.exe == "\"/usr/bin/flatpak\"")
-        #expect(s.launchOptions == "run org.libretro.RetroArch -L \"/c/mgba_libretro.so\" \"/r/Golden Sun.gba\"")
+        #expect(s.launchOptions == "run org.libretro.RetroArch -f -L \"/c/mgba_libretro.so\" \"/r/Golden Sun.gba\"")
     }
 }
 
