@@ -56,11 +56,34 @@ public enum Transfer {
         let (source, target) = named.map { (local.path + "/", directory + $0 + "/") } ?? (local.path, directory)
         let spec = remoteSpec(config, path: target, clientQuotes: await clientQuotes())
         let result = try await rsync(rsyncArguments(config: config, source: source, destination: spec), onProgress)
+        if Task.isCancelled {
+            await purgeCancelled(local: local, directory: directory, named: named, config: config)
+            throw CancellationError()
+        }
         guard needsFallback(result) else {
             guard result.ok else { throw DeckError.commandFailed(command: "rsync \(local.lastPathComponent)", result: result) }
             return result
         }
         return try await sftpUpload(local, to: directory, named: named, config: config, onProgress: onProgress)
+    }
+
+    /// Cancelado pelo usuário: o parcial que o rsync guarda para retomar ocupa o tamanho do jogo e não
+    /// vai ser usado. Queda do app ou da rede não passa por aqui, e o envio segue retomável.
+    /// Roda fora da tarefa cancelada, senão o próprio ssh da limpeza seria interrompido.
+    static func purgeCancelled(local: URL, directory: String, named: String?, config: SSHConfig) async {
+        let name = named ?? local.lastPathComponent
+        let script = purgeScript(name: name, directory: directory, isFolder: named != nil)
+        // ponytail: falha da limpeza não tem onde aparecer (o job já é "cancelado"); registrar quando houver log (fase 5).
+        _ = await Task.detached { try? await SSHRunner(config: config).run(script) }.value
+    }
+
+    /// Pasta enviada com nome novo some inteira; arquivo leva o parcial e o temporário `.<nome>.XXXXXX` do rsync.
+    static func purgeScript(name: String, directory: String, isFolder: Bool) -> String {
+        let dir = directory.hasSuffix("/") ? String(directory.dropLast()) : directory
+        if isFolder { return "rm -rf \(Shell.quote(dir + "/" + name))" }
+        let partial = dir + "/" + partialDir
+        return "cd \(Shell.quote(dir)) && rm -f \(Shell.quote(partial + "/" + name)) && for f in .*; do case \"$f\" in .\(Shell.quote(name)).??????) rm -f -- \"$f\";; esac; done; "
+            + "if [ -d \(Shell.quote(partial)) ] && [ -z \"$(ls -A \(Shell.quote(partial)))\" ]; then rmdir \(Shell.quote(partial)); fi"
     }
 
     /// Traz o conteúdo de uma pasta do Deck para `local`, sem apagar nada do que já existe lá.

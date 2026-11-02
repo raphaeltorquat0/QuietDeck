@@ -354,6 +354,8 @@ public struct RomImporter: Sendable {
 
         let work = workRoot.appendingPathComponent(hash)
         try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
+        // Cancelado pelo usuário: extração e conversão no Mac não vão ser retomadas.
+        defer { if Task.isCancelled { try? FileManager.default.removeItem(at: work) } }
         var entries = [source]
         var patches: [URL: URL] = [:]
         let archive = ["zip", "7z"].contains(source.pathExtension.lowercased())

@@ -33,3 +33,24 @@ import Testing
         #expect(Transfer.sftpBatch(local: "/a/it's \"x\".iso", remotePath: "/r/y", isDirectory: false) == "reput \"/a/it's \\\"x\\\".iso\" \"/r/y\"\n")
     }
 }
+
+@Suite struct TransferPurgeTests {
+    @Test func cancelledFileLeavesNothingBehind() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let name = "Resident Evil 0 [010097000BC10000][v0].nsp"
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent(Transfer.partialDir), withIntermediateDirectories: true)
+        for f in [Transfer.partialDir + "/" + name, "." + name + ".kaKvW8", "." + name + ".other.kaKvW8", "Outro.nsp", ".Outro.nsp.abc123"] {
+            try Data().write(to: dir.appendingPathComponent(f))
+        }
+        let script = Transfer.purgeScript(name: name, directory: dir.path + "/", isFolder: false)
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/bash")
+        p.arguments = ["-c", script]
+        try p.run()
+        p.waitUntilExit()
+        #expect(p.terminationStatus == 0)
+        let left = try FileManager.default.contentsOfDirectory(atPath: dir.path).sorted()
+        #expect(left == [".Outro.nsp.abc123", "." + name + ".other.kaKvW8", "Outro.nsp"])
+        #expect(Transfer.purgeScript(name: "RE0 [CUSA1]", directory: "/r/ps4", isFolder: true) == "rm -rf '/r/ps4/RE0 [CUSA1]'")
+    }
+}
