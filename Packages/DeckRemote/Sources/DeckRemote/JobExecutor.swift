@@ -113,6 +113,16 @@ public enum JobExecutor {
                 try await SwitchKeys.send(config: c.config, runner: r)
                 progress(100, "Switch keys sent")
             case let .tidyShortcuts(user):
+                // Perfis de controle e tela de quem já está instalado: o arquivo do emulador pode só ter
+                // surgido depois do atalho (o Ryubing cria o Config.json na primeira abertura).
+                let paths = try await Emulation.paths(r)
+                if !paths.isEmuDeck {
+                    let installed = Set(try await Flatpaks.installed(r).map(\.appID))
+                    for emulator in c.catalog.emulators where emulator.profiles != nil && installed.contains(emulator.flatpak) {
+                        if try await EmulatorSetup.isOpen(emulator, runner: r) { continue }
+                        _ = try await EmulatorSetup.applyProfiles(emulator, runner: r)
+                    }
+                }
                 if let done = try await SteamControl(runner: r).tidyShortcuts(user: user) {
                     progress(100, done.removed + done.renamed == 0 ? "Shortcuts already tidy" : "Shortcuts tidied")
                 } else {

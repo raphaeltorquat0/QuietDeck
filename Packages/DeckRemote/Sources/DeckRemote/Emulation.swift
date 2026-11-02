@@ -154,6 +154,7 @@ public enum Emulation {
 public enum ConfigPatcher {
     /// Só muda as chaves pedidas; todo o resto do arquivo fica como estava.
     public static func apply(_ text: String, format: String, entries: [ConfigEntry]) -> String {
+        if format == "json" { return applyJSON(text, entries: entries) }
         var lines = text.components(separatedBy: "\n")
         if lines.last == "" { lines.removeLast() }
         for entry in entries {
@@ -177,6 +178,36 @@ public enum ConfigPatcher {
         case "toml": "\(e.key) = '\(e.value)'"
         default: "\(e.key) = \(e.value)"
         }
+    }
+
+    /// JSON (Ryubing): cada entrada troca uma chave do topo; o valor é um trecho de JSON.
+    /// Texto que não é JSON fica como está: o emulador cria o arquivo na primeira abertura.
+    static func applyJSON(_ text: String, entries: [ConfigEntry]) -> String {
+        guard var root = (try? JSONSerialization.jsonObject(with: Data(text.utf8))) as? [String: Any] else { return text }
+        for entry in entries {
+            guard let value = try? JSONSerialization.jsonObject(with: Data(entry.value.utf8), options: .fragmentsAllowed) else { continue }
+            root[entry.key] = value
+        }
+        guard let data = try? JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) else { return text }
+        return String(decoding: data, as: UTF8.self) + "\n"
+    }
+
+    /// Valor num caminho `a.0.b` de um JSON, como texto (`true`, `WindowKeyboard`, `1`).
+    static func jsonValue(_ text: String, path: String) -> String? {
+        var node: Any? = try? JSONSerialization.jsonObject(with: Data(text.utf8))
+        for part in path.split(separator: ".") {
+            if let i = Int(part), let array = node as? [Any] { node = array.indices.contains(i) ? array[i] : nil }
+            else { node = (node as? [String: Any])?[String(part)] }
+        }
+        if let s = node as? String { return s }
+        #if canImport(Darwin)
+        // No macOS número e booleano chegam como NSNumber; só o tipo CF separa `true` de `1`.
+        if let n = node as? NSNumber { return CFGetTypeID(n) == CFBooleanGetTypeID() ? (n.boolValue ? "true" : "false") : n.stringValue }
+        #else
+        if let b = node as? Bool { return b ? "true" : "false" }
+        if let n = node as? NSNumber { return n.stringValue }
+        #endif
+        return nil
     }
 
     public static func has(_ text: String, section: String?, key: String) -> Bool {
@@ -270,6 +301,16 @@ public enum EmulatorSetup {
     }
 
     static func patched(_ config: EmulatorConfig, current: String?) -> String? {
+        // JSON: o marcador é `caminho=valor`, porque cada emulador formata o arquivo do seu jeito.
+        if config.format == "json" {
+            guard let current else { return nil }
+            if let marker = config.untouched {
+                let parts = marker.split(separator: "=", maxSplits: 1).map(String.init)
+                guard parts.count == 2, ConfigPatcher.jsonValue(current, path: parts[0]) == parts[1] else { return nil }
+            }
+            let after = ConfigPatcher.apply(current, format: "json", entries: config.entries)
+            return after == current ? nil : after
+        }
         if let current, let marker = config.untouched, !current.contains(marker) { return nil }
         var entries = config.entries
         if config.onlyMissing == true, let current {

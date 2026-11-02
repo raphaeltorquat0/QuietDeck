@@ -272,6 +272,23 @@ import Testing
         #expect(EmulatorSetup.patched(profile, current: "[GCPad1]\nDevice = SDL/0/Outro\n[GCPad2]\nDevice = XInput2/0/Virtual core pointer\n") == nil)
     }
 
+    @Test func ryubingGetsDeckControllerAndScreenOnce() throws {
+        let profiles = try #require(try Catalog.load().emulator("ryubing")?.profiles)
+        let factory = #"{"version": 70, "start_fullscreen": false, "docked_mode": true, "res_scale": 1, "input_config": [{"backend": "WindowKeyboard", "id": "0"}]}"#
+        let input = try #require(EmulatorSetup.patched(profiles[0], current: factory))
+        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.backend") == "GamepadSDL3")
+        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.id") == "0-00000003-28de-0000-ff11-000001000000")
+        #expect(ConfigPatcher.jsonValue(input, path: "res_scale") == "1")
+        #expect(EmulatorSetup.patched(profiles[0], current: input) == nil)
+        let screen = try #require(EmulatorSetup.patched(profiles[1], current: input))
+        #expect(ConfigPatcher.jsonValue(screen, path: "start_fullscreen") == "true")
+        #expect(ConfigPatcher.jsonValue(screen, path: "docked_mode") == "false")
+        // Quem voltou ao modo dock no Ryubing não é desfeito no próximo atalho.
+        #expect(EmulatorSetup.patched(profiles[1], current: screen.replacingOccurrences(of: #""docked_mode" : false"#, with: #""docked_mode" : true"#)) == nil)
+        #expect(EmulatorSetup.patched(profiles[0], current: #"{"input_config": [{"backend": "GamepadSDL3", "id": "1-outro"}]}"#) == nil)
+        #expect(EmulatorSetup.patched(profiles[0], current: nil) == nil)
+    }
+
     @Test func videoProfileOnlyFillsMissingKeys() throws {
         let profiles = try #require(try Catalog.load().emulator("dolphin")?.profiles)
         let gfx = try #require(profiles.first { $0.path.hasSuffix("GFX.ini") })
