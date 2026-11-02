@@ -33,6 +33,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case importBIOS(localPath: String, sdMount: String?)
     case quickAction(QuickAction)
     case installQuietHome
+    /// Firmware do Switch do próprio console, pasta ou `.zip` com os `.nca`.
+    case installSwitchFirmware(localPath: String)
     /// Grava (ou apaga, com `false`) a conta do RetroAchievements nos emuladores instalados.
     case applyAchievements(signedIn: Bool)
     case applyQuietGlass

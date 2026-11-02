@@ -255,6 +255,12 @@ final class AppModel {
         }
     }
 
+    func installSwitchFirmware(_ paths: [String]) {
+        for path in paths {
+            enqueue(String(localized: "Install Switch firmware"), .installSwitchFirmware(localPath: path))
+        }
+    }
+
     private func context(_ id: UUID) -> JobContext? {
         guard let deck = live[id] else { return nil }
         return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),

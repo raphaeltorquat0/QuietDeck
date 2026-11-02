@@ -57,6 +57,23 @@ enum Real {
         #expect(try await EmulatorSetup.applyProfiles(dolphin, runner: r) == 0)
     }
 
+    /// Firmware falso pelo caminho real (rsync com nome novo e troca da pasta), apagado no fim.
+    /// Só roda sem firmware instalado: nunca toca num `registered` de verdade.
+    @Test(.enabled(if: Real.step("firmware-fake"))) func firmwareSwap() async throws {
+        let r = Real.runner
+        let base = "~/" + SwitchFirmware.deckDirectory
+        #expect(try await !r.run("test -e \(base)/registered").ok, "Já há firmware: o teste não roda")
+        let src = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: src, withIntermediateDirectories: true)
+        for i in 0..<SwitchFirmware.minimum { try Data("fake\(i)".utf8).write(to: src.appendingPathComponent("f\(i).nca")) }
+        let work = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let n = try await SwitchFirmware.install(src, config: Real.config, runner: r, work: work) { _, _ in }
+        #expect(n == SwitchFirmware.minimum)
+        #expect(try await r.check("cat \(base)/registered/f3.nca/00").stdout == "fake3")
+        #expect(try await !r.run("test -e \(base)/registered.quietdeck-new").ok)
+        try await r.check("rm -rf \(base)/registered")
+    }
+
     @Test(.enabled(if: Real.step("switch-clean"))) func switchClean() async throws {
         let r = Real.runner
         let paths = try await Emulation.paths(r, sdMount: nil)

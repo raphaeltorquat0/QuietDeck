@@ -217,11 +217,15 @@ struct LibraryView: View {
         urls.forEach { _ = $0.startAccessingSecurityScopedResource() }
         let catalog = model.catalog
         Task.detached {
-            let bios = await ROMScanner.biosFiles(urls, table: catalog.bios.entries)
-            let found = ROMScanner.scan(urls, catalog: catalog).filter { !bios.contains($0.path) }
+            var firmware: [URL] = []
+            for url in urls where await SwitchFirmware.isFirmware(url) { firmware.append(url) }
+            let rest = urls.filter { !firmware.contains($0) }
+            let bios = await ROMScanner.biosFiles(rest, table: catalog.bios.entries)
+            let found = ROMScanner.scan(rest, catalog: catalog).filter { !bios.contains($0.path) }
             let folderNames = Dictionary(uniqueKeysWithValues: found.map { URL(fileURLWithPath: $0.path) }
                 .filter(PS4Game.isGameFolder).map { ($0.path, PS4Game.folderName($0)) })
             await MainActor.run {
+                model.installSwitchFirmware(firmware.map(\.path))
                 model.importBIOS(bios)
                 let known = Set(candidates.map(\.path))
                 let unknown = found.filter { $0.detection == .unknown }.map(\.path)

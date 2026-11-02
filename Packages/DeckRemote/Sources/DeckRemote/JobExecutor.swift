@@ -109,6 +109,12 @@ public enum JobExecutor {
             case .removeQuietGlass:
                 try await QuietTheme.removeGlass(r, password: c.requirePassword())
                 progress(100, "Quiet Glass removed")
+            case let .installSwitchFirmware(local):
+                _ = try await Flatpaks.install(SwitchFirmware.flatpak, runner: r)
+                _ = try await SwitchFirmware.install(URL(fileURLWithPath: local), config: c.config, runner: r,
+                                                             work: c.workRoot.appendingPathComponent("firmware"), progress: progress)
+                try await SwitchKeys.send(config: c.config, runner: r)
+                progress(100, "Firmware installed")
             case let .applyAchievements(signedIn):
                 let installed = Set(try await Flatpaks.installed(r).map(\.appID))
                 let account = signedIn ? c.achievements : nil

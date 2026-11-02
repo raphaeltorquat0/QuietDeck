@@ -21,6 +21,16 @@
     }
    }
   },
+  "%@ doesn't look like Switch firmware: it has %@ .nca files.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não parece firmware do Switch: tem %@ arquivos .nca."
+     }
+    }
+   }
+  },
   "%@ doesn't match any known BIOS hash, so it wasn't copied.": {
    "localizations": {
     "pt-BR": {
@@ -1441,6 +1451,16 @@
     }
    }
   },
+  "Firmware installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Firmware instalado"
+     }
+    }
+   }
+  },
   "Flatpak finished, but the app state didn't change: %@": {
    "localizations": {
     "pt-BR": {
@@ -1787,6 +1807,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Instalar Quiet Home"
+     }
+    }
+   }
+  },
+  "Install Switch firmware": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar firmware do Switch"
      }
     }
    }
@@ -2537,6 +2567,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Preparando o emulador"
+     }
+    }
+   }
+  },
+  "Preparing the firmware": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Preparando o firmware"
      }
     }
    }
@@ -3727,6 +3767,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "O Deck aprovou este Mac e está ligando o SSH."
+     }
+    }
+   }
+  },
+  "The Deck has %@ firmware files instead of %@. Try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O Deck tem %@ arquivos de firmware em vez de %@. Tente de novo."
      }
     }
    }

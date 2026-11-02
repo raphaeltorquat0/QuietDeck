@@ -93,6 +93,7 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 
 - [ ] Drag a folder with `.cue` and `.bin` for PlayStation: it arrives as `.chd`
 - [ ] Drag a `.nsz` without keys: the job fails asking for `prod.keys`, and nothing reaches the Deck
+- [ ] Drop your own Switch firmware (folder or `.zip` of `.nca` files): an "Install Switch firmware" job runs and Ryubing shows the firmware version
 - [ ] Drop your own `prod.keys`, retry: it arrives as `.nsp` and opens in the emulator
 - [ ] Drag a SNES ROM with its translation `.ips` or `.bps`: the card shows the patch, the game arrives as `ROM (patch).sfc` next to the original and opens translated
 - [ ] Drag a PlayStation `.cue`/`.bin` with an `.xdelta`: it arrives as a translated `.chd`
