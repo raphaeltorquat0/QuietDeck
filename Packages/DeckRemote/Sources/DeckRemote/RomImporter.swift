@@ -115,7 +115,10 @@ public enum PS3Install {
         case .firmware: "\(base)/dev_flash/vsh/etc/version.txt"
         case .package: "\(base)/dev_hdd0/game/\(try packageTitleID(source))/PARAM.SFO"
         }
-        guard try await runner.run("test -f \(proof) && test $(( $(date +%s) - $(stat -c %Y \(proof)) )) -lt 3600").ok else {
+        // O firmware mantém a data original dos arquivos (4.92: fevereiro de 2025); basta existir.
+        // O pacote é extraído agora, então o PARAM.SFO tem de ser recente.
+        let check = kind == .firmware ? "test -f \(proof)" : "test -f \(proof) && test $(( $(date +%s) - $(stat -c %Y \(proof)) )) -lt 3600"
+        guard try await runner.run(check).ok else {
             throw DeckError.commandFailed(command: "rpcs3 --\(kind.rawValue)", result: r)
         }
     }
