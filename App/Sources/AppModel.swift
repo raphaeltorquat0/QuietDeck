@@ -309,6 +309,10 @@ final class AppModel {
         }
     }
 
+    func installPS3Firmware(_ paths: [String]) {
+        for path in paths { enqueue(String(localized: "Install PS3 firmware"), .installPS3Firmware(localPath: path)) }
+    }
+
     func installSwitchFirmware(_ paths: [String]) {
         for path in paths {
             enqueue(String(localized: "Install Switch firmware"), .installSwitchFirmware(localPath: path))

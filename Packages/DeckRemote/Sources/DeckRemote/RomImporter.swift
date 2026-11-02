@@ -90,6 +90,49 @@ public enum SwitchKeys {
     }
 }
 
+/// Patch `.pkg` e firmware `PS3UPDAT.PUP` do PS3 entram pelo próprio RPCS3, sem janela
+/// (`--headless --installpkg/--installfw`, `rpcs3.cpp`). O arquivo vai para o cache do flatpak e sai depois.
+public enum PS3Install {
+    public enum Kind: String { case package = "installpkg", firmware = "installfw" }
+    static let flatpak = "net.rpcs3.RPCS3"
+
+    public static func run(_ source: URL, kind: Kind, config: SSHConfig, runner: any CommandRunner,
+                           progress: @escaping @Sendable (Int?, String?) -> Void) async throws {
+        _ = try await Flatpaks.install(flatpak, runner: runner)
+        let files = RemoteFiles(runner: runner)
+        let dir = try await files.home() + "/.var/app/\(flatpak)/cache/quietdeck"
+        let size = (try? FileManager.default.attributesOfItem(atPath: source.path)[.size] as? Int64) ?? 0
+        try await files.ensureSpace(size * 2, in: dir)
+        try await Transfer.upload(source, to: dir, config: config) { p in progress(p.percent, "Sending") }
+        let remote = dir + "/" + source.lastPathComponent
+        progress(nil, kind == .firmware ? "Installing PS3 firmware" : "Installing the PS3 package")
+        // Nesta ordem: `--headless` antes faz o parser do Qt recusar a opção (0.0.43 do Flathub).
+        let r = try await runner.run(RemoteCommand("flatpak run \(flatpak) --\(kind.rawValue) \(Shell.quote(remote)) --headless", timeout: 1800), onOutput: nil)
+        try await runner.check("rm -f \(Shell.quote(remote))")
+        // O RPCS3 cai ao encerrar (`~manual_typemap`) mesmo depois de instalar: vale o que ficou no disco.
+        let base = "~/.var/app/\(flatpak)/config/rpcs3"
+        let proof = switch kind {
+        case .firmware: "\(base)/dev_flash/vsh/etc/version.txt"
+        case .package: "\(base)/dev_hdd0/game/\(try packageTitleID(source))/PARAM.SFO"
+        }
+        guard try await runner.run("test -f \(proof) && test $(( $(date +%s) - $(stat -c %Y \(proof)) )) -lt 3600").ok else {
+            throw DeckError.commandFailed(command: "rpcs3 --\(kind.rawValue)", result: r)
+        }
+    }
+
+    /// Content ID no cabeçalho do `.pkg` (offset 0x30, `EP9000-BCES00791_00-…`): o Title ID vem depois do `-`.
+    static func packageTitleID(_ url: URL) throws -> String {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        let head = try handle.read(upToCount: 0x60) ?? Data()
+        guard head.count >= 0x54 else { throw DeckError.unexpectedState("%@ isn't a PS3 package.", url.lastPathComponent) }
+        let contentID = String(decoding: head[0x30..<0x54], as: UTF8.self)
+        let parts = contentID.split(separator: "-")
+        guard parts.count >= 2, parts[1].count >= 9 else { throw DeckError.unexpectedState("%@ isn't a PS3 package.", url.lastPathComponent) }
+        return String(parts[1].prefix(9))
+    }
+}
+
 /// Update de Switch no Deck passa a valer no Ryubing: `games/<TitleID base>/updates.json`, o mesmo arquivo
 /// que a janela "Gerenciar atualizações" grava (`TitleUpdatesHelper.cs` da 1.3.3), com o mais novo escolhido.
 public enum SwitchUpdates {
@@ -154,8 +197,11 @@ public enum ROMScanner {
         var files: [URL] = []
         var folders: [ROMCandidate] = []
         func folderGame(_ url: URL) -> Bool {
-            guard PS4Game.isGameFolder(url) else { return false }
-            folders.append(ROMCandidate(path: url.path, size: folderSize(url), detection: .system("ps4")))
+            guard let system = GameFolder.system(url) else { return false }
+            folders.append(ROMCandidate(path: url.path, size: folderSize(url), detection: .system(system)))
+            // Patch `.pkg` que veio junto na raiz da pasta do disco também vale.
+            let loose = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+            files += loose.filter { $0.pathExtension.lowercased() == "pkg" }
             return true
         }
         for url in urls {
@@ -403,7 +449,10 @@ public struct RomImporter: Sendable {
         guard FileManager.default.fileExists(atPath: path) else {
             throw DeckError.unexpectedState("%@ isn't there anymore. Check that the network share is mounted.", source.lastPathComponent)
         }
-        if system.entry != nil {
+        var isDirectory: ObjCBool = false
+        FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        // Pasta de jogo (PS3, PS4) e `.pkg`; o resto (ISO de PS3) segue o caminho de arquivo.
+        if system.entry != nil, isDirectory.boolValue || source.pathExtension.lowercased() == "pkg" {
             guard patch == nil else { throw DeckError.unexpectedState("Patches aren't supported for %@ games.", system.name) }
             return try await importFolder(source, system: system, paths: paths, progress: progress)
         }
@@ -497,7 +546,11 @@ public struct RomImporter: Sendable {
     /// Jogo em pasta (PS4) vai inteiro, com o nome tirado do `param.sfo`. O `.pkg` precisa ser
     /// extraído antes: o shadPS4 não instala pacotes pela linha de comando.
     func importFolder(_ source: URL, system: GameSystem, paths: EmulationPaths, progress: @escaping Progress) async throws -> ROMImportResult {
-        guard let entryName = system.entry, PS4Game.isGameFolder(source) else {
+        if system.id == "ps3", source.pathExtension.lowercased() == "pkg" {
+            try await PS3Install.run(source, kind: .package, config: config, runner: runner, progress: progress)
+            return ROMImportResult(remotePath: "", skippedAsDuplicate: false, files: [])
+        }
+        guard let entryName = system.entry, GameFolder.system(source) == system.id else {
             throw DeckError.unexpectedState("%@ isn't an extracted %@ game. Drop the game folder (CUSA…, with eboot.bin and sce_sys) instead of the .pkg.", source.lastPathComponent, system.name)
         }
         let files = RemoteFiles(runner: runner)
@@ -509,7 +562,7 @@ public struct RomImporter: Sendable {
             progress(100, "Already on the Deck")
             return ROMImportResult(remotePath: existing, skippedAsDuplicate: true, files: [(existing as NSString).deletingLastPathComponent])
         }
-        let name = PS4Game.folderName(source)
+        let name = GameFolder.folderName(source)
         let directory = "\(paths.roms)/\(system.folder)"
         try await files.ensureSpace(ROMScanner.folderSize(source), in: directory)
         try await Transfer.upload(source, to: directory, named: name, config: config) { p in progress(p.percent, "Sending") }
@@ -537,7 +590,7 @@ public struct RomImporter: Sendable {
 public enum Library {
     public static func listing(paths: EmulationPaths) -> String {
         // Pasta ainda inexistente (nada enviado para aquele destino) é biblioteca vazia, não erro.
-        "if [ -d \(Shell.quote(paths.roms)) ]; then cd \(Shell.quote(paths.roms)) && find . -mindepth 2 -maxdepth 3 -type f -printf '%s\\t%P\\n'; fi"
+        "if [ -d \(Shell.quote(paths.roms)) ]; then cd \(Shell.quote(paths.roms)) && find . -mindepth 2 -maxdepth 4 -type f -printf '%s\\t%P\\n'; fi"
     }
 
     public struct Game: Equatable, Identifiable, Sendable {
@@ -559,9 +612,14 @@ public enum Library {
                   let system = systems.first(where: { relative.hasPrefix($0.folder + "/") }) else { return nil }
             // Jogo em pasta: o nome é o da pasta, e só o arquivo de entrada conta.
             if let entry = system.entry {
-                let folder = (relative as NSString).deletingLastPathComponent
-                guard name == entry, (folder as NSString).deletingLastPathComponent == system.folder else { return nil }
-                return Game(systemID: system.id, name: (folder as NSString).lastPathComponent, path: "\(paths.roms)/\(relative)", size: size)
+                // `<pasta do sistema>/<jogo>/<entry>`; entry pode ter subpastas (PS3_GAME/PARAM.SFO).
+                let parts = relative.split(separator: "/").map(String.init)
+                let depth = entry.split(separator: "/").count
+                if parts.count == 2 + depth, parts.suffix(depth).joined(separator: "/") == entry, parts[0] == system.folder {
+                    return Game(systemID: system.id, name: parts[1], path: "\(paths.roms)/\(relative)", size: size)
+                }
+                // Arquivo solto ao lado (ISO de PS3) segue a regra da extensão; o resto da pasta não é jogo.
+                guard parts.count == 2 else { return nil }
             }
             guard system.extensions.contains((name as NSString).pathExtension.lowercased()) else { return nil }
             return Game(systemID: system.id, name: name, path: "\(paths.roms)/\(relative)", size: size)
@@ -579,6 +637,11 @@ public enum Library {
         guard let emulator = catalog.emulator(system.emulator(for: (romPath as NSString).lastPathComponent)), emulator.isAvailable,
               let template = emulator.launch else { return nil }
         func q(_ s: String) -> String { "\"\(s)\"" }
+        // Jogo em pasta: o emulador abre `boot` (PS3: o EBOOT.BIN), e a Biblioteca acha o jogo por `entry`.
+        var romPath = romPath
+        if let entry = system.entry, let boot = system.boot, romPath.hasSuffix("/" + entry) {
+            romPath = String(romPath.dropLast(entry.count)) + boot
+        }
         let options = template.replacingOccurrences(of: "{rom}", with: q(romPath)).replacingOccurrences(of: "{core}", with: q(corePath ?? ""))
         return Shortcut(name: name, exe: "/usr/bin/flatpak", startDir: "/usr/bin", launchOptions: options, tags: [system.name])
     }

@@ -137,6 +137,9 @@ public enum JobExecutor {
             case let .applyArtwork(user, items):
                 let n = try await writeArt(items, user: user, runner: r)
                 progress(100, n == 0 ? "Artwork already there" : "Artwork added")
+            case let .installPS3Firmware(local):
+                try await PS3Install.run(URL(fileURLWithPath: local), kind: .firmware, config: c.config, runner: r, progress: progress)
+                progress(100, "PS3 firmware installed")
             case let .installSwitchMod(local):
                 _ = try await Flatpaks.install(SwitchMods.flatpak, runner: r)
                 _ = try await SwitchMods.install(URL(fileURLWithPath: local), config: c.config, runner: r,

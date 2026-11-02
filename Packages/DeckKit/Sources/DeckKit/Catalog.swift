@@ -14,6 +14,8 @@ public struct GameSystem: Codable, Hashable, Identifiable, Sendable {
     public var core: String?
     /// Jogo em pasta (PS4): o arquivo dentro dela que o emulador abre.
     public var entry: String?
+    /// Arquivo que o emulador abre, quando difere de `entry` (PS3: `PS3_GAME/USRDIR/EBOOT.BIN`).
+    public var boot: String?
     /// Emulador por jogo, pelo Title ID no nome do arquivo: quando o padrão não roda aquele jogo.
     public var emulatorFor: [String: String]?
 

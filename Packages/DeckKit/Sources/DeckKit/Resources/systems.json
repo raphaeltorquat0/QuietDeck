@@ -285,12 +285,15 @@
   "aliases": [],
   "extensions": [
    "iso",
+   "pkg",
    "ps3",
    "ps3dir"
   ],
   "readsArchives": false,
   "chd": null,
-  "emulator": "rpcs3"
+  "emulator": "rpcs3",
+  "entry": "PS3_GAME/PARAM.SFO",
+  "boot": "PS3_GAME/USRDIR/EBOOT.BIN"
  },
  {
   "id": "ps4",

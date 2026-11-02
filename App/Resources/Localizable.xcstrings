@@ -121,6 +121,16 @@
     }
    }
   },
+  "%@ isn't a PS3 package.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não é um pacote do PS3."
+     }
+    }
+   }
+  },
   "%@ isn't a Switch keys file.": {
    "localizations": {
     "pt-BR": {
@@ -1851,6 +1861,16 @@
     }
    }
   },
+  "Install PS3 firmware": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalar firmware do PS3"
+     }
+    }
+   }
+  },
   "Install Quiet Home": {
    "localizations": {
     "pt-BR": {
@@ -1917,6 +1937,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Plugins instalados"
+     }
+    }
+   }
+  },
+  "Installing PS3 firmware": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalando o firmware do PS3"
+     }
+    }
+   }
+  },
+  "Installing the PS3 package": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instalando o pacote do PS3"
      }
     }
    }
@@ -2437,6 +2477,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Visão geral"
+     }
+    }
+   }
+  },
+  "PS3 firmware installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Firmware do PS3 instalado"
+     }
+    }
+   }
+  },
+  "PS3UPDAT.PUP": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "PS3UPDAT.PUP"
      }
     }
    }

@@ -226,7 +226,7 @@ struct LibraryView: View {
             let bios = await ROMScanner.biosFiles(rest, table: catalog.bios.entries)
             let found = ROMScanner.scan(rest, catalog: catalog).filter { !bios.contains($0.path) }
             let folderNames = Dictionary(uniqueKeysWithValues: found.map { URL(fileURLWithPath: $0.path) }
-                .filter(PS4Game.isGameFolder).map { ($0.path, PS4Game.folderName($0)) })
+                .filter { GameFolder.system($0) != nil }.map { ($0.path, GameFolder.folderName($0)) })
             await MainActor.run {
                 model.installSwitchFirmware(firmware.map(\.path))
                 model.installSwitchMods(mods.map(\.path))
@@ -235,6 +235,8 @@ struct LibraryView: View {
                 let unknown = found.filter { $0.detection == .unknown }.map(\.path)
                 let keys = unknown.filter { SwitchKeys.files.contains(($0 as NSString).lastPathComponent.lowercased()) }
                 model.importSwitchKeys(keys)
+                let ps3Firmware = unknown.filter { ($0 as NSString).lastPathComponent.uppercased() == "PS3UPDAT.PUP" }
+                model.installPS3Firmware(ps3Firmware)
                 var added: [Candidate] = found.filter { !known.contains($0.path) }.compactMap { c in
                     switch c.detection {
                     case let .system(id): Candidate(path: c.path, size: c.size, systemID: id, options: catalog.systems.map(\.id), deckName: folderNames[c.path])
@@ -247,7 +249,7 @@ struct LibraryView: View {
                 let pairs = ROMPatch.pair(roms: (candidates + added).filter { $0.patch == nil }.map(\.path), patches: patches)
                 for i in added.indices where added[i].patch == nil { added[i].patch = pairs[added[i].path] }
                 let paired = Set(pairs.values)
-                unrecognized = unknown.filter { !keys.contains($0) && !paired.contains($0) }.map { ($0 as NSString).lastPathComponent }
+                unrecognized = unknown.filter { !keys.contains($0) && !paired.contains($0) && !ps3Firmware.contains($0) }.map { ($0 as NSString).lastPathComponent }
                 Motion.run {
                     for i in candidates.indices where candidates[i].patch == nil { candidates[i].patch = pairs[candidates[i].path] }
                     candidates += added

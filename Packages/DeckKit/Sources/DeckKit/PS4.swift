@@ -1,18 +1,29 @@
 import Foundation
 
-/// Jogo de PS4 é uma pasta (`CUSA00900/`) com `eboot.bin` e `sce_sys/param.sfo`. O shadPS4 abre o `eboot.bin`.
+/// Compatibilidade com o nome antigo: o PS4 virou um caso de `GameFolder`.
 public enum PS4Game {
     public static let entry = "eboot.bin"
+    public static func isGameFolder(_ url: URL) -> Bool { GameFolder.system(url) == "ps4" }
+    public static func folderName(_ url: URL) -> String { GameFolder.folderName(url) }
+}
 
-    public static func isGameFolder(_ url: URL) -> Bool {
+/// Jogo que é uma pasta: PS4 (`CUSA…/eboot.bin`) e disco de PS3 (`PS3_GAME/USRDIR/EBOOT.BIN`).
+/// O nome no Deck sai do `PARAM.SFO` de cada um.
+public enum GameFolder {
+    static let kinds: [(system: String, marker: String, sfo: String)] = [
+        ("ps4", "eboot.bin", "sce_sys/param.sfo"),
+        ("ps3", "PS3_GAME/USRDIR/EBOOT.BIN", "PS3_GAME/PARAM.SFO"),
+    ]
+
+    public static func system(_ url: URL) -> String? {
         let fm = FileManager.default
-        return fm.fileExists(atPath: url.appendingPathComponent(entry).path)
-            && fm.fileExists(atPath: url.appendingPathComponent("sce_sys/param.sfo").path)
+        return kinds.first { fm.fileExists(atPath: url.appendingPathComponent($0.marker).path) && fm.fileExists(atPath: url.appendingPathComponent($0.sfo).path) }?.system
     }
 
-    /// Nome da pasta no Deck: `Título [CUSA00900]`. Sem `param.sfo` legível, fica o nome da pasta.
+    /// `Título [ID]`, ou o nome da pasta quando o `PARAM.SFO` não é legível.
     public static func folderName(_ url: URL) -> String {
-        guard let data = try? Data(contentsOf: url.appendingPathComponent("sce_sys/param.sfo")),
+        guard let kind = kinds.first(where: { $0.system == system(url) }),
+              let data = try? Data(contentsOf: url.appendingPathComponent(kind.sfo)),
               let sfo = ParamSFO.parse(data), let title = sfo["TITLE"], !title.isEmpty else { return url.lastPathComponent }
         let clean = title.components(separatedBy: CharacterSet(charactersIn: "/:\n\r\t")).joined(separator: " ")
             .trimmingCharacters(in: .whitespaces)

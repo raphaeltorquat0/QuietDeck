@@ -39,6 +39,9 @@ public struct ROMDetector: Sendable {
         func at(_ offset: Int, _ text: String) -> Bool { match(d, offset, Array(text.utf8)) }
         func at(_ offset: Int, _ bytes: [UInt8]) -> Bool { match(d, offset, bytes) }
 
+        // `.pkg` existe nos dois: PS3 começa com `\x7FPKG`, PS4 com `\x7FCNT`.
+        if at(0, [0x7F, 0x50, 0x4B, 0x47]) { return "ps3" }
+        if at(0, [0x7F, 0x43, 0x4E, 0x54]) { return "ps4" }
         if at(0, [0x4E, 0x45, 0x53, 0x1A]) || at(0, [0x46, 0x44, 0x53, 0x1A]) { return "nes" }
         if at(0, [0x80, 0x37, 0x12, 0x40]) || at(0, [0x37, 0x80, 0x40, 0x12]) || at(0, [0x40, 0x12, 0x37, 0x80]) { return "n64" }
         let logo: [UInt8] = [0x24, 0xFF, 0xAE, 0x51, 0x69, 0x9A, 0xA2, 0x21]

@@ -360,6 +360,36 @@ import Testing
         #expect(try #require(EmulatorSetup.patched(eden[1], current: factory)).contains("use_docked_mode=0"))
     }
 
+    @Test func ps3DiscFolderAndPackages() throws {
+        let catalog = try Catalog.load()
+        let detector = ROMDetector(systems: catalog.systems)
+        #expect(detector.detect(path: "/d/Patch 1.01.pkg", prefix: Data([0x7F, 0x50, 0x4B, 0x47]), size: 10) == .system("ps3"))
+        #expect(detector.detect(path: "/d/Game.pkg", prefix: Data([0x7F, 0x43, 0x4E, 0x54]), size: 10) == .system("ps4"))
+
+        let root = try tempDir()
+        let game = root.appendingPathComponent("GoW [BCES00791]")
+        try FileManager.default.createDirectory(at: game.appendingPathComponent("PS3_GAME/USRDIR"), withIntermediateDirectories: true)
+        try Data(count: 4).write(to: game.appendingPathComponent("PS3_GAME/USRDIR/EBOOT.BIN"))
+        try Data(count: 4).write(to: game.appendingPathComponent("PS3_GAME/PARAM.SFO"))
+        try Data([0x7F, 0x50, 0x4B, 0x47]).write(to: game.appendingPathComponent("GoW Patch 1.01.pkg"))
+        let found = ROMScanner.scan([root], catalog: catalog)
+        #expect(found.filter { $0.detection == .system("ps3") }.map { ($0.path as NSString).lastPathComponent }.sorted() == ["GoW Patch 1.01.pkg", "GoW [BCES00791]"])
+
+        let paths = EmulationPaths(root: "/home/deck/Emulation")
+        let listing = "9\tps3/God of War [BCES00791]/PS3_GAME/PARAM.SFO\n9\tps3/God of War [BCES00791]/PS3_GAME/ICON0.PNG\n9\tps3/Demon.iso\n"
+        let games = Library.parse(listing, systems: catalog.systems, paths: paths)
+        #expect(games.map(\.name) == ["God of War [BCES00791]", "Demon.iso"])
+        let ps3 = try #require(catalog.system("ps3"))
+        let s = try #require(Library.shortcut(name: "God of War", romPath: games[0].path, system: ps3, catalog: catalog, corePath: nil))
+        #expect(s.launchOptions.hasSuffix("\"/home/deck/Emulation/roms/ps3/God of War [BCES00791]/PS3_GAME/USRDIR/EBOOT.BIN\""))
+        #expect(try #require(Library.shortcut(name: "Demon", romPath: games[1].path, system: ps3, catalog: catalog, corePath: nil)).launchOptions.hasSuffix("\"/home/deck/Emulation/roms/ps3/Demon.iso\""))
+        var header = Data([0x7F, 0x50, 0x4B, 0x47]) + Data(count: 0x2C)
+        header += Data("EP9000-BCES00791_00-GOWHDCLSHIP02222".utf8) + Data(count: 0x30)
+        let pkg = root.appendingPathComponent("header.pkg")
+        try header.write(to: pkg)
+        #expect(try PS3Install.packageTitleID(pkg) == "BCES00791")
+    }
+
     @Test func keysAreValidatedAndPrivate() throws {
         let dir = try tempDir(), home = dir.appendingPathComponent("home")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

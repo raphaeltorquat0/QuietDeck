@@ -61,6 +61,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case applyArtwork(user: String, items: [ArtItem])
     /// Remove atalhos com ROM apagada e limpa os nomes, sem tocar no Steam se não houver mudança.
     case tidyShortcuts(user: String)
+    /// `PS3UPDAT.PUP` do site da Sony, instalado pelo RPCS3.
+    case installPS3Firmware(localPath: String)
     /// Firmware do Switch do próprio console, pasta ou `.zip` com os `.nca`.
     case installSwitchFirmware(localPath: String)
     /// Grava (ou apaga, com `false`) a conta do RetroAchievements nos emuladores instalados.
