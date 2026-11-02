@@ -192,7 +192,16 @@ def reapply(settings, root="/"):
     """Steam e steamos-manager escrevem nos mesmos arquivos quando um jogo abre."""
     if not os.path.exists(settings):
         return False
-    profile = load_profile(settings)
+    board = model(root)
+    if board is None:
+        return False
+    # Mesma régua do boot: um arquivo corrompido não pode virar exceção a cada jogo aberto.
+    try:
+        profile = validate(load_profile(settings), LIMITS[board])
+    except (OSError, ValueError) as error:
+        log.error("perfil inválido, voltando ao padrão: %s", error)
+        reset(settings, root)
+        return False
     state = read_state(root)
     if matches(state, profile):
         return False

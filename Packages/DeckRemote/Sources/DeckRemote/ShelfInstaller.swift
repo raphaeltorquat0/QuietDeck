@@ -33,7 +33,8 @@ public struct ShelfInstaller: Sendable {
     public static func manifest(_ runner: any CommandRunner) async throws -> [String: ShelfManifestEntry] {
         let files = RemoteFiles(runner: runner)
         guard let data = try await files.read(try await files.home() + "/" + manifestPath) else { return [:] }
-        return (try? JSONDecoder().decode([String: ShelfManifestEntry].self, from: data)) ?? [:]
+        // Manifesto ilegível lança: devolver vazio faria o próximo `save` apagar o registro da Estante.
+        return try JSONDecoder().decode([String: ShelfManifestEntry].self, from: data)
     }
 
     private func save(_ manifest: [String: ShelfManifestEntry]) async throws {
@@ -88,7 +89,8 @@ public struct ShelfInstaller: Sendable {
         let script = manifest.map { id, entry in
             (entry.files.map { "test -e \(Shell.quote($0))" } + ["echo \(Shell.quote(id))"]).joined(separator: " && ")
         }.joined(separator: "; ")
-        let present = try await runner.run(script + "; true").stdout.split(whereSeparator: \.isNewline).map(String.init)
+        // `run`, não `check`: o status é o do último teste, e a resposta está no que foi ecoado.
+        let present = try await runner.run(script).stdout.split(whereSeparator: \.isNewline).map(String.init)
         return manifest.filter { present.contains($0.key) }
     }
 
@@ -126,11 +128,7 @@ public struct ShelfInstaller: Sendable {
         let name = (item.entry as NSString).lastPathComponent
         guard !name.isEmpty, name != ".", name != ".." else { throw DeckError.unexpectedState("Invalid file name: %@", name) }
         let target = "\(directory)/\(name)", partial = target + ".quietdeck-part"
-        let needed = item.size + SpaceAdvisor.reserve
-        let free = Int64(try await runner.check("mkdir -p \(Shell.quote(directory)) && df -B1 --output=avail \(Shell.quote(directory)) | tail -1").trimmed) ?? 0
-        guard free >= needed else {
-            throw DeckError.unexpectedState("Not enough space on the Deck: %@ MB needed, %@ MB free. Free up space or send to the microSD.", String(needed / 1_048_576), String(free / 1_048_576))
-        }
+        try await RemoteFiles(runner: runner).ensureSpace(item.size, in: directory)
         progress(nil, "Sending")
         let url = Self.fileURL(service: service, path: item.entry)
         let script = "curl -fsS -K - -C - -o \(Shell.quote(partial)) \(Shell.quote(url)) && test \"$(sha1sum \(Shell.quote(partial)) | cut -d' ' -f1)\" = \(Shell.quote(item.id)) && mv -f \(Shell.quote(partial)) \(Shell.quote(target))"

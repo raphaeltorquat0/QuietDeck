@@ -50,7 +50,8 @@ struct LibraryView: View {
                 grid
             }
         }
-        .onChange(of: model.openGame) {
+        // `initial`: pela paleta, a Biblioteca nasce com o jogo já pedido.
+        .onChange(of: model.openGame, initial: true) {
             if let game = model.openGame {
                 Motion.run { selected = game }
                 model.openGame = nil

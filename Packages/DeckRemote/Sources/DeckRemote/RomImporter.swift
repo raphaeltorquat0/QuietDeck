@@ -178,13 +178,6 @@ public struct RomImporter: Sendable {
         try await runner.check("mkdir -p \"$(dirname \(index))\" && printf '%s\\n' \(line) >> \(index)")
     }
 
-    private func checkFreeSpace(_ needed: Int64, directory: String) async throws {
-        let r = try await runner.check("df -B1 --output=avail \(Shell.quote(directory)) | tail -1")
-        if let free = Int64(r.trimmed), free < needed {
-            throw DeckError.unexpectedState("Not enough space on the Deck: %@ MB needed, %@ MB free. Free up space or send to the microSD.", String(needed / 1_048_576), String(free / 1_048_576))
-        }
-    }
-
     private func run(_ tool: String, _ args: [String], _ label: String) async throws {
         let r = try await LocalProcess.run(tool, args)
         guard r.ok else { throw DeckError.commandFailed(command: label, result: r) }
@@ -385,9 +378,8 @@ public struct RomImporter: Sendable {
         }
 
         let directory = "\(paths.roms)/\(system.folder)"
-        try await runner.check("mkdir -p \(Shell.quote(directory))")
         let total = outputs.reduce(Int64(0)) { $0 + ((try? FileManager.default.attributesOfItem(atPath: $1.path)[.size] as? Int64) ?? 0) }
-        try await checkFreeSpace(total, directory: directory)
+        try await files.ensureSpace(total, in: directory)
         for (i, output) in outputs.enumerated() {
             let count = outputs.count
             try await Transfer.upload(output, to: directory, config: config) { p in

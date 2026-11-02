@@ -282,6 +282,9 @@ final class LiveDeck: Identifiable {
     /// Avisa quando o tema acaba de ser desligado por um cliente novo.
     var onThemeDisabled: ((ThemeHealth) -> Void)?
     private var refreshing = false
+    /// Pedido que chegou durante uma leitura: refaz ao terminar, senão o jogo recém-enviado
+    /// só aparecia no próximo ciclo.
+    private var refreshAgain = false
 
     init(profile: DeckProfile, runner: any CommandRunner, config: SSHConfig, catalog: Catalog) {
         self.profile = profile
@@ -294,9 +297,15 @@ final class LiveDeck: Identifiable {
     var sdMount: String? { status.sdCard?.mountPoint }
 
     func refresh() async {
-        guard !refreshing else { return }
+        guard !refreshing else { refreshAgain = true; return }
         refreshing = true
-        defer { refreshing = false }
+        defer {
+            refreshing = false
+            if refreshAgain {
+                refreshAgain = false
+                Task { await refresh() }
+            }
+        }
         do {
             status = try await DeviceProbe.read(runner)
             connection = .online

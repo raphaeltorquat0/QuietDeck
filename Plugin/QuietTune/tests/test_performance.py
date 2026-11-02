@@ -214,6 +214,16 @@ def test_reapply_only_when_overwritten():
     deck.close()
 
 
+def test_reapply_resets_broken_profile():
+    deck = FakeDeck()
+    os.makedirs(os.path.dirname(deck.settings), exist_ok=True)
+    with open(deck.settings, "w") as f:
+        f.write('{"tdp": 99, "gpu": "auto"}')
+    assert with_kernel(deck, lambda: p.reapply(deck.settings, deck.root)) is False
+    assert not os.path.exists(deck.settings) and p.read_state(deck.root)["gpu"] == "auto"
+    deck.close()
+
+
 def test_uninstall_restores_only_if_we_changed_something():
     deck = FakeDeck(level="manual", low=1600, high=1600)
     before = deck.writes()

@@ -244,7 +244,8 @@ public enum QuietTheme {
                       "\(overrides)/movies/deck_startup.webm", "\(overrides)/movies/oled_startup.webm"]
         try await runner.check("cd ~ && rm -rf " + remove.map(Shell.quote).joined(separator: " "))
         // O Steam gera uma miniatura ao lado do vídeo; sem o vídeo, ela e as pastas vazias não têm dono.
-        try await runner.check("cd ~ && rm -f \(overrides)/movies/deck_startup.jpg \(overrides)/movies/oled_startup.jpg; rmdir -p --ignore-fail-on-non-empty \(overrides)/movies \(overrides)/screensavers 2>/dev/null; true")
+        let leftovers = ["\(overrides)/movies", "\(overrides)/screensavers"].map(Shell.quote).joined(separator: " ")
+        try await runner.check("cd ~ && rm -f \(overrides)/movies/deck_startup.jpg \(overrides)/movies/oled_startup.jpg && for d in \(leftovers); do if [ -d \"$d\" ]; then rmdir -p --ignore-fail-on-non-empty \"$d\"; fi; done")
         try await runner.check("cd ~ && if [ -e \(tabMaster).quietdeck-backup ]; then mv -f \(tabMaster).quietdeck-backup \(tabMaster); fi")
         _ = try await SteamControl(runner: runner).removeShortcuts(names: [storeTitle], user: user)
         try await runner.check("rm -f ~/\(snapshot)")

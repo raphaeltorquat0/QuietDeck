@@ -71,9 +71,37 @@ import DeckKit
         let root = try ShortcutsFile.merge([game], into: ShortcutsFile.emptyFile).root
         let b64 = VDF.serialize(root).base64EncodedString()
         let r = ReplayRunner(["printf %s \"$HOME\"": CommandResult(stdout: "/home/deck"),
-                              "base64 -w0 '/home/deck/.local/share/Steam/userdata/1/config/shortcuts.vdf' 2>/dev/null": CommandResult(stdout: b64)])
+                              Self.read(Self.shortcuts): CommandResult(stdout: b64)])
         #expect(try await SteamControl(runner: r).addShortcuts([game], user: "1").added.isEmpty)
         #expect(!r.executed.contains { $0.contains("systemctl") || $0.contains("pkill") })
+    }
+
+    static let shortcuts = "/home/deck/.local/share/Steam/userdata/1/config/shortcuts.vdf"
+    static func read(_ path: String) -> String { "if [ -e '\(path)' ]; then base64 -w0 '\(path)'; else exit 3; fi" }
+
+    @Test func readTellsMissingFromFailed() async throws {
+        let r = ReplayRunner([Self.read("/a"): CommandResult(exitCode: 3),
+                              Self.read("/b"): CommandResult(stderr: "Permission denied", exitCode: 1),
+                              Self.read("/c"): CommandResult(stdout: "aGk=")])
+        let files = RemoteFiles(runner: r)
+        #expect(try await files.read("/a") == nil)
+        await #expect(throws: DeckError.self) { try await files.read("/b") }
+        #expect(try await files.read("/c") == Data("hi".utf8))
+    }
+
+    @Test func unreadableShelfManifestIsNotEmpty() async {
+        let r = ReplayRunner(["printf %s \"$HOME\"": CommandResult(stdout: "/home/deck"),
+                              Self.read("/home/deck/" + ShelfInstaller.manifestPath): CommandResult(stdout: Data("{\"x\": 1}".utf8).base64EncodedString())])
+        await #expect(throws: (any Error).self) { try await ShelfInstaller.manifest(r) }
+    }
+
+    @Test func spaceCheckKeepsTheReserve() async throws {
+        let df = "mkdir -p '/r' && df -B1 --output=avail '/r' | tail -1"
+        let files = RemoteFiles(runner: ReplayRunner([df: CommandResult(stdout: String(SpaceAdvisor.reserve + 100))]))
+        try await files.ensureSpace(100, in: "/r")
+        await #expect(throws: DeckError.self) { try await files.ensureSpace(101, in: "/r") }
+        let broken = RemoteFiles(runner: ReplayRunner([df: CommandResult(stdout: "")]))
+        await #expect(throws: DeckError.self) { try await broken.ensureSpace(1, in: "/r") }
     }
 
     @Test func unrecordedCommandIsAnError() async {

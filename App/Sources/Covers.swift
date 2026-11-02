@@ -22,10 +22,16 @@ final class CoverStore {
 
     /// Arte da Estante, sempre em PNG: o Steam vai receber este mesmo arquivo.
     func store(_ remote: URL, title: String, kind: ArtKind) async {
-        guard let (data, _) = try? await URLSession.shared.data(from: remote), let image = NSImage(data: data),
-              let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return }
-        try? png.write(to: file(for: title, kind: kind))
+        guard let (data, _) = try? await URLSession.shared.data(from: remote), let image = save(data, title: title, kind: kind) else { return }
         images[key(title, kind)] = image
+    }
+
+    /// Qualquer formato vira PNG no disco: o arquivo do cache também vai ao Steam.
+    private func save(_ data: Data, title: String, kind: ArtKind) -> NSImage? {
+        guard let image = NSImage(data: data), let tiff = image.tiffRepresentation,
+              let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return nil }
+        try? png.write(to: file(for: title, kind: kind))
+        return image
     }
 
     func load(_ title: String, kind: ArtKind = .portrait) {
@@ -38,9 +44,8 @@ final class CoverStore {
             if let image = NSImage(contentsOf: url) { images[id] = image; return }
             guard let apiKey, let game = try? await SteamGridDB(key: apiKey).search(title).first,
                   let art = try? await SteamGridDB(key: apiKey).images(kind, gameID: game.id).first,
-                  let remote = URL(string: art.thumb), let (data, _) = try? await URLSession.shared.data(from: remote) else { return }
-            try? data.write(to: url)
-            images[id] = NSImage(data: data)
+                  let remote = URL(string: art.url), let (data, _) = try? await URLSession.shared.data(from: remote) else { return }
+            images[id] = save(data, title: title, kind: kind)
         }
     }
 }

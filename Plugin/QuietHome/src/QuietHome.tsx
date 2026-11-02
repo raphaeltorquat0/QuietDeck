@@ -95,17 +95,17 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
     return () => timers.forEach(clearTimeout)
   }, [tabIndex])
 
-  useEffect(() => {
-    const fresh = loadTabs()
-    if (fresh) setTabs(fresh)
-  }, [tabIndex])
-
   useEffect(() => (focused ? watchDetails(focused.appid, () => redraw((n) => n + 1)) : undefined), [focused])
 
+  // Recarrega antes de calcular o índice: a aba Emuladores pode ter surgido ou sumido, e o
+  // índice antigo apontaria para outra aba. A aba atual é achada pelo id.
   const change = (delta: number) => {
-    const next = (tabIndex + delta + tabs.length) % tabs.length
+    const fresh = loadTabs() ?? tabs
+    const current = Math.max(0, fresh.findIndex((t) => t.id === tab.id))
+    const next = (current + delta + fresh.length) % fresh.length
+    setTabs(fresh)
     setTabIndex(next)
-    setFocused(tabs[next].games[0])
+    setFocused(fresh[next].games[0])
   }
 
   const onButtonDown = (e: any) => {

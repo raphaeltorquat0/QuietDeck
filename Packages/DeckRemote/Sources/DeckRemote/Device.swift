@@ -111,10 +111,27 @@ public struct RemoteFiles: Sendable {
         try await runner.check("printf %s \"$HOME\"").stdout
     }
 
+    /// `nil` só quando o arquivo não existe. Timeout, permissão ou leitura truncada lançam:
+    /// quem chama grava em cima do que leu, e "falhou" tratado como "vazio" apagaria o arquivo.
     public func read(_ path: String) async throws -> Data? {
-        let r = try await runner.run("base64 -w0 \(Shell.quote(path)) 2>/dev/null")
-        guard r.ok else { return nil }
-        return Data(base64Encoded: r.trimmed)
+        let p = Shell.quote(path)
+        let r = try await runner.run("if [ -e \(p) ]; then base64 -w0 \(p); else exit 3; fi")
+        if r.exitCode == 3 { return nil }
+        guard r.ok else { throw DeckError.commandFailed(command: "read \(path)", result: r) }
+        guard let data = Data(base64Encoded: r.trimmed) else { throw DeckError.unexpectedState("%@ came back unreadable from the Deck.", path) }
+        return data
+    }
+
+    /// Cria a pasta e confere o espaço com a folga de `SpaceAdvisor.reserve`: o Deck cheio até zero
+    /// para de gravar saves e atualizações. Todo envio passa por aqui.
+    public func ensureSpace(_ size: Int64, in directory: String) async throws {
+        let d = Shell.quote(directory)
+        let r = try await runner.check("mkdir -p \(d) && df -B1 --output=avail \(d) | tail -1")
+        guard let free = Int64(r.trimmed) else { throw DeckError.unexpectedState("Couldn't read the free space on the Deck: %@", r.trimmed) }
+        let needed = size + SpaceAdvisor.reserve
+        guard free >= needed else {
+            throw DeckError.unexpectedState("Not enough space on the Deck: %@ MB needed, %@ MB free. Free up space or send to the microSD.", String(needed / 1_048_576), String(free / 1_048_576))
+        }
     }
 
     public func write(_ data: Data, to path: String) async throws {

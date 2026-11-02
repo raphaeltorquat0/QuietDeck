@@ -132,10 +132,13 @@ public struct SSHConfig: Codable, Hashable, Sendable {
 }
 
 /// Canal real: `/usr/bin/ssh` multiplexado por ControlMaster.
-public final class SSHRunner: CommandRunner {
+/// `@unchecked`: o único estado mutável, `connecting`, só é tocado com `lock`.
+public final class SSHRunner: CommandRunner, @unchecked Sendable {
     public let config: SSHConfig
     private let ssh = "/usr/bin/ssh"
     private let environment: [String: String]
+    private let lock = NSLock()
+    private var connecting: Task<Void, Error>?
 
     public init(config: SSHConfig) {
         self.config = config
@@ -145,9 +148,22 @@ public final class SSHRunner: CommandRunner {
         environment = env
     }
 
+    /// Comandos em paralelo esperam a mesma subida: cada um subindo o seu master deixava
+    /// conexões órfãs quando o socket já tinha sido criado por outro.
+    public func connect() async throws {
+        let task = lock.withLock {
+            if let connecting { return connecting }
+            let task = Task { try await self.establish() }
+            connecting = task
+            return task
+        }
+        defer { lock.withLock { if connecting == task { connecting = nil } } }
+        try await task.value
+    }
+
     /// O master sobe separado, sem pipes do app: em background ele herdaria o stderr de quem
     /// o criou e nenhum comando veria EOF.
-    public func connect() async throws {
+    private func establish() async throws {
         let check = try await LocalProcess.run(ssh, ["-o", "ControlPath=\(config.controlPath)", "-O", "check", "-p", String(config.port), config.destination],
                                                environment: environment, timeout: 5)
         if check.ok { return }
