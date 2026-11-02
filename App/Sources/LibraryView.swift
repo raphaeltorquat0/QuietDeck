@@ -27,10 +27,12 @@ struct LibraryView: View {
         var systemID: String?
         var options: [String]
         var patch: String?
+        /// Pasta de PS4: chega ao Deck com o título do `param.sfo`.
+        var deckName: String?
         var frame = CGRect.zero
         var name: String { (path as NSString).lastPathComponent }
         /// O nome com que o jogo chega ao Deck: traduzido ganha o nome do patch.
-        var title: String { ROMPlan.displayName(patch.map { ROMPatch.patchedName(rom: path, patch: $0) } ?? name) }
+        var title: String { ROMPlan.displayName(deckName ?? patch.map { ROMPatch.patchedName(rom: path, patch: $0) } ?? name) }
     }
 
     /// Discos do mesmo jogo aparecem como uma capa só.
@@ -217,6 +219,8 @@ struct LibraryView: View {
         Task.detached {
             let bios = await ROMScanner.biosFiles(urls, table: catalog.bios.entries)
             let found = ROMScanner.scan(urls, catalog: catalog).filter { !bios.contains($0.path) }
+            let folderNames = Dictionary(uniqueKeysWithValues: found.map { URL(fileURLWithPath: $0.path) }
+                .filter(PS4Game.isGameFolder).map { ($0.path, PS4Game.folderName($0)) })
             await MainActor.run {
                 model.importBIOS(bios)
                 let known = Set(candidates.map(\.path))
@@ -225,7 +229,7 @@ struct LibraryView: View {
                 model.importSwitchKeys(keys)
                 var added: [Candidate] = found.filter { !known.contains($0.path) }.compactMap { c in
                     switch c.detection {
-                    case let .system(id): Candidate(path: c.path, size: c.size, systemID: id, options: catalog.systems.map(\.id))
+                    case let .system(id): Candidate(path: c.path, size: c.size, systemID: id, options: catalog.systems.map(\.id), deckName: folderNames[c.path])
                     case let .ambiguous(ids): Candidate(path: c.path, size: c.size, systemID: nil, options: ids)
                     case .unknown: nil
                     }

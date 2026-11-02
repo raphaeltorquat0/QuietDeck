@@ -289,6 +289,19 @@
   "emulator": "rpcs3"
  },
  {
+  "id": "ps4",
+  "name": "PlayStation 4",
+  "folder": "ps4",
+  "aliases": [],
+  "extensions": [
+   "pkg"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "shadps4",
+  "entry": "eboot.bin"
+ },
+ {
   "id": "psp",
   "name": "PlayStation Portable",
   "folder": "psp",

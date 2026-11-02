@@ -48,16 +48,19 @@ public enum Transfer {
 
     /// Envia um arquivo ou pasta para dentro de `remoteDirectory`, retomando o que ficou pela metade.
     @discardableResult
-    public static func upload(_ local: URL, to remoteDirectory: String, config: SSHConfig,
+    /// `named`: nome no Deck, quando difere do local (pasta de jogo de PS4 renomeada pelo título).
+    public static func upload(_ local: URL, to remoteDirectory: String, named: String? = nil, config: SSHConfig,
                               onProgress: (@Sendable (TransferProgress) -> Void)? = nil) async throws -> CommandResult {
         let directory = remoteDirectory.hasSuffix("/") ? remoteDirectory : remoteDirectory + "/"
-        let spec = remoteSpec(config, path: directory, clientQuotes: await clientQuotes())
-        let result = try await rsync(rsyncArguments(config: config, source: local.path, destination: spec), onProgress)
+        // Com nome novo, o rsync copia o conteúdo (`origem/`) para `destino/nome/`.
+        let (source, target) = named.map { (local.path + "/", directory + $0 + "/") } ?? (local.path, directory)
+        let spec = remoteSpec(config, path: target, clientQuotes: await clientQuotes())
+        let result = try await rsync(rsyncArguments(config: config, source: source, destination: spec), onProgress)
         guard needsFallback(result) else {
             guard result.ok else { throw DeckError.commandFailed(command: "rsync \(local.lastPathComponent)", result: result) }
             return result
         }
-        return try await sftpUpload(local, to: directory, config: config, onProgress: onProgress)
+        return try await sftpUpload(local, to: directory, named: named, config: config, onProgress: onProgress)
     }
 
     /// Traz o conteúdo de uma pasta do Deck para `local`, sem apagar nada do que já existe lá.
@@ -95,11 +98,11 @@ public enum Transfer {
         return "reput\(isDirectory ? " -r" : "") \(q(local)) \(q(remotePath))\n"
     }
 
-    static func sftpUpload(_ local: URL, to directory: String, config: SSHConfig,
+    static func sftpUpload(_ local: URL, to directory: String, named: String? = nil, config: SSHConfig,
                            onProgress: (@Sendable (TransferProgress) -> Void)?) async throws -> CommandResult {
         var isDirectory: ObjCBool = false
         FileManager.default.fileExists(atPath: local.path, isDirectory: &isDirectory)
-        let remote = (directory.hasSuffix("/") ? directory : directory + "/") + local.lastPathComponent
+        let remote = (directory.hasSuffix("/") ? directory : directory + "/") + (named ?? local.lastPathComponent)
         let prepare = isDirectory.boolValue ? "mkdir -p \(Shell.quote(remote))" : "touch \(Shell.quote(remote))"
         try await SSHRunner(config: config).check(prepare)
         let args = config.keyOptions + ["-P", String(config.port), "-b", "-", config.destination]

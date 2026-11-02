@@ -360,6 +360,15 @@
   "launch": "run net.rpcs3.RPCS3 --no-gui {rom}"
  },
  {
+  "id": "shadps4",
+  "name": "shadPS4",
+  "flatpak": "net.shadps4.shadPS4",
+  "systems": [
+   "ps4"
+  ],
+  "launch": "run --command=shadps4 net.shadps4.shadPS4 -f true -g {rom}"
+ },
+ {
   "id": "ryubing",
   "name": "Ryubing (Ryujinx)",
   "flatpak": "io.github.ryubing.Ryujinx",

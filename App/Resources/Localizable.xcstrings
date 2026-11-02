@@ -111,6 +111,16 @@
     }
    }
   },
+  "%@ isn't an extracted %@ game. Drop the game folder (CUSA…, with eboot.bin and sce_sys) instead of the .pkg.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não é um jogo de %@ extraído. Solte a pasta do jogo (CUSA…, com eboot.bin e sce_sys) em vez do .pkg."
+     }
+    }
+   }
+  },
   "%@ isn't available.": {
    "localizations": {
     "pt-BR": {
@@ -2377,6 +2387,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Senha do usuário deck"
+     }
+    }
+   }
+  },
+  "Patches aren't supported for %@ games.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Patches não são aceitos em jogos de %@."
      }
     }
    }

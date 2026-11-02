@@ -18,6 +18,8 @@ PT = {
 "%@ is damaged or isn't a patch QuietDeck can apply.": "%@ está danificado ou não é um patch que o QuietDeck sabe aplicar.",
 "Applying patch": "Aplicando o patch",
 "This patch is applied before sending. Your original files aren't changed.": "Este patch é aplicado antes do envio. Seus arquivos originais não mudam.",
+"Patches aren't supported for %@ games.": "Patches não são aceitos em jogos de %@.",
+"%@ isn't an extracted %@ game. Drop the game folder (CUSA…, with eboot.bin and sce_sys) instead of the .pkg.": "%@ não é um jogo de %@ extraído. Solte a pasta do jogo (CUSA…, com eboot.bin e sce_sys) em vez do .pkg.",
 "nsz finished without creating a game from %@.": "O nsz terminou sem gerar um jogo a partir de %@.",
 "SMB": "SMB",
 "NFS": "NFS",

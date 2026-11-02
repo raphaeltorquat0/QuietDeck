@@ -12,6 +12,8 @@ public struct GameSystem: Codable, Hashable, Identifiable, Sendable {
     public var chd: String?
     public var emulator: String
     public var core: String?
+    /// Jogo em pasta (PS4): o arquivo dentro dela que o emulador abre.
+    public var entry: String?
 }
 
 public struct ConfigEntry: Codable, Hashable, Sendable {

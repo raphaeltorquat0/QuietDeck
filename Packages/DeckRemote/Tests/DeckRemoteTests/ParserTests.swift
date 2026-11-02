@@ -285,6 +285,30 @@ import Testing
         #expect(try #require(EmulatorSetup.patched(main, current: "[General]\nISOPaths = 2\n")).hasSuffix("[Display]\nFullscreen = True\n"))
     }
 
+    @Test func ps4GameIsAFolder() throws {
+        let catalog = try Catalog.load()
+        let root = try tempDir()
+        let game = root.appendingPathComponent("Dump/CUSA00900")
+        try FileManager.default.createDirectory(at: game.appendingPathComponent("sce_sys"), withIntermediateDirectories: true)
+        try Data(count: 10).write(to: game.appendingPathComponent("eboot.bin"))
+        try Data(count: 5).write(to: game.appendingPathComponent("sce_sys/param.sfo"))
+        try Data(count: 3).write(to: game.appendingPathComponent("other.bin"))
+        try Data(count: 3).write(to: root.appendingPathComponent("Dump/Golden Sun.gba"))
+        let found = ROMScanner.scan([root], catalog: catalog)
+        #expect(found.count == 2)
+        let ps4Game = try #require(found.first { $0.detection == .system("ps4") })
+        #expect(ps4Game.path.hasSuffix("/Dump/CUSA00900") && ps4Game.size == 18)
+
+        let paths = EmulationPaths(root: "/home/deck/Emulation")
+        let listing = "10\tps4/Bloodborne [CUSA00900]/eboot.bin\n3\tps4/Bloodborne [CUSA00900]/other.bin\n4\tps4/Bloodborne [CUSA00900]/sce_module/x.bin\n"
+        let games = Library.parse(listing, systems: catalog.systems, paths: paths)
+        #expect(games == [Library.Game(systemID: "ps4", name: "Bloodborne [CUSA00900]", path: "/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin", size: 10)])
+        let game0 = try #require(Library.pick(GameRef(systemID: "ps4", title: "Bloodborne"), in: games))
+        let ps4 = try #require(catalog.system("ps4"))
+        let s = try #require(Library.shortcut(name: "Bloodborne", romPath: game0.path, system: ps4, catalog: catalog, corePath: nil))
+        #expect(s.launchOptions == "run --command=shadps4 net.shadps4.shadPS4 -f true -g \"/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin\"")
+    }
+
     @Test func keysAreValidatedAndPrivate() throws {
         let dir = try tempDir(), home = dir.appendingPathComponent("home")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

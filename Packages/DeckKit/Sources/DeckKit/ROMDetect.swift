@@ -150,7 +150,7 @@ public enum ROMPlan {
     /// Nome do jogo na biblioteca do Steam: tira extensão, marcações de disco e as do dump do Switch.
     public static func displayName(_ fileName: String) -> String {
         let name = discInfo(fileName)?.base ?? (fileName as NSString).deletingPathExtension
-        return name.replacingOccurrences(of: #"\s*(\[[0-9A-Fa-f]{16}\]|\[v[0-9]+\]|\([0-9.]+ [GM]B\))"#, with: "", options: .regularExpression)
+        return name.replacingOccurrences(of: #"\s*(\[[0-9A-Fa-f]{16}\]|\[[A-Z]{4}[0-9]{5}\]|\[v[0-9]+\]|\([0-9.]+ [GM]B\))"#, with: "", options: .regularExpression)
             .trimmingCharacters(in: .whitespaces)
     }
 

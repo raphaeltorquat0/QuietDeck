@@ -97,6 +97,8 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 - [ ] Drag a SNES ROM with its translation `.ips` or `.bps`: the card shows the patch, the game arrives as `ROM (patch).sfc` next to the original and opens translated
 - [ ] Drag a PlayStation `.cue`/`.bin` with an `.xdelta`: it arrives as a translated `.chd`
 - [ ] Drag a patch for another version: the job fails saying so, and nothing reaches the Deck
+- [ ] Drag an extracted PS4 game folder (`CUSA…`): it shows the game title, arrives as `roms/ps4/Title [CUSA…]/` and opens fullscreen in shadPS4 from the home
+- [ ] Drag a PS4 `.pkg`: the job fails asking for the extracted folder
 - [ ] Drag a file of an unknown format: the Library names it instead of ignoring it
 - [ ] Send a Switch game with update, no game open: one shortcut, clean name, first on Quiet Home with focus
 - [ ] Send with a game open: the game stays open, and the job finishes after it closes

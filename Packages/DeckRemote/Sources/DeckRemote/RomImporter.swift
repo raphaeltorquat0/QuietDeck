@@ -80,13 +80,22 @@ public enum ROMScanner {
     public static func scan(_ urls: [URL], catalog: Catalog) -> [ROMCandidate] {
         let detector = ROMDetector(systems: catalog.systems)
         var files: [URL] = []
+        var folders: [ROMCandidate] = []
+        func folderGame(_ url: URL) -> Bool {
+            guard PS4Game.isGameFolder(url) else { return false }
+            folders.append(ROMCandidate(path: url.path, size: folderSize(url), detection: .system("ps4")))
+            return true
+        }
         for url in urls {
             var isDir: ObjCBool = false
             guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) else { continue }
             if isDir.boolValue {
-                let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles])
+                if folderGame(url) { continue }
+                let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey], options: [.skipsHiddenFiles])
                 while let item = walker?.nextObject() as? URL {
-                    if (try? item.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true { files.append(item) }
+                    let values = try? item.resourceValues(forKeys: [.isRegularFileKey, .isDirectoryKey])
+                    if values?.isDirectory == true, folderGame(item) { walker?.skipDescendants() }
+                    if values?.isRegularFile == true { files.append(item) }
                 }
             } else {
                 files.append(url)
@@ -99,7 +108,7 @@ public enum ROMScanner {
                 members.insert(file.deletingLastPathComponent().appendingPathComponent(name).standardizedFileURL.path)
             }
         }
-        return files.compactMap { file in
+        return folders + files.compactMap { file in
             guard !members.contains(file.standardizedFileURL.path) else { return nil }
             let size = (try? FileManager.default.attributesOfItem(atPath: file.path)[.size] as? Int64) ?? 0
             var head = prefix(file.path)
@@ -116,6 +125,15 @@ public enum ROMScanner {
 }
 
 extension ROMScanner {
+    static func folderSize(_ url: URL) -> Int64 {
+        var total: Int64 = 0
+        let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey])
+        while let item = walker?.nextObject() as? URL {
+            total += Int64((try? item.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+        return total
+    }
+
     /// Separa o que é BIOS conhecida pelo hash; o tamanho evita ler jogos inteiros à toa.
     public static func biosFiles(_ urls: [URL], table: [BIOSEntry]) async -> [String] {
         let sizes = Set(table.map { Int64($0.size) })
@@ -313,6 +331,10 @@ public struct RomImporter: Sendable {
         guard FileManager.default.fileExists(atPath: path) else {
             throw DeckError.unexpectedState("%@ isn't there anymore. Check that the network share is mounted.", source.lastPathComponent)
         }
+        if system.entry != nil {
+            guard patch == nil else { throw DeckError.unexpectedState("Patches aren't supported for %@ games.", system.name) }
+            return try await importFolder(source, system: system, paths: paths, progress: progress)
+        }
         let files = RemoteFiles(runner: runner)
         let home = try await files.home()
 
@@ -398,6 +420,33 @@ public struct RomImporter: Sendable {
         return ROMImportResult(remotePath: playlist ?? main, skippedAsDuplicate: false, files: outputs.map { directory + "/" + $0.lastPathComponent })
     }
 
+    /// Jogo em pasta (PS4) vai inteiro, com o nome tirado do `param.sfo`. O `.pkg` precisa ser
+    /// extraído antes: o shadPS4 não instala pacotes pela linha de comando.
+    func importFolder(_ source: URL, system: GameSystem, paths: EmulationPaths, progress: @escaping Progress) async throws -> ROMImportResult {
+        guard let entryName = system.entry, PS4Game.isGameFolder(source) else {
+            throw DeckError.unexpectedState("%@ isn't an extracted %@ game. Drop the game folder (CUSA…, with eboot.bin and sce_sys) instead of the .pkg.", source.lastPathComponent, system.name)
+        }
+        let files = RemoteFiles(runner: runner)
+        let home = try await files.home()
+        let entry = source.appendingPathComponent(entryName)
+        progress(nil, "Checking for duplicates")
+        let hash = try await LocalHash.compute(entry.path, algorithm: 256)
+        if let existing = try await duplicate(of: hash, files: files, home: home) {
+            progress(100, "Already on the Deck")
+            return ROMImportResult(remotePath: existing, skippedAsDuplicate: true, files: [(existing as NSString).deletingLastPathComponent])
+        }
+        let name = PS4Game.folderName(source)
+        let directory = "\(paths.roms)/\(system.folder)"
+        try await files.ensureSpace(ROMScanner.folderSize(source), in: directory)
+        try await Transfer.upload(source, to: directory, named: name, config: config) { p in progress(p.percent, "Sending") }
+        let remoteEntry = "\(directory)/\(name)/\(entryName)"
+        let size = (try? FileManager.default.attributesOfItem(atPath: entry.path)[.size] as? Int64) ?? 0
+        let verified = try await runner.run("stat -c %s \(Shell.quote(remoteEntry))").trimmed
+        guard verified == String(size) else { throw DeckError.unexpectedState("The file on the Deck has %@ bytes instead of %@. Try again.", verified, String(size)) }
+        try await record(hash: hash, path: remoteEntry, size: size, home: home)
+        return ROMImportResult(remotePath: remoteEntry, skippedAsDuplicate: false, files: ["\(directory)/\(name)"])
+    }
+
     /// Olha a pasta real: os discos podem ter chegado em trabalhos diferentes.
     func updatePlaylist(for fileName: String, directory: String) async throws -> String? {
         guard let base = ROMPlan.discInfo(fileName)?.base else { return nil }
@@ -429,8 +478,14 @@ public enum Library {
             let f = line.split(separator: "\t", maxSplits: 1).map(String.init)
             guard f.count == 2, let size = Int64(f[0]) else { return nil }
             let relative = f[1], name = (relative as NSString).lastPathComponent
-            guard let system = systems.first(where: { relative.hasPrefix($0.folder + "/") }),
-                  system.extensions.contains((name as NSString).pathExtension.lowercased()) else { return nil }
+            guard let system = systems.first(where: { relative.hasPrefix($0.folder + "/") }) else { return nil }
+            // Jogo em pasta: o nome é o da pasta, e só o arquivo de entrada conta.
+            if let entry = system.entry {
+                let folder = (relative as NSString).deletingLastPathComponent
+                guard name == entry, (folder as NSString).deletingLastPathComponent == system.folder else { return nil }
+                return Game(systemID: system.id, name: (folder as NSString).lastPathComponent, path: "\(paths.roms)/\(relative)", size: size)
+            }
+            guard system.extensions.contains((name as NSString).pathExtension.lowercased()) else { return nil }
             return Game(systemID: system.id, name: name, path: "\(paths.roms)/\(relative)", size: size)
         }
     }
