@@ -294,6 +294,8 @@ final class AppModel {
             do {
                 try SwitchKeys.install(from: URL(fileURLWithPath: path))
                 toast = Toast(title: String(localized: "Switch keys imported"), detail: String(localized: "Compressed Switch games can now be sent."), isError: false)
+                // Substitui também a do Ryubing: chaves velhas no Deck não abrem jogo de firmware novo.
+                enqueue(String(localized: "Send Switch keys"), .sendSwitchKeys)
             } catch {
                 toast = Toast(title: String(localized: "Couldn't import the keys"), detail: describe(error), isError: true)
             }

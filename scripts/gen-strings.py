@@ -51,6 +51,8 @@ PT = {
 "Shortcuts already tidy": "Atalhos já organizados",
 "Shortcuts tidied": "Atalhos organizados",
 "Shortcuts wait until the game is closed": "Os atalhos esperam o jogo fechar",
+"Send Switch keys": "Enviar chaves do Switch",
+"Switch keys sent": "Chaves do Switch enviadas",
 "nsz finished without creating a game from %@.": "O nsz terminou sem gerar um jogo a partir de %@.",
 "SMB": "SMB",
 "NFS": "NFS",

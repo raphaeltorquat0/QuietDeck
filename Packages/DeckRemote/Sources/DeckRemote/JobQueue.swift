@@ -53,6 +53,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case importBIOS(localPath: String, sdMount: String?)
     case quickAction(QuickAction)
     case installQuietHome
+    /// `prod.keys` do Mac para o Ryubing, substituindo a do Deck.
+    case sendSwitchKeys
     /// Tradução ou mod de Switch em LayeredFS (`<TitleID>/romfs`), pasta ou `.zip`.
     case installSwitchMod(localPath: String)
     /// Arte que falta em atalhos já criados; a que existe não é trocada.

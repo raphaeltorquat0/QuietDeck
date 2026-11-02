@@ -109,6 +109,9 @@ public enum JobExecutor {
             case .removeQuietGlass:
                 try await QuietTheme.removeGlass(r, password: c.requirePassword())
                 progress(100, "Quiet Glass removed")
+            case .sendSwitchKeys:
+                try await SwitchKeys.send(config: c.config, runner: r)
+                progress(100, "Switch keys sent")
             case let .tidyShortcuts(user):
                 if let done = try await SteamControl(runner: r).tidyShortcuts(user: user) {
                     progress(100, done.removed + done.renamed == 0 ? "Shortcuts already tidy" : "Shortcuts tidied")

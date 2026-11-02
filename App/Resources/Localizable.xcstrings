@@ -3291,6 +3291,16 @@
     }
    }
   },
+  "Send Switch keys": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Enviar chaves do Switch"
+     }
+    }
+   }
+  },
   "Send and Add to Steam": {
    "localizations": {
     "pt-BR": {
@@ -3767,6 +3777,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Chaves do Switch importadas"
+     }
+    }
+   }
+  },
+  "Switch keys sent": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chaves do Switch enviadas"
      }
     }
    }
