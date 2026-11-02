@@ -31,6 +31,26 @@ enum Real {
 }
 
 @Suite("RealDeck", .serialized) struct RealDeckTests {
+    /// ROM vazia, só para percorrer o job até o Steam reiniciado. Desfaça com o passo `switch-clean`.
+    @Test(.enabled(if: Real.step("switch-shortcut"))) func switchShortcut() async throws {
+        let r = Real.runner
+        let paths = try await Emulation.paths(r, sdMount: nil)
+        let dir = paths.roms + "/switch"
+        try await r.check("mkdir -p \(Shell.quote(dir)) && : > \(Shell.quote(dir + "/QuietDeck Teste [0100000000000000][v0] (0.01 GB).nsp"))")
+        let action = JobAction.addToSteam(user: try await Real.user(), games: [GameRef(systemID: "switch", title: "QuietDeck Teste")], sdMount: nil)
+        let context = JobContext(runner: r, config: Real.config, catalog: try Catalog.load(), password: nil, workRoot: FileManager.default.temporaryDirectory) {}
+        try await JobExecutor.run(Job(deckID: UUID(), title: "Teste", action: action), context: context) { _, _ in }
+        #expect(try await Real.names().contains("QuietDeck Teste"))
+    }
+
+    @Test(.enabled(if: Real.step("switch-clean"))) func switchClean() async throws {
+        let r = Real.runner
+        let paths = try await Emulation.paths(r, sdMount: nil)
+        #expect(try await SteamControl(runner: r).removeShortcuts(names: ["QuietDeck Teste"], user: try await Real.user()))
+        try await r.check("rm -f \(Shell.quote(paths.roms + "/switch/QuietDeck Teste [0100000000000000][v0] (0.01 GB).nsp"))")
+        #expect(try await !Real.names().contains("QuietDeck Teste"))
+    }
+
     @Test(.enabled(if: Real.step("record"))) func recordFixture() async throws {
         let url = URL(fileURLWithPath: Real.env["QUIETDECK_REAL_OUT"] ?? "/tmp/steamos-real.json")
         let r = RecordingRunner(base: Real.runner, recorder: CommandRecorder(url: url, source: "steamos-real"))

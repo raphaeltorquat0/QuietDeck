@@ -230,6 +230,17 @@ final class AppModel {
         }
     }
 
+    func importSwitchKeys(_ files: [String]) {
+        for path in files {
+            do {
+                try SwitchKeys.install(from: URL(fileURLWithPath: path))
+                toast = Toast(title: String(localized: "Switch keys imported"), detail: String(localized: "Compressed Switch games can now be sent."), isError: false)
+            } catch {
+                toast = Toast(title: String(localized: "Couldn't import the keys"), detail: describe(error), isError: true)
+            }
+        }
+    }
+
     private func context(_ id: UUID) -> JobContext? {
         guard let deck = live[id] else { return nil }
         return JobContext(runner: deck.runner, config: deck.config, catalog: catalog, password: Keychain.password(for: id.uuidString),
@@ -301,7 +312,13 @@ final class LiveDeck: Identifiable {
             paths = p
             let scan = (try? await r.run(BIOS.scan(paths: p)).stdout) ?? ""
             bios = DeckRemote.BIOS.status(scanOutput: scan, table: catalog.bios.entries)
-            games = Library.parse((try? await r.run(Library.listing(paths: p)).stdout) ?? "", systems: catalog.systems, paths: p)
+            var locations = [p]
+            if !p.isEmuDeck, let sd = sdMount { locations.append(EmulationPaths(root: sd + "/Emulation")) }
+            var found: [Library.Game] = []
+            for location in locations {
+                found += Library.parse((try? await r.run(Library.listing(paths: location)).stdout) ?? "", systems: catalog.systems, paths: location)
+            }
+            games = found
         }
         shelfInstalled = (try? await ShelfInstaller.installed(r)) ?? shelfInstalled
         if let user = steamUsers.first { shortcutsPlayed = (try? await SteamControl(runner: r).lastPlayed(user: user)) ?? shortcutsPlayed }

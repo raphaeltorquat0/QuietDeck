@@ -24,6 +24,8 @@ import Testing
         #expect(detect("/x/Game.z64") == .system("n64"))
         #expect(detect("/x/Game.gdi") == .system("dreamcast"))
         #expect(detect("/x/readme.txt") == .unknown)
+        #expect(detect("/x/Game [v0].nsz") == .system("switch"))
+        #expect(detect("/x/Game.xcz") == .system("switch"))
     }
 
     @Test func folderBeatsExtensionWithAliases() {
@@ -83,6 +85,16 @@ import Testing
                 == ["Game (Track 1).bin", "t2.bin"])
         #expect(ROMPlan.referencedFiles(cueSheet: "3\n1 0 4 2352 track01.bin 0\n2 600 0 2352 \"track 02.raw\" 0\n3 45000 4 2352 track03.bin 0\n", extension: "gdi")
                 == ["track01.bin", "track 02.raw", "track03.bin"])
+    }
+
+    @Test func switchDumpNames() {
+        let base = "Super Mario Galaxy [010099C022B96000][v0] (3.30 GB).nsz"
+        #expect(ROMPlan.displayName(base) == "Super Mario Galaxy")
+        #expect(ROMPlan.displayName("Game (USA) (Disc 1).chd") == "Game (USA)")
+        #expect(!ROMPlan.isSwitchAddon(base))
+        #expect(ROMPlan.isSwitchAddon("Super Mario Galaxy [010099C022B96800][v327680] (0.32 GB).nsp"))
+        #expect(ROMPlan.isSwitchAddon("Game [0100AAAA00001001][v0].nsp"))
+        #expect(!ROMPlan.isSwitchAddon("Game (USA).sfc"))
     }
 
     @Test func multiDiscPlaylists() {

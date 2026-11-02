@@ -81,12 +81,32 @@
     }
    }
   },
+  "%@ is damaged or isn't a patch QuietDeck can apply.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ está danificado ou não é um patch que o QuietDeck sabe aplicar."
+     }
+    }
+   }
+  },
   "%@ is missing and Homebrew isn't installed. Install Homebrew from brew.sh, then try again.": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "%@ não foi encontrado, e o Homebrew não está instalado. Instale o Homebrew em brew.sh e tente de novo."
+     }
+    }
+   }
+  },
+  "%@ isn't a Switch keys file.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não é um arquivo de chaves do Switch."
      }
     }
    }
@@ -137,6 +157,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "%@ recusou suas credenciais."
+     }
+    }
+   }
+  },
+  "%@ was made for another version of this game. Check the CRC32 or SHA-1 its readme asks for.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ foi feito para outra versão deste jogo. Confira o CRC32 ou SHA-1 pedido no leia-me do patch."
      }
     }
    }
@@ -227,6 +257,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Há um pedido de pareamento deste Mac na tela do Deck. Escolha **Aprovar**."
+     }
+    }
+   }
+  },
+  "A patch can't be applied to %@. Use the original .bin, .iso or .cue instead.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não dá para aplicar um patch em %@. Use o .bin, .iso ou .cue original."
      }
     }
    }
@@ -551,6 +591,16 @@
     }
    }
   },
+  "Applying patch": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Aplicando o patch"
+     }
+    }
+   }
+  },
   "Approve": {
    "localizations": {
     "pt-BR": {
@@ -861,6 +911,16 @@
     }
    }
   },
+  "Compressed Switch games can now be sent.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Agora é possível enviar jogos de Switch compactados."
+     }
+    }
+   }
+  },
   "Confirm": {
    "localizations": {
     "pt-BR": {
@@ -977,6 +1037,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Não foi possível baixar %@."
+     }
+    }
+   }
+  },
+  "Couldn't import the keys": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não foi possível importar as chaves"
      }
     }
    }
@@ -2007,6 +2077,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Nenhum"
+     }
+    }
+   }
+  },
+  "Not added, format not recognized: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não adicionados, formato não reconhecido: %@"
      }
     }
    }
@@ -3401,6 +3481,26 @@
     }
    }
   },
+  "Switch keys are missing. Drop your own prod.keys on Library, then try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Faltam as chaves do Switch. Solte seu próprio prod.keys na Biblioteca e tente de novo."
+     }
+    }
+   }
+  },
+  "Switch keys imported": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Chaves do Switch importadas"
+     }
+    }
+   }
+  },
   "Switch to Game Mode": {
    "localizations": {
     "pt-BR": {
@@ -3531,6 +3631,16 @@
     }
    }
   },
+  "The game isn't on the Deck in this location, so no shortcut was created.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O jogo não está neste local do Deck, então nenhum atalho foi criado."
+     }
+    }
+   }
+  },
   "The installer finished, but Decky isn't there.": {
    "localizations": {
     "pt-BR": {
@@ -3647,6 +3757,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Este app está instalado no sistema, e o QuietDeck só gerencia instalações --user."
+     }
+    }
+   }
+  },
+  "This patch is applied before sending. Your original files aren't changed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Este patch é aplicado antes do envio. Seus arquivos originais não mudam."
      }
     }
    }
@@ -3987,6 +4107,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "armazenamento interno"
+     }
+    }
+   }
+  },
+  "nsz finished without creating a game from %@.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O nsz terminou sem gerar um jogo a partir de %@."
      }
     }
    }

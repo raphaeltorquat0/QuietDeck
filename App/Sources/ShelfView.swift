@@ -344,7 +344,6 @@ struct ShelfDetail: View {
     var close: () -> Void
     @State private var useSD = false
     @State private var addToSteam = true
-    @State private var confirmInstall = false
     @State private var confirmRemove = false
 
     private var entry: ShelfManifestEntry? { deck.shelfInstalled[item.id] }
@@ -383,9 +382,6 @@ struct ShelfDetail: View {
             }
         }
         .task { model.covers.load(item.deckTitle, kind: .hero) }
-        .confirmationDialog("Restart Steam?", isPresented: $confirmInstall) {
-            Button("Install and Add to Steam", role: .destructive) { install() }
-        } message: { Text("Steam restarts to save the shortcuts, so any running game will close.") }
         .confirmationDialog("Restart Steam?", isPresented: $confirmRemove) {
             Button("Remove from Deck", role: .destructive) { remove() }
         } message: { Text("Steam restarts to remove the shortcut, so any running game will close.") }
@@ -432,7 +428,7 @@ struct ShelfDetail: View {
                     InlineNote(text: "Not enough space. Least played: \(suggestion.map(\.title).formatted())", symbol: "externaldrive.badge.exclamationmark", tint: .orange)
                 }
             }
-            Button("Install on Deck") { addToSteam ? (confirmInstall = true) : install() }
+            Button("Install on Deck") { install() }
                 .buttonStyle(.glassProminent).disabled(!fits || (free == nil && source == nil))
             if free == nil && source == nil {
                 InlineNote(text: "No source with this game is online.", symbol: "wifi.slash", tint: .orange)

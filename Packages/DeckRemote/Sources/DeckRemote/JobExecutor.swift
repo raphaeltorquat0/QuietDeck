@@ -62,10 +62,10 @@ public enum JobExecutor {
                 }
             case let .upload(local, remote):
                 try await Transfer.upload(URL(fileURLWithPath: local), to: remote, config: c.config, onProgress: transfer)
-            case let .importROM(local, system, sd):
+            case let .importROM(local, system, sd, patch):
                 let paths = try await Emulation.paths(r, sdMount: sd)
                 let importer = RomImporter(runner: r, config: c.config, catalog: c.catalog, workRoot: c.workRoot)
-                _ = try await importer.importGame(path: local, systemID: system, paths: paths, progress: progress)
+                _ = try await importer.importGame(path: local, systemID: system, paths: paths, patch: patch, progress: progress)
             case let .addToSteam(user, refs, sd): try await addToSteam(user, refs, sd, c, progress)
             case let .applyArt(user, appID, kind, url):
                 let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
@@ -167,12 +167,27 @@ public enum JobExecutor {
                   let emulator = c.catalog.emulator(system.emulator) else { continue }
             progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
+            if !paths.isEmuDeck { _ = try await EmulatorSetup.applyController(emulator, runner: r) }
+            if system.id == "switch" { try await SwitchKeys.send(config: c.config, runner: r) }
+            // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria.
+            if paths.roms.hasPrefix("/run/media/") {
+                try await r.check("flatpak override --user --filesystem=\(Shell.quote(paths.roms)):ro \(Shell.quote(emulator.flatpak))")
+            }
             var core: String?
             if let name = system.core { core = try await EmulatorSetup.ensureCore(name, runner: r) }
             if let s = Library.shortcut(name: ref.title, romPath: game.path, system: system, catalog: c.catalog, corePath: core) { shortcuts.append(s) }
         }
+        guard !shortcuts.isEmpty else { throw DeckError.unexpectedState("The game isn't on the Deck in this location, so no shortcut was created.") }
+        let steam = SteamControl(runner: r)
+        let known = try await steam.lastPlayed(user: user)
+        if shortcuts.contains(where: { known[$0.name] == nil }) {
+            while try await steam.gameOpen() {
+                progress(nil, "Waiting for the game to close")
+                try await Task.sleep(for: .seconds(15))
+            }
+        }
         progress(nil, "Writing shortcuts")
-        let result = try await SteamControl(runner: r).addShortcuts(shortcuts, user: user)
+        let result = try await steam.addShortcuts(shortcuts, user: user)
         progress(100, result.added.isEmpty ? "Already in Steam" : "Added to Steam")
     }
 }

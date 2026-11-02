@@ -64,6 +64,133 @@
     }
    ]
   },
+  "controller": {
+   "path": ".var/app/org.DolphinEmu.dolphin-emu/config/dolphin-emu/GCPadNew.ini",
+   "format": "ini",
+   "untouched": "[GCPad1]\nDevice = XInput2/0/Virtual core pointer",
+   "entries": [
+    {
+     "section": "GCPad1",
+     "key": "Device",
+     "value": "SDL/0/Steam Deck Controller"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/A",
+     "value": "`Button S`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/B",
+     "value": "`Button E`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/X",
+     "value": "`Button W`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/Y",
+     "value": "`Button N`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/Z",
+     "value": "`Shoulder R`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Buttons/Start",
+     "value": "`Start`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Main Stick/Up",
+     "value": "`Left Y+`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Main Stick/Down",
+     "value": "`Left Y-`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Main Stick/Left",
+     "value": "`Left X-`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Main Stick/Right",
+     "value": "`Left X+`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "C-Stick/Up",
+     "value": "`Right Y+`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "C-Stick/Down",
+     "value": "`Right Y-`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "C-Stick/Left",
+     "value": "`Right X-`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "C-Stick/Right",
+     "value": "`Right X+`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Triggers/L",
+     "value": "`Trigger L`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Triggers/R",
+     "value": "`Trigger R`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Triggers/L-Analog",
+     "value": "`Trigger L`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Triggers/R-Analog",
+     "value": "`Trigger R`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "D-Pad/Up",
+     "value": "`Pad N`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "D-Pad/Down",
+     "value": "`Pad S`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "D-Pad/Left",
+     "value": "`Pad W`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "D-Pad/Right",
+     "value": "`Pad E`"
+    },
+    {
+     "section": "GCPad1",
+     "key": "Rumble/Motor",
+     "value": "`Motor L`|`Motor R`"
+    }
+   ]
+  },
   "saves": [
    ".var/app/org.DolphinEmu.dolphin-emu/data/dolphin-emu/GC",
    ".var/app/org.DolphinEmu.dolphin-emu/data/dolphin-emu/Wii"

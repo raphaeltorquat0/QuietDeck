@@ -11,11 +11,11 @@ struct LibraryView: View {
     @Namespace private var cover
     @State private var filter: String?
     @State private var candidates: [Candidate] = []
+    @State private var unrecognized: [String] = []
     @State private var targetSD = false
-    @State private var addToSteam = false
+    @State private var addToSteam = true
     @State private var dropping = false
     @State private var choosing = false
-    @State private var confirmSend = false
     @State private var selected: Library.Game?
     @State private var preview: URL?
     @FocusState private var gridFocused: Bool
@@ -26,9 +26,11 @@ struct LibraryView: View {
         var size: Int64
         var systemID: String?
         var options: [String]
+        var patch: String?
         var frame = CGRect.zero
         var name: String { (path as NSString).lastPathComponent }
-        var title: String { ROMPlan.displayName(name) }
+        /// O nome com que o jogo chega ao Deck: traduzido ganha o nome do patch.
+        var title: String { ROMPlan.displayName(patch.map { ROMPatch.patchedName(rom: path, patch: $0) } ?? name) }
     }
 
     /// Discos do mesmo jogo aparecem como uma capa só.
@@ -58,9 +60,6 @@ struct LibraryView: View {
         .fileImporter(isPresented: $choosing, allowedContentTypes: [.data, .folder], allowsMultipleSelection: true) { result in
             scan((try? result.get()) ?? [])
         }
-        .confirmationDialog("Add to Steam after sending?", isPresented: $confirmSend) {
-            Button("Send and Add to Steam", role: .destructive) { send() }
-        } message: { Text("Steam restarts to save the shortcuts, so any running game will close.") }
     }
 
     private var grid: some View {
@@ -116,6 +115,10 @@ struct LibraryView: View {
                 }
             }
             InlineNote(text: "Files must already be yours. QuietDeck never downloads ROMs.")
+            if !unrecognized.isEmpty {
+                let names = unrecognized.formatted()
+                InlineNote(text: "Not added, format not recognized: \(names)", symbol: "exclamationmark.triangle", tint: .orange)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(20)
@@ -144,6 +147,11 @@ struct LibraryView: View {
                                 ForEach(item.options, id: \.self) { Text(verbatim: model.catalog.system($0)?.name ?? $0).tag(String?.some($0)) }
                             }
                             .labelsHidden().frame(width: 104)
+                            if let patch = item.patch {
+                                Label((patch as NSString).lastPathComponent, systemImage: "bandage")
+                                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1).frame(width: 104)
+                                    .help(Text("This patch is applied before sending. Your original files aren't changed."))
+                            }
                             Button { Motion.run { candidates.removeAll { $0.id == item.id } } } label: { Image(systemName: "xmark.circle") }
                                 .buttonStyle(.borderless).accessibilityLabel(Text("Remove \(item.name)"))
                         }
@@ -160,9 +168,7 @@ struct LibraryView: View {
             }
             Toggle("Add to Steam when done", isOn: $addToSteam).disabled(deck.steamUsers.isEmpty)
             InlineNote(text: "Archives are extracted when the emulator can't read them, CD and DVD images become CHD on supported systems, and multi-disc games get an .m3u. Your original files aren't changed.")
-            Button("Send \(candidates.filter { $0.systemID != nil }.count) Games") {
-                if addToSteam { confirmSend = true } else { send() }
-            }
+            Button("Send \(candidates.filter { $0.systemID != nil }.count) Games") { send() }
             .keyboardShortcut(.defaultAction)
             .buttonStyle(.glassProminent)
             .disabled(!candidates.contains { $0.systemID != nil })
@@ -179,7 +185,7 @@ struct LibraryView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(jobs) { job in
-                            let title = if case let .importROM(path, _, _) = job.action { ROMPlan.displayName((path as NSString).lastPathComponent) } else { job.title }
+                            let title = if case let .importROM(path, _, _, patch) = job.action { ROMPlan.displayName(patch.map { ROMPatch.patchedName(rom: path, patch: $0) } ?? (path as NSString).lastPathComponent) } else { job.title }
                             CoverView(title: title)
                                 .frame(width: 92)
                                 .overlay {
@@ -213,14 +219,26 @@ struct LibraryView: View {
             await MainActor.run {
                 model.importBIOS(bios)
                 let known = Set(candidates.map(\.path))
-                let added: [Candidate] = found.filter { !known.contains($0.path) }.map { c in
+                let unknown = found.filter { $0.detection == .unknown }.map(\.path)
+                let keys = unknown.filter { ($0 as NSString).lastPathComponent.lowercased() == "prod.keys" }
+                model.importSwitchKeys(keys)
+                var added: [Candidate] = found.filter { !known.contains($0.path) }.compactMap { c in
                     switch c.detection {
                     case let .system(id): Candidate(path: c.path, size: c.size, systemID: id, options: catalog.systems.map(\.id))
                     case let .ambiguous(ids): Candidate(path: c.path, size: c.size, systemID: nil, options: ids)
-                    case .unknown: Candidate(path: c.path, size: c.size, systemID: nil, options: catalog.systems.map(\.id))
+                    case .unknown: nil
                     }
                 }
-                Motion.run { candidates += added }
+                // Patch solto vai com a ROM que ainda não tem um, do arrasto ou de antes; sem par, avisa.
+                let patches = unknown.filter(ROMPatch.isPatch)
+                let pairs = ROMPatch.pair(roms: (candidates + added).filter { $0.patch == nil }.map(\.path), patches: patches)
+                for i in added.indices where added[i].patch == nil { added[i].patch = pairs[added[i].path] }
+                let paired = Set(pairs.values)
+                unrecognized = unknown.filter { !keys.contains($0) && !paired.contains($0) }.map { ($0 as NSString).lastPathComponent }
+                Motion.run {
+                    for i in candidates.indices where candidates[i].patch == nil { candidates[i].patch = pairs[candidates[i].path] }
+                    candidates += added
+                }
             }
         }
     }
@@ -232,7 +250,7 @@ struct LibraryView: View {
             guard let id = item.systemID else { continue }
             model.launch(title: item.title, from: item.frame)
             let name = item.name
-            model.enqueue(String(localized: "Send \(name)"), .importROM(localPath: item.path, systemID: id, sdMount: sd))
+            model.enqueue(String(localized: "Send \(name)"), .importROM(localPath: item.path, systemID: id, sdMount: sd, patch: item.patch))
             refs.append(GameRef(systemID: id, title: item.title))
         }
         if addToSteam, let user = deck.steamUsers.first {
@@ -249,7 +267,6 @@ struct GameDetail: View {
     var game: Library.Game
     var namespace: Namespace.ID
     var close: () -> Void
-    @State private var confirmAdd = false
     @State private var results: [SteamGridDB.Game] = []
     @State private var images: [ArtKind: [SteamGridDB.Image]] = [:]
     @State private var kind = ArtKind.portrait
@@ -270,7 +287,7 @@ struct GameDetail: View {
                     LabeledContent("System", value: system?.name ?? game.systemID)
                     LabeledContent("Size", value: game.size.bytes)
                     MonoText(text: game.path)
-                    Button("Add to Steam…") { confirmAdd = true }.disabled(deck.steamUsers.isEmpty)
+                    Button("Add to Steam") { add() }.disabled(deck.steamUsers.isEmpty)
                 }
                 artwork
             }
@@ -284,9 +301,6 @@ struct GameDetail: View {
             await load()
         }
         .onChange(of: kind) { Task { await load() } }
-        .confirmationDialog("Add \(title) to Steam?", isPresented: $confirmAdd) {
-            Button("Add to Steam", role: .destructive) { add() }
-        } message: { Text("Steam restarts to save the shortcuts, so any running game will close. A backup of shortcuts.vdf is kept.") }
     }
 
     private var hero: some View {
@@ -348,7 +362,7 @@ struct GameDetail: View {
 
     private func add() {
         guard let user = deck.steamUsers.first else { return }
-        model.enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: [GameRef(systemID: game.systemID, title: title)], sdMount: nil))
+        model.enqueue(String(localized: "Add to Steam"), .addToSteam(user: user, games: [GameRef(systemID: game.systemID, title: title)], sdMount: deck.sdMount.flatMap { game.path.hasPrefix($0 + "/") ? $0 : nil }))
     }
 
     private func apply() {

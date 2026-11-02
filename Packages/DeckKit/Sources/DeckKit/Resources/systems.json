@@ -214,7 +214,9 @@
    "nro",
    "nso",
    "nsp",
-   "xci"
+   "nsz",
+   "xci",
+   "xcz"
   ],
   "readsArchives": false,
   "chd": null,

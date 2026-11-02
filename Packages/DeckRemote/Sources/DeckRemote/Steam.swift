@@ -17,6 +17,7 @@ public struct SteamControl: Sendable {
 
     static let unit = "steam-launcher.service"
     static let isRunning = "pgrep -x steam >/dev/null"
+    static let isGameOpen = "ps -eo args | grep -q '[r]eaper SteamLaunch'"
     static let mask = DeviceProbe.userBus + "systemctl --user mask --runtime \(unit)"
     static let unmask = DeviceProbe.userBus + "systemctl --user unmask --runtime \(unit)"
     static let stopUnit = DeviceProbe.userBus + "systemctl --user stop \(unit)"
@@ -42,6 +43,7 @@ public struct SteamControl: Sendable {
     }
 
     public func running() async throws -> Bool { try await runner.run(Self.isRunning).ok }
+    public func gameOpen() async throws -> Bool { try await runner.run(Self.isGameOpen).ok }
 
     func wait(untilRunning target: Bool, polls: Int) async throws -> Bool {
         for _ in 0..<polls {

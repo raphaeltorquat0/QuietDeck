@@ -98,6 +98,11 @@ public enum ROMPlan {
         ["zip", "7z"].contains(fileExtension.lowercased()) && !system.readsArchives
     }
 
+    /// Ryubing e Eden só abrem `.nsp` e `.xci`: o compactado do Switch nunca vai como está.
+    public static func mustDecompress(fileExtension: String) -> Bool {
+        ["nsz", "xcz"].contains(fileExtension.lowercased())
+    }
+
     /// Arquivos citados por um `.cue` ou `.gdi`: viajam junto e não contam como jogos separados.
     public static func referencedFiles(cueSheet text: String, extension ext: String) -> [String] {
         text.split(whereSeparator: \.isNewline).compactMap { line in
@@ -142,8 +147,16 @@ public enum ROMPlan {
         }
     }
 
-    /// Nome do jogo na biblioteca do Steam: tira extensão e as marcações de disco.
+    /// Nome do jogo na biblioteca do Steam: tira extensão, marcações de disco e as do dump do Switch.
     public static func displayName(_ fileName: String) -> String {
-        discInfo(fileName)?.base ?? (fileName as NSString).deletingPathExtension
+        let name = discInfo(fileName)?.base ?? (fileName as NSString).deletingPathExtension
+        return name.replacingOccurrences(of: #"\s*(\[[0-9A-Fa-f]{16}\]|\[v[0-9]+\]|\([0-9.]+ [GM]B\))"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Title ID do Switch: jogo base termina em `000`; update (`800`) e DLC não abrem sozinhos.
+    public static func isSwitchAddon(_ fileName: String) -> Bool {
+        guard let id = fileName.range(of: #"\[[0-9A-Fa-f]{16}\]"#, options: .regularExpression) else { return false }
+        return !fileName[id].lowercased().hasSuffix("000]")
     }
 }

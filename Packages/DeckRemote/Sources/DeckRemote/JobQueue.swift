@@ -42,7 +42,8 @@ public enum JobAction: Codable, Hashable, Sendable {
     case applyArtFile(user: String, appID: UInt32, kind: ArtKind, localPath: String)
     case applyTheme(user: String, model: String?)
     case restoreTheme(user: String)
-    case importROM(localPath: String, systemID: String, sdMount: String?)
+    /// `patch`: tradução ou correção aplicada no Mac antes do envio.
+    case importROM(localPath: String, systemID: String, sdMount: String?, patch: String? = nil)
 }
 
 public struct Job: Codable, Identifiable, Hashable, Sendable {

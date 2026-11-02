@@ -3,7 +3,7 @@ import DeckKit
 
 /// Ferramentas do Mac usadas pelo pipeline. Apps abertos pelo Finder não herdam o PATH do Homebrew.
 public enum LocalTools {
-    static let prefixes = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"]
+    static let prefixes = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", NSHomeDirectory() + "/.local/bin"]
 
     public static func find(_ names: String...) -> String? {
         for prefix in prefixes {
@@ -23,6 +23,42 @@ public enum LocalTools {
         guard r.ok, let path = found() else { throw DeckError.commandFailed(command: "brew install \(formula)", result: r) }
         return path
     }
+
+    /// `nsz` não tem fórmula: vem do PyPI pelo pipx, na versão conferida.
+    public static func nsz() async throws -> String {
+        if let path = find("nsz") { return path }
+        let pipx = try await require(["pipx"], formula: "pipx")
+        let r = try await LocalProcess.run(pipx, ["install", "nsz==5.0.0"])
+        guard r.ok, let path = find("nsz") else { throw DeckError.commandFailed(command: "pipx install nsz", result: r) }
+        return path
+    }
+}
+
+/// `prod.keys` vem do console do usuário: o app nunca baixa. Fica onde o `nsz` procura, só para o dono.
+public enum SwitchKeys {
+    public static func install(from source: URL, home: URL = FileManager.default.homeDirectoryForCurrentUser) throws {
+        let data = try Data(contentsOf: source)
+        guard String(decoding: data, as: UTF8.self).range(of: #"(?m)^\s*header_key\s*=\s*[0-9a-fA-F]{64}\s*$"#, options: .regularExpression) != nil else {
+            throw DeckError.unexpectedState("%@ isn't a Switch keys file.", source.lastPathComponent)
+        }
+        let directory = home.appendingPathComponent(".switch")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        let target = directory.appendingPathComponent("prod.keys")
+        try data.write(to: target, options: .atomic)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: target.path)
+    }
+
+    /// Sem chaves no Mac, o emulador pode já ter as dele: não é falha.
+    public static func send(config: SSHConfig, runner: any CommandRunner, home: URL = FileManager.default.homeDirectoryForCurrentUser) async throws {
+        let local = home.appendingPathComponent(".switch/prod.keys")
+        guard FileManager.default.fileExists(atPath: local.path) else { return }
+        let directory = try await RemoteFiles(runner: runner).home() + "/" + deckDirectory
+        try await runner.check("mkdir -p \(Shell.quote(directory)) && chmod 700 \(Shell.quote(directory))")
+        try await Transfer.upload(local, to: directory, config: config) { _ in }
+        try await runner.check("chmod 600 \(Shell.quote(directory + "/prod.keys"))")
+    }
+
+    static let deckDirectory = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/system"
 }
 
 public struct ROMCandidate: Equatable, Sendable {
@@ -40,6 +76,7 @@ public enum ROMScanner {
 
     /// Aceita arquivos e pastas (Finder, seletor, pasta sincronizada, SMB/NFS montado).
     /// Faixas citadas por um `.cue`/`.gdi` viajam com ele e não viram jogos separados.
+    /// O que não é reconhecido volta como `.unknown`: quem chama avisa, não some em silêncio.
     public static func scan(_ urls: [URL], catalog: Catalog) -> [ROMCandidate] {
         let detector = ROMDetector(systems: catalog.systems)
         var files: [URL] = []
@@ -73,8 +110,7 @@ public enum ROMScanner {
                     head = prefix(file.deletingLastPathComponent().appendingPathComponent(first).path)
                 }
             }
-            let result = detector.detect(path: file.path, prefix: head, size: size)
-            return result == .unknown ? nil : ROMCandidate(path: file.path, size: size, detection: result)
+            return ROMCandidate(path: file.path, size: size, detection: detector.detect(path: file.path, prefix: head, size: size))
         }
     }
 }
@@ -181,6 +217,95 @@ public struct RomImporter: Sendable {
         return output
     }
 
+    /// `.nsz` vira `.nsp` e `.xcz` vira `.xci`. Só um resultado completo ganha a pasta final.
+    static func decompress(_ input: URL, work: URL, tool: String? = nil) async throws -> URL {
+        let stem = input.deletingPathExtension().lastPathComponent
+        let extensions = ["nsp", "xci"]
+        func output(in dir: URL) -> URL? {
+            try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil).first { extensions.contains($0.pathExtension.lowercased()) }
+        }
+        let done = work.appendingPathComponent("decompressed-" + stem)
+        if let ready = output(in: done) { return ready }
+        let partial = work.appendingPathComponent("decompressing-" + stem)
+        try? FileManager.default.removeItem(at: partial)
+        try FileManager.default.createDirectory(at: partial, withIntermediateDirectories: true)
+        let nsz = if let tool { tool } else { try await LocalTools.nsz() }
+        let r = try await LocalProcess.run(nsz, ["-D", "--verify", "-o", partial.path, input.path])
+        if r.stdout.contains("Could not load keys file") || r.stderr.contains("Could not load keys file") {
+            throw DeckError.unexpectedState("Switch keys are missing. Drop your own prod.keys on Library, then try again.")
+        }
+        guard r.ok else { throw DeckError.commandFailed(command: "nsz -D", result: r) }
+        guard output(in: partial) != nil else { throw DeckError.unexpectedState("nsz finished without creating a game from %@.", input.lastPathComponent) }
+        try? FileManager.default.removeItem(at: done)
+        try FileManager.default.moveItem(at: partial, to: done)
+        guard let ready = output(in: done) else { throw DeckError.unexpectedState("nsz finished without creating a game from %@.", input.lastPathComponent) }
+        return ready
+    }
+
+    /// Aplica o patch numa cópia com nome próprio: a original não muda e pode já estar no Deck.
+    /// Num `.cue`/`.gdi` o patch vale para a primeira faixa, e as faixas ganham o novo nome.
+    static func patched(_ entry: URL, with patch: URL, named name: String, work: URL, xdelta: String? = nil) async throws -> URL {
+        let ext = entry.pathExtension.lowercased()
+        guard !["chd", "rvz", "wia", "gcz", "cso", "wbfs", "nsp", "nsz", "xci", "xcz"].contains(ext) else {
+            throw DeckError.unexpectedState("A patch can't be applied to %@. Use the original .bin, .iso or .cue instead.", entry.lastPathComponent)
+        }
+        let dir = work.appendingPathComponent("patched-" + (name as NSString).deletingPathExtension)
+        let output = dir.appendingPathComponent(name)
+        if FileManager.default.fileExists(atPath: output.path) { return output }
+        try? FileManager.default.removeItem(at: dir)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        guard ["cue", "gdi"].contains(ext) else {
+            try await apply(patch, to: entry, output: output, xdelta: xdelta)
+            return output
+        }
+        let sheet = try String(contentsOf: entry, encoding: .utf8)
+        let tracks = ROMPlan.referencedFiles(cueSheet: sheet, extension: ext)
+        let stem = (name as NSString).deletingPathExtension
+        var renamed: [String: String] = [:]
+        for (i, track) in tracks.enumerated() {
+            let new = "\(stem) (Track \(i + 1)).\((track as NSString).pathExtension)"
+            renamed[track] = new
+            let from = entry.deletingLastPathComponent().appendingPathComponent(track)
+            if i == 0 {
+                try await apply(patch, to: from, output: dir.appendingPathComponent(new), xdelta: xdelta)
+            } else {
+                try FileManager.default.copyItem(at: from, to: dir.appendingPathComponent(new))
+            }
+        }
+        // Uma troca por linha: cada linha cita um arquivo só, e o nome novo contém o antigo.
+        let lines = sheet.components(separatedBy: "\n").map { line in
+            guard let track = tracks.sorted(by: { $0.count > $1.count }).first(where: { line.contains($0) }) else { return line }
+            return line.replacingOccurrences(of: track, with: renamed[track]!)
+        }
+        // A folha vai por último: ela existir é o sinal de que tudo ficou pronto.
+        try lines.joined(separator: "\n").write(to: output, atomically: true, encoding: .utf8)
+        return output
+    }
+
+    private static func apply(_ patch: URL, to source: URL, output: URL, xdelta: String?) async throws {
+        let label = patch.lastPathComponent
+        if ["xdelta", "vcdiff"].contains(patch.pathExtension.lowercased()) {
+            let tool = if let xdelta { xdelta } else { try await LocalTools.require(["xdelta3"], formula: "xdelta") }
+            let partial = output.appendingPathExtension("partial")
+            let r = try await LocalProcess.run(tool, ["-d", "-f", "-s", source.path, patch.path, partial.path])
+            guard r.ok else {
+                try? FileManager.default.removeItem(at: partial)
+                // 3.2 confere o BLAKE3 da origem; patches de 3.0 só acusam no checksum da janela.
+                if r.stderr.contains("mismatch") || r.stderr.contains("does not match") { throw DeckError.unexpectedState("%@ was made for another version of this game. Check the CRC32 or SHA-1 its readme asks for.", label) }
+                throw DeckError.commandFailed(command: "xdelta3 -d", result: r)
+            }
+            try FileManager.default.moveItem(at: partial, to: output)
+            return
+        }
+        do {
+            try ROMPatch.apply(try Data(contentsOf: patch), to: try Data(contentsOf: source)).write(to: output, options: .atomic)
+        } catch ROMPatch.Failure.wrongSource {
+            throw DeckError.unexpectedState("%@ was made for another version of this game. Check the CRC32 or SHA-1 its readme asks for.", label)
+        } catch is ROMPatch.Failure {
+            throw DeckError.unexpectedState("%@ is damaged or isn't a patch QuietDeck can apply.", label)
+        }
+    }
+
     /// Arquivos que acompanham o ponto de entrada quando ele vai sem conversão.
     private func companions(of entry: URL) -> [URL] {
         guard ["cue", "gdi"].contains(entry.pathExtension.lowercased()),
@@ -189,7 +314,7 @@ public struct RomImporter: Sendable {
         return [entry] + ROMPlan.referencedFiles(cueSheet: text, extension: entry.pathExtension).map { dir.appendingPathComponent($0) }
     }
 
-    public func importGame(path: String, systemID: String, paths: EmulationPaths, progress: @escaping Progress) async throws -> ROMImportResult {
+    public func importGame(path: String, systemID: String, paths: EmulationPaths, patch: String? = nil, progress: @escaping Progress) async throws -> ROMImportResult {
         guard let system = catalog.system(systemID) else { throw DeckError.unexpectedState("Unknown system: %@", systemID) }
         let source = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: path) else {
@@ -199,7 +324,14 @@ public struct RomImporter: Sendable {
         let home = try await files.home()
 
         progress(nil, "Checking for duplicates")
-        let hash = try await LocalHash.compute(path, algorithm: 256)
+        var hash = try await LocalHash.compute(path, algorithm: 256)
+        if let patch {
+            guard FileManager.default.fileExists(atPath: patch) else {
+                throw DeckError.unexpectedState("%@ isn't there anymore. Check that the network share is mounted.", (patch as NSString).lastPathComponent)
+            }
+            // Traduzida e original são jogos diferentes no índice.
+            hash += "+" + (try await LocalHash.compute(patch, algorithm: 256)).prefix(16)
+        }
         if let existing = try await duplicate(of: hash, files: files, home: home) {
             progress(100, "Already on the Deck")
             return ROMImportResult(remotePath: existing, skippedAsDuplicate: true, files: [existing])
@@ -208,18 +340,43 @@ public struct RomImporter: Sendable {
         let work = workRoot.appendingPathComponent(hash)
         try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
         var entries = [source]
-        if ROMPlan.mustExtract(system: system, fileExtension: source.pathExtension) {
+        var patches: [URL: URL] = [:]
+        let archive = ["zip", "7z"].contains(source.pathExtension.lowercased())
+        // O patch vale para a ROM, não para o compactado: com patch, sempre extrai.
+        if ROMPlan.mustExtract(system: system, fileExtension: source.pathExtension) || (archive && patch != nil) {
             progress(nil, "Extracting")
             let dir = work.appendingPathComponent("extracted")
             try await extract(source, to: dir)
-            entries = ROMScanner.scan([dir], catalog: catalog).map { URL(fileURLWithPath: $0.path) }
+            let found = ROMScanner.scan([dir], catalog: catalog)
+            entries = found.filter { $0.detection != .unknown }.map { URL(fileURLWithPath: $0.path) }
             guard !entries.isEmpty else { throw DeckError.unexpectedState("No game found inside %@.", source.lastPathComponent) }
+            // Pacote de tradução costuma trazer o patch junto da ROM.
+            let inside = patch.map { [$0] } ?? found.map(\.path).filter(ROMPatch.isPatch)
+            for (rom, p) in ROMPatch.pair(roms: entries.map(\.path), patches: inside) {
+                patches[URL(fileURLWithPath: rom)] = URL(fileURLWithPath: p)
+            }
+        } else if let patch {
+            patches[source] = URL(fileURLWithPath: patch)
+        }
+        if !patches.isEmpty {
+            progress(nil, "Applying patch")
+            for (i, entry) in entries.enumerated() {
+                guard let p = patches[entry] else { continue }
+                // O nome segue o que a Biblioteca mostrou, para o atalho achar o jogo. Patch que veio
+                // dentro do pacote faz do pacote o jogo traduzido, então fica o nome dele.
+                let shown = entries.count == 1 ? source.deletingPathExtension().lastPathComponent + "." + entry.pathExtension : entry.lastPathComponent
+                let name = patch == nil ? shown : ROMPatch.patchedName(rom: shown, patch: p.path)
+                entries[i] = try await Self.patched(entry, with: p, named: name, work: work)
+            }
         }
 
         var outputs: [URL] = []
         for entry in entries {
             let size = (try? FileManager.default.attributesOfItem(atPath: entry.path)[.size] as? Int64) ?? 0
-            if let mode = ROMPlan.conversion(for: system, fileExtension: entry.pathExtension, size: size) {
+            if ROMPlan.mustDecompress(fileExtension: entry.pathExtension) {
+                progress(nil, "Decompressing")
+                outputs.append(try await Self.decompress(entry, work: work))
+            } else if let mode = ROMPlan.conversion(for: system, fileExtension: entry.pathExtension, size: size) {
                 progress(nil, "Converting to CHD")
                 outputs.append(try await convert(entry, mode: mode, work: work))
             } else {
@@ -288,7 +445,7 @@ public enum Library {
 
     /// O `.m3u` representa o conjunto de discos; sem ele, o primeiro arquivo do título.
     public static func pick(_ ref: GameRef, in games: [Game]) -> Game? {
-        let matches = games.filter { $0.systemID == ref.systemID && ROMPlan.displayName($0.name) == ref.title }
+        let matches = games.filter { $0.systemID == ref.systemID && ROMPlan.displayName($0.name) == ref.title && !ROMPlan.isSwitchAddon($0.name) }
         return matches.first { $0.name.lowercased().hasSuffix(".m3u") } ?? matches.sorted { $0.name < $1.name }.first
     }
 

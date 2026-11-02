@@ -219,6 +219,26 @@ public enum EmulatorSetup {
         return .written
     }
 
+    /// Mapeamento feito à mão não é tocado. Devolve se gravou.
+    public static func applyController(_ emulator: Emulator, runner: any CommandRunner) async throws -> Bool {
+        guard let config = emulator.controller else { return false }
+        let files = RemoteFiles(runner: runner)
+        let path = try await files.home() + "/" + config.path
+        let current = try await files.read(path).map { String(decoding: $0, as: UTF8.self) }
+        guard let after = patchedController(config, current: current) else { return false }
+        if current != nil {
+            try await runner.check("cp -n \(Shell.quote(path)) \(Shell.quote(path + ".quietdeck-backup"))")
+        }
+        try await files.write(Data(after.utf8), to: path)
+        return true
+    }
+
+    static func patchedController(_ config: EmulatorConfig, current: String?) -> String? {
+        if let current, let marker = config.untouched, !current.contains(marker) { return nil }
+        let after = ConfigPatcher.apply(current ?? "", format: config.format, entries: config.entries)
+        return after == current ? nil : after
+    }
+
     static func coresDirectory(home: String) -> String { home + "/.var/app/org.libretro.RetroArch/config/retroarch/cores" }
 
     /// Cores são software do RetroArch, não ROM/BIOS. Vêm do buildbot oficial, só o que faltar.

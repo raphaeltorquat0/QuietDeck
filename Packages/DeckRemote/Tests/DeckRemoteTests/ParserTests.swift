@@ -137,8 +137,152 @@ import Testing
         try Data([0x4E, 0x45, 0x53, 0x1A]).write(to: other.appendingPathComponent("noext.rom"))
         try Data("x".utf8).write(to: other.appendingPathComponent("notes.txt"))
         let found = ROMScanner.scan([root], catalog: try Catalog.load())
-        #expect(found.count == 2)
+        #expect(found.count == 3)
+        #expect(found.first { $0.path.hasSuffix("notes.txt") }?.detection == .unknown)
         #expect(found.first { $0.path.hasSuffix("Game.cue") }?.detection == .system("psx"))
         #expect(found.first { $0.path.hasSuffix("noext.rom") }?.detection == .system("nes"))
+    }
+
+    private func tempDir() throws -> URL {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    private func fakeNSZ(_ body: String, in dir: URL) throws -> String {
+        let tool = dir.appendingPathComponent("nsz")
+        try "#!/bin/sh\n\(body)\n".write(to: tool, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: tool.path)
+        return tool.path
+    }
+
+    @Test func decompressMovesFinishedGameAndReusesIt() async throws {
+        let dir = try tempDir()
+        let tool = try fakeNSZ(#"echo "$@" >> "$0.calls"; touch "$4/Game.nsp""#, in: dir)
+        let source = dir.appendingPathComponent("Game.nsz")
+        for _ in 0..<2 {
+            let out = try await RomImporter.decompress(source, work: dir, tool: tool)
+            #expect(out.lastPathComponent == "Game.nsp")
+            #expect(FileManager.default.fileExists(atPath: out.path))
+        }
+        let calls = try String(contentsOfFile: tool + ".calls", encoding: .utf8)
+        #expect(calls.split(separator: "\n").count == 1)
+        #expect(calls.hasPrefix("-D --verify -o "))
+    }
+
+    @Test func decompressAsksForKeysAndKeepsNothing() async throws {
+        let dir = try tempDir()
+        let tool = try fakeNSZ(#"echo "Exception: Could not load keys file." >&2; exit 1"#, in: dir)
+        await #expect(throws: DeckError.unexpectedState("Switch keys are missing. Drop your own prod.keys on Library, then try again.")) {
+            _ = try await RomImporter.decompress(dir.appendingPathComponent("Game.nsz"), work: dir, tool: tool)
+        }
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("decompressed-Game").path))
+    }
+
+    @Test func decompressFailsWhenToolCreatesNoGame() async throws {
+        let dir = try tempDir()
+        let tool = try fakeNSZ("exit 0", in: dir)
+        await #expect(throws: DeckError.self) {
+            _ = try await RomImporter.decompress(dir.appendingPathComponent("Game.xcz"), work: dir, tool: tool)
+        }
+    }
+
+    /// IPS que troca os dois primeiros bytes por "HI".
+    private let hiPatch = Data("PATCH".utf8) + Data([0, 0, 0, 0, 2]) + Data("HIEOF".utf8)
+
+    @Test func patchedCopyKeepsOriginalAndIsReused() async throws {
+        let dir = try tempDir()
+        let rom = dir.appendingPathComponent("Game (USA).sfc"), patch = dir.appendingPathComponent("Game PT-BR.ips")
+        try Data("abcd".utf8).write(to: rom)
+        try hiPatch.write(to: patch)
+        let out = try await RomImporter.patched(rom, with: patch, named: "Game (USA) (Game PT-BR).sfc", work: dir)
+        #expect(out.lastPathComponent == "Game (USA) (Game PT-BR).sfc")
+        #expect(try Data(contentsOf: out) == Data("HIcd".utf8))
+        #expect(try Data(contentsOf: rom) == Data("abcd".utf8))
+        try FileManager.default.removeItem(at: patch)
+        #expect(try await RomImporter.patched(rom, with: patch, named: out.lastPathComponent, work: dir) == out)
+    }
+
+    @Test func patchedDiscRenamesTracksAndPatchesTheFirst() async throws {
+        let dir = try tempDir()
+        let cue = dir.appendingPathComponent("Game.cue"), patch = dir.appendingPathComponent("p.ips")
+        try "FILE \"Game (Track 1).bin\" BINARY\n  TRACK 01 MODE2/2352\nFILE \"Game (Track 2).bin\" BINARY\n  TRACK 02 AUDIO\n".write(to: cue, atomically: true, encoding: .utf8)
+        try Data("data".utf8).write(to: dir.appendingPathComponent("Game (Track 1).bin"))
+        try Data("song".utf8).write(to: dir.appendingPathComponent("Game (Track 2).bin"))
+        try hiPatch.write(to: patch)
+        let out = try await RomImporter.patched(cue, with: patch, named: "Game (p).cue", work: dir)
+        let sheet = try String(contentsOf: out, encoding: .utf8)
+        #expect(ROMPlan.referencedFiles(cueSheet: sheet, extension: "cue") == ["Game (p) (Track 1).bin", "Game (p) (Track 2).bin"])
+        let folder = out.deletingLastPathComponent()
+        #expect(try Data(contentsOf: folder.appendingPathComponent("Game (p) (Track 1).bin")) == Data("HIta".utf8))
+        #expect(try Data(contentsOf: folder.appendingPathComponent("Game (p) (Track 2).bin")) == Data("song".utf8))
+    }
+
+    @Test func patchRefusesCompressedImagesAndExplainsWrongVersion() async throws {
+        let dir = try tempDir()
+        let chd = dir.appendingPathComponent("Game.chd"), rom = dir.appendingPathComponent("Game.iso"), patch = dir.appendingPathComponent("p.xdelta")
+        await #expect(throws: DeckError.self) { _ = try await RomImporter.patched(chd, with: patch, named: "x.chd", work: dir) }
+        try Data("abcd".utf8).write(to: rom)
+        try Data().write(to: patch)
+        let tool = try fakeNSZ(#"echo "xdelta3: source file BLAKE3 mismatch: x" >&2; exit 1"#, in: dir)
+        await #expect(throws: DeckError.unexpectedState("%@ was made for another version of this game. Check the CRC32 or SHA-1 its readme asks for.", "p.xdelta")) {
+            _ = try await RomImporter.patched(rom, with: patch, named: "Game (p).iso", work: dir, xdelta: tool)
+        }
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("patched-Game (p)/Game (p).iso").path))
+    }
+
+    /// Com o `xdelta3` do Homebrew, quando instalado: confere o formato e a mensagem reais.
+    @Test(.enabled(if: LocalTools.find("xdelta3") != nil)) func patchWithRealXdelta() async throws {
+        let dir = try tempDir()
+        let a = dir.appendingPathComponent("a.iso"), b = dir.appendingPathComponent("b.iso"), patch = dir.appendingPathComponent("t.xdelta")
+        let source = Data((0..<200_000).map { UInt8($0 % 251) })
+        var target = source
+        target.replaceSubrange(1000..<1010, with: Data("TRADUZIDO!".utf8))
+        try source.write(to: a)
+        try target.write(to: b)
+        let tool = LocalTools.find("xdelta3")!
+        #expect(try await LocalProcess.run(tool, ["-e", "-f", "-s", a.path, b.path, patch.path]).ok)
+        let out = try await RomImporter.patched(a, with: patch, named: "a (t).iso", work: dir)
+        #expect(try Data(contentsOf: out) == target)
+        var wrong = source
+        wrong[5] ^= 1
+        try wrong.write(to: a)
+        await #expect(throws: DeckError.unexpectedState("%@ was made for another version of this game. Check the CRC32 or SHA-1 its readme asks for.", "t.xdelta")) {
+            _ = try await RomImporter.patched(a, with: patch, named: "a (t2).iso", work: dir)
+        }
+    }
+
+    @Test func shortcutPointsToBaseGameNotUpdate() {
+        func game(_ name: String) -> Library.Game { Library.Game(systemID: "switch", name: name, path: "/r/" + name, size: 1) }
+        let update = game("Zelda [01006BB00C6F0800][v131072] (0.04 GB).nsp"), base = game("Zelda [01006BB00C6F0000][v0] (5.84 GB).nsp")
+        let ref = GameRef(systemID: "switch", title: "Zelda")
+        #expect(Library.pick(ref, in: [update, base]) == base)
+        #expect(Library.pick(ref, in: [update]) == nil)
+    }
+
+    @Test func controllerProfileRespectsManualMapping() throws {
+        let profile = try #require(try Catalog.load().emulator("dolphin")?.controller)
+        let factory = "[GCPad1]\nDevice = XInput2/0/Virtual core pointer\nButtons/A = `X`\nMain Stick/Calibration = 100.00\n"
+        let written = try #require(EmulatorSetup.patchedController(profile, current: factory))
+        #expect(written.contains("Device = SDL/0/Steam Deck Controller"))
+        #expect(written.contains("Buttons/A = `Button S`"))
+        #expect(written.contains("Main Stick/Calibration = 100.00"))
+        #expect(!written.contains("XInput2"))
+        #expect(EmulatorSetup.patchedController(profile, current: written) == nil)
+        #expect(EmulatorSetup.patchedController(profile, current: "[GCPad1]\nDevice = SDL/0/Outro\n[GCPad2]\nDevice = XInput2/0/Virtual core pointer\n") == nil)
+    }
+
+    @Test func keysAreValidatedAndPrivate() throws {
+        let dir = try tempDir(), home = dir.appendingPathComponent("home")
+        try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        let bad = dir.appendingPathComponent("notes.keys"), good = dir.appendingPathComponent("prod.keys")
+        try "hello".write(to: bad, atomically: true, encoding: .utf8)
+        #expect(throws: DeckError.self) { try SwitchKeys.install(from: bad, home: home) }
+        let target = home.appendingPathComponent(".switch/prod.keys")
+        #expect(!FileManager.default.fileExists(atPath: target.path))
+        try ("header_key = " + String(repeating: "0", count: 64) + "\n").write(to: good, atomically: true, encoding: .utf8)
+        try SwitchKeys.install(from: good, home: home)
+        let mode = try FileManager.default.attributesOfItem(atPath: target.path)[.posixPermissions] as? NSNumber
+        #expect(mode?.intValue == 0o600)
     }
 }

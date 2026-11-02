@@ -50,19 +50,23 @@ function toGame(o: Overview): Game {
 
 function list(collection: any, limit = 30): Game[] {
   const apps: Overview[] = collection?.visibleApps ?? collection?.allApps ?? []
-  return [...apps].sort((a, b) => (b.rt_last_time_played ?? 0) - (a.rt_last_time_played ?? 0)).slice(0, limit).map(toGame)
+  // Atalho nunca aberto é jogo recém-enviado: vem primeiro, com o foco, até ser jogado.
+  const rank = (o: Overview) => (o.app_type === NON_STEAM && !o.rt_last_time_played ? Infinity : o.rt_last_time_played ?? 0)
+  return [...apps].sort((a, b) => (rank(a) === rank(b) ? 0 : rank(b) - rank(a))).slice(0, limit).map(toGame)
 }
 
 /** Instalados, Favoritos, Emuladores (só com atalhos não-Steam) e Todos. `null` se o cliente mudou. */
 export function loadTabs(): Tab[] | null {
   try {
-    const installed = list(collectionStore.localGamesCollection)
-    const all = list(collectionStore.allGamesCollection)
+    // `allGamesCollection` e `localGamesCollection` não trazem atalhos; `myGamesCollection` traz.
+    const nonSteam: Overview[] = (collectionStore.myGamesCollection.visibleApps ?? []).filter((o: Overview) => o.app_type === NON_STEAM)
+    const installed = list({ visibleApps: [...(collectionStore.localGamesCollection.visibleApps ?? []), ...nonSteam] })
+    const all = list(collectionStore.myGamesCollection)
     let favorites: Game[] = []
     try {
       favorites = list(collectionStore.GetCollection('favorite'))
     } catch {}
-    const emulators = list({ visibleApps: (collectionStore.allGamesCollection.visibleApps ?? []).filter((o: Overview) => o.app_type === NON_STEAM) })
+    const emulators = list({ visibleApps: nonSteam })
     const tabs: Tab[] = [{ id: 'installed', title: 'Instalados', games: installed }, { id: 'favorites', title: 'Favoritos', games: favorites }]
     if (emulators.length > 0) tabs.push({ id: 'emulators', title: 'Emuladores', games: emulators })
     tabs.push({ id: 'all', title: 'Todos', games: all })

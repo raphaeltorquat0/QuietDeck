@@ -26,8 +26,8 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 - **Emulators:** install, update and remove RetroArch, Dolphin, PCSX2, PPSSPP, Cemu, xemu, PrimeHack and more as user Flatpaks
 - **Folders:** creates `~/Emulation` in the EmuDeck/ES-DE layout, and follows EmuDeck when it's already installed
 - **BIOS:** status per system, with imports checked against known hashes
-- **Library:** drop your own ROMs. QuietDeck detects the system, extracts archives, converts disc images to CHD, creates `.m3u` playlists, skips duplicates by hash and resumes interrupted transfers
-- **Steam shortcuts:** adds non-Steam games to `shortcuts.vdf` with a backup, and fetches artwork from SteamGridDB with your API key
+- **Library:** drop your own ROMs. QuietDeck detects the system, extracts archives, decompresses Switch `.nsz` and `.xcz` with your own `prod.keys`, applies translation patches (`.ips`, `.ups`, `.bps`, `.xdelta`) dropped with the ROM, converts disc images to CHD, creates `.m3u` playlists, skips duplicates by hash and resumes interrupted transfers
+- **Steam shortcuts:** sending a game adds it to Steam and to the top of Quiet Home, waiting for any open game to close first. Adds non-Steam games to `shortcuts.vdf` with a backup, and fetches artwork from SteamGridDB with your API key
 - **Decky Loader:** install the loader and browse the plugin store
 - **Compat tools:** install and remove GE-Proton and Proton-CachyOS
 - **Saves:** back up to and restore from a folder on your Mac
@@ -76,7 +76,7 @@ Either way, macOS blocks the first launch because the app isn't notarized by App
 
 Allow **Local Network** access when macOS asks.
 
-QuietDeck runs on macOS 26 or later, on Apple Silicon and Intel. Converting games to CHD uses `chdman`, which QuietDeck installs through Homebrew the first time it's needed.
+QuietDeck runs on macOS 26 or later, on Apple Silicon and Intel. Converting games to CHD uses `chdman`, which QuietDeck installs through Homebrew the first time it's needed. Compressed Switch games use `nsz`, installed the same way through `pipx`, and `.xdelta` patches use `xdelta3`, from Homebrew.
 
 ### Build from source
 

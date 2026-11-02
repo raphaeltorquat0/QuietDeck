@@ -92,6 +92,15 @@ This is the check that matters most. It proves the systemd sequence in `DECISION
 ## Transfers
 
 - [ ] Drag a folder with `.cue` and `.bin` for PlayStation: it arrives as `.chd`
+- [ ] Drag a `.nsz` without keys: the job fails asking for `prod.keys`, and nothing reaches the Deck
+- [ ] Drop your own `prod.keys`, retry: it arrives as `.nsp` and opens in the emulator
+- [ ] Drag a SNES ROM with its translation `.ips` or `.bps`: the card shows the patch, the game arrives as `ROM (patch).sfc` next to the original and opens translated
+- [ ] Drag a PlayStation `.cue`/`.bin` with an `.xdelta`: it arrives as a translated `.chd`
+- [ ] Drag a patch for another version: the job fails saying so, and nothing reaches the Deck
+- [ ] Drag a file of an unknown format: the Library names it instead of ignoring it
+- [ ] Send a Switch game with update, no game open: one shortcut, clean name, first on Quiet Home with focus
+- [ ] Send with a game open: the game stays open, and the job finishes after it closes
+- [ ] Send to the microSD: the shortcut opens the game
 - [ ] Interrupt with Cancel, try again: it resumes
 - [ ] Sending the same game again is skipped
 - [ ] A two-disc game gets a `.m3u`
