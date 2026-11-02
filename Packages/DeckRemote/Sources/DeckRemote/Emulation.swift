@@ -176,6 +176,8 @@ public enum ConfigPatcher {
         switch format {
         case "cfg": "\(e.key) = \"\(e.value)\""
         case "toml": "\(e.key) = '\(e.value)'"
+        // QSettings (Eden): o arquivo do próprio emulador não tem espaço em volta do `=`.
+        case "qt": "\(e.key)=\(e.value)"
         default: "\(e.key) = \(e.value)"
         }
     }

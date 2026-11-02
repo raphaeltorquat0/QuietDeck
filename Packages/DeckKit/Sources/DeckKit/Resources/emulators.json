@@ -414,6 +414,232 @@
   ]
  },
  {
+  "id": "eden",
+  "name": "Eden",
+  "flatpak": "dev.eden_emu.eden",
+  "systems": [
+   "switch"
+  ],
+  "launch": "run dev.eden_emu.eden -f -g {rom}",
+  "romAccess": true,
+  "profiles": [
+   {
+    "path": ".var/app/dev.eden_emu.eden/config/eden/qt-config.ini",
+    "format": "qt",
+    "untouched": "player_0_button_a=\"engine:keyboard,code:67,toggle:0\"",
+    "entries": [
+     {
+      "section": "Controls",
+      "key": "player_0_button_a\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_a",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:0\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_b\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_b",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:1\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_x\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_x",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:2\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_y\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_y",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:3\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_l\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_l",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:4\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_r\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_r",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:5\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_zl\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_zl",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,axis:2,threshold:0.5,invert:+\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_zr\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_zr",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,axis:5,threshold:0.5,invert:+\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_minus\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_minus",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:6\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_plus\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_plus",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:7\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_home\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_home",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:8\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_lstick\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_lstick",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:9\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_rstick\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_rstick",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:10\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dup\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dup",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,hat:0,direction:up\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_ddown\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_ddown",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,hat:0,direction:down\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dleft\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dleft",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,hat:0,direction:left\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dright\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_button_dright",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,hat:0,direction:right\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_lstick\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_lstick",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,axis_x:0,axis_y:1,offset_x:0,offset_y:0,invert_x:+,invert_y:+,deadzone:0.150000,range:1.000000\""
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_rstick\\default",
+      "value": "false"
+     },
+     {
+      "section": "Controls",
+      "key": "player_0_rstick",
+      "value": "\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,axis_x:3,axis_y:4,offset_x:0,offset_y:0,invert_x:+,invert_y:+,deadzone:0.150000,range:1.000000\""
+     }
+    ]
+   },
+   {
+    "path": ".var/app/dev.eden_emu.eden/config/eden/qt-config.ini",
+    "format": "qt",
+    "untouched": "use_docked_mode=1",
+    "entries": [
+     {
+      "section": "System",
+      "key": "use_docked_mode\\default",
+      "value": "false"
+     },
+     {
+      "section": "System",
+      "key": "use_docked_mode",
+      "value": "0"
+     }
+    ]
+   }
+  ]
+ },
+ {
   "id": "azahar",
   "name": "Azahar",
   "flatpak": "org.azahar_emu.Azahar",

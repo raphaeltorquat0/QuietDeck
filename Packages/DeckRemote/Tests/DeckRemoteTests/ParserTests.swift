@@ -345,6 +345,21 @@ import Testing
                                                 "01006bb00c6f0000": "/r/Zelda [01006BB00C6F0800][v131072].nsp"])
     }
 
+    @Test func edenRunsTheGamesRyubingCannot() throws {
+        let catalog = try Catalog.load()
+        let switchSystem = try #require(catalog.system("switch"))
+        #expect(switchSystem.emulator(for: "Super Mario Galaxy [010099C022B96000][v0] (3.30 GB).nsp") == "eden")
+        #expect(switchSystem.emulator(for: "Resident Evil 0 [010097000BC10000][v0].nsp") == "ryubing")
+        let s = try #require(Library.shortcut(name: "Super Mario Galaxy", romPath: "/r/Super Mario Galaxy [010099C022B96000][v0].nsp", system: switchSystem, catalog: catalog, corePath: nil))
+        #expect(s.launchOptions == "run dev.eden_emu.eden -f -g \"/r/Super Mario Galaxy [010099C022B96000][v0].nsp\"")
+        let eden = try #require(catalog.emulator("eden")?.profiles)
+        let factory = "[Controls]\nplayer_0_button_a\\default=false\nplayer_0_button_a=\"engine:keyboard,code:67,toggle:0\"\n[System]\nuse_docked_mode\\default=true\nuse_docked_mode=1\n"
+        let pad = try #require(EmulatorSetup.patched(eden[0], current: factory))
+        #expect(pad.contains("player_0_button_a=\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:0\""))
+        #expect(EmulatorSetup.patched(eden[0], current: pad) == nil)
+        #expect(try #require(EmulatorSetup.patched(eden[1], current: factory)).contains("use_docked_mode=0"))
+    }
+
     @Test func keysAreValidatedAndPrivate() throws {
         let dir = try tempDir(), home = dir.appendingPathComponent("home")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

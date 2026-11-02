@@ -220,7 +220,11 @@
   ],
   "readsArchives": false,
   "chd": null,
-  "emulator": "ryubing"
+  "emulator": "ryubing",
+  "emulatorFor": {
+   "010099C022B96000": "eden",
+   "0100FD8022DAA000": "eden"
+  }
  },
  {
   "id": "psx",

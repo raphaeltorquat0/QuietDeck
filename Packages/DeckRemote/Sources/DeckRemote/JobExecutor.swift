@@ -249,14 +249,15 @@ public enum JobExecutor {
         var emulators: [Emulator] = []
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
-                  let emulator = c.catalog.emulator(system.emulator) else { continue }
+                  let emulator = c.catalog.emulator(system.emulator(for: game.name)) else { continue }
             if !emulators.contains(emulator) { emulators.append(emulator) }
             progress(nil, "Preparing the emulator")
             _ = try await Flatpaks.install(emulator.flatpak, runner: r)
             if !paths.isEmuDeck { _ = try await EmulatorSetup.applyProfiles(emulator, runner: r) }
             if system.id == "switch" { try await SwitchKeys.send(config: c.config, runner: r) }
-            // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria.
-            if paths.roms.hasPrefix("/run/media/") {
+            if emulator.id == "eden" { try await SwitchKeys.prepareEden(runner: r) }
+            // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria. O Eden nem a pessoal.
+            if paths.roms.hasPrefix("/run/media/") || emulator.romAccess == true {
                 try await r.check("flatpak override --user --filesystem=\(Shell.quote(paths.roms)):ro \(Shell.quote(emulator.flatpak))")
             }
             var core: String?

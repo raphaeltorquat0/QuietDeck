@@ -14,6 +14,14 @@ public struct GameSystem: Codable, Hashable, Identifiable, Sendable {
     public var core: String?
     /// Jogo em pasta (PS4): o arquivo dentro dela que o emulador abre.
     public var entry: String?
+    /// Emulador por jogo, pelo Title ID no nome do arquivo: quando o padrão não roda aquele jogo.
+    public var emulatorFor: [String: String]?
+
+    /// Emulador deste arquivo: o do jogo, se houver, senão o do sistema.
+    public func emulator(for fileName: String) -> String {
+        let upper = fileName.uppercased()
+        return emulatorFor?.first { upper.contains("[" + $0.key.uppercased() + "]") }?.value ?? emulator
+    }
 }
 
 public struct ConfigEntry: Codable, Hashable, Sendable {
@@ -57,6 +65,8 @@ public struct Emulator: Codable, Hashable, Identifiable, Sendable {
     /// Controle e vídeo para o Deck, aplicados ao criar atalho. Cada um respeita `untouched` ou `onlyMissing`.
     public var profiles: [EmulatorConfig]?
     public var saves: [String]?
+    /// O flatpak não enxerga a pasta pessoal: a pasta de ROMs precisa de permissão (Eden).
+    public var romAccess: Bool?
 
     public var isAvailable: Bool { available ?? true }
 }

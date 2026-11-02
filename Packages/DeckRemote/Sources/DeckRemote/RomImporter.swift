@@ -71,6 +71,23 @@ public enum SwitchKeys {
     }
 
     static let deckDirectory = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/system"
+
+    /// O Eden lê as mesmas chaves e o mesmo firmware, em outro formato: copia do Ryubing, no próprio Deck.
+    /// Firmware do Ryubing é `registered/<id>.nca/00`; o do Eden, `registered/<id>.nca` (como o yuzu).
+    public static func prepareEden(runner: any CommandRunner) async throws {
+        let ryu = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx"
+        let eden = ".var/app/dev.eden_emu.eden/data/eden"
+        let script = """
+        cd ~ && mkdir -p \(eden)/keys \(eden)/nand/system/Contents/registered && \
+        for k in prod.keys title.keys; do if [ -f \(ryu)/system/$k ]; then cp \(ryu)/system/$k \(eden)/keys/$k && chmod 600 \(eden)/keys/$k; fi; done && \
+        if [ -d \(ryu)/bis/system/Contents/registered ]; then \
+          for d in \(ryu)/bis/system/Contents/registered/*.nca; do n=$(basename "$d"); \
+            if [ ! -f "\(eden)/nand/system/Contents/registered/$n" ]; then cp "$d/00" "\(eden)/nand/system/Contents/registered/$n"; fi; done && \
+          for f in \(eden)/nand/system/Contents/registered/*.nca; do \
+            if [ ! -d "\(ryu)/bis/system/Contents/registered/$(basename "$f")" ]; then rm -f "$f"; fi; done; fi
+        """
+        try await runner.check(RemoteCommand(script, timeout: 300))
+    }
 }
 
 /// Update de Switch no Deck passa a valer no Ryubing: `games/<TitleID base>/updates.json`, o mesmo arquivo
@@ -559,7 +576,8 @@ public enum Library {
 
     /// Exe, diretório e argumentos do atalho. Steam interpreta aspas duplas em `LaunchOptions`.
     public static func shortcut(name: String, romPath: String, system: GameSystem, catalog: Catalog, corePath: String?) -> Shortcut? {
-        guard let emulator = catalog.emulator(system.emulator), emulator.isAvailable, let template = emulator.launch else { return nil }
+        guard let emulator = catalog.emulator(system.emulator(for: (romPath as NSString).lastPathComponent)), emulator.isAvailable,
+              let template = emulator.launch else { return nil }
         func q(_ s: String) -> String { "\"\(s)\"" }
         let options = template.replacingOccurrences(of: "{rom}", with: q(romPath)).replacingOccurrences(of: "{core}", with: q(corePath ?? ""))
         return Shortcut(name: name, exe: "/usr/bin/flatpak", startDir: "/usr/bin", launchOptions: options, tags: [system.name])
