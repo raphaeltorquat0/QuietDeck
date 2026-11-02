@@ -154,6 +154,20 @@ public enum ROMPlan {
             .trimmingCharacters(in: .whitespaces)
     }
 
+    /// Nome de capa: sem região/idioma/revisão do nome de ROM e com o artigo de volta à frente
+    /// ("Legend of Zelda, The - The Wind Waker (USA)" → "The Legend of Zelda - The Wind Waker").
+    public static func coverTitle(_ title: String) -> String {
+        let tags = #"\s*\((USA|Europe|Japan|World|Brazil|Korea|Asia|En|Fr|De|Es|It|Pt|Rev [0-9A-Z]+|v[0-9.]+|[A-Z][a-z](,[A-Z][a-z])+)[^)]*\)"#
+        var t = title.replacingOccurrences(of: tags, with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces)
+        if let m = t.range(of: #"^(.+?), (The|A|An)(\b.*)$"#, options: .regularExpression) {
+            let parts = t[m].split(separator: ",", maxSplits: 1)
+            let rest = parts[1].trimmingCharacters(in: .whitespaces)
+            let article = rest.split(separator: " ", maxSplits: 1)
+            t = "\(article[0]) \(parts[0])" + (article.count > 1 ? " " + article[1] : "")
+        }
+        return t
+    }
+
     /// Title ID do Switch: jogo base termina em `000`; update (`800`) e DLC não abrem sozinhos.
     public static func isSwitchAddon(_ fileName: String) -> Bool {
         guard let id = fileName.range(of: #"\[[0-9A-Fa-f]{16}\]"#, options: .regularExpression) else { return false }

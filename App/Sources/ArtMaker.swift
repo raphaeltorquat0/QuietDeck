@@ -68,22 +68,6 @@ enum ArtMaker {
     }
 }
 
-extension ArtMaker {
-    /// Nome de capa: sem região/idioma/revisão do nome de ROM e com o artigo de volta à frente
-    /// ("Legend of Zelda, The - The Wind Waker (USA)" → "The Legend of Zelda - The Wind Waker").
-    nonisolated static func coverTitle(_ title: String) -> String {
-        let tags = #"\s*\((USA|Europe|Japan|World|Brazil|Korea|Asia|En|Fr|De|Es|It|Pt|Rev [0-9A-Z]+|v[0-9.]+|[A-Z][a-z](,[A-Z][a-z])+)[^)]*\)"#
-        var t = title.replacingOccurrences(of: tags, with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces)
-        if let m = t.range(of: #"^(.+?), (The|A|An)(\b.*)$"#, options: .regularExpression) {
-            let parts = t[m].split(separator: ",", maxSplits: 1)
-            let rest = parts[1].trimmingCharacters(in: .whitespaces)
-            let article = rest.split(separator: " ", maxSplits: 1)
-            t = "\(article[0]) \(parts[0])" + (article.count > 1 ? " " + article[1] : "")
-        }
-        return t
-    }
-}
-
 /// Capa desenhada: cor da família do console, símbolo grande ao fundo e o título em destaque.
 /// O hero não leva texto, porque o Steam escreve o nome por cima.
 struct GeneratedArt: View {
@@ -122,7 +106,7 @@ struct GeneratedArt: View {
                     Text(verbatim: system.name.uppercased())
                         .font(.system(size: tall ? 26 : 22, weight: .semibold)).tracking(3)
                         .foregroundStyle(.white.opacity(0.75))
-                    Text(verbatim: ArtMaker.coverTitle(title))
+                    Text(verbatim: ROMPlan.coverTitle(title))
                         .font(.system(size: tall ? 64 : 52, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white).lineLimit(tall ? 5 : 2).minimumScaleFactor(0.5)
                         .shadow(color: .black.opacity(0.35), radius: 8, y: 4)

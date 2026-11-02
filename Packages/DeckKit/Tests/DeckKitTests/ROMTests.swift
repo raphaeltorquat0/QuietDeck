@@ -144,4 +144,12 @@ import Testing
         try Data(#"[{"id":"x","name":"X","flatpak":"a.b.C","systems":[]}]"#.utf8).write(to: dir.appendingPathComponent("emulators.json"))
         #expect(try Catalog.load(overrideDirectory: dir).emulators.map(\.id) == ["x"])
     }
+
+    @Test func coverTitleReadsLikeABoxArt() {
+        #expect(ROMPlan.coverTitle("Legend of Zelda, The - The Wind Waker (USA)") == "The Legend of Zelda - The Wind Waker")
+        #expect(ROMPlan.coverTitle("Pokemon - Emerald Version (USA, Europe)") == "Pokemon - Emerald Version")
+        #expect(ROMPlan.coverTitle("Super Mario World (USA) (Rev 1)") == "Super Mario World")
+        #expect(ROMPlan.coverTitle("Final Fantasy VII (USA) (Disc 1)") == "Final Fantasy VII (Disc 1)")
+        #expect(ROMPlan.coverTitle("Resident Evil 0 (Russian Voice+Text mod.)") == "Resident Evil 0 (Russian Voice+Text mod.)")
+    }
 }
