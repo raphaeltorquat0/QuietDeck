@@ -309,6 +309,13 @@ import Testing
         #expect(s.launchOptions == "run --command=shadps4 net.shadps4.shadPS4 -f true -g \"/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin\"")
     }
 
+    @Test func partialUploadsAreNotGames() throws {
+        let catalog = try Catalog.load()
+        let listing = "10\tswitch/.quietdeck-partial/RE0.nsp\n10\tswitch/.RE0.nsp.kaKvW8\n10\tswitch/RE0.nsp\n"
+        let games = Library.parse(listing, systems: catalog.systems, paths: EmulationPaths(root: "/home/deck/Emulation"))
+        #expect(games.map(\.path) == ["/home/deck/Emulation/roms/switch/RE0.nsp"])
+    }
+
     @Test func keysAreValidatedAndPrivate() throws {
         let dir = try tempDir(), home = dir.appendingPathComponent("home")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

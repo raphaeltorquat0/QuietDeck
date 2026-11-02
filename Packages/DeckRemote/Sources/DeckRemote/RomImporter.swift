@@ -481,7 +481,10 @@ public enum Library {
             let f = line.split(separator: "\t", maxSplits: 1).map(String.init)
             guard f.count == 2, let size = Int64(f[0]) else { return nil }
             let relative = f[1], name = (relative as NSString).lastPathComponent
-            guard let system = systems.first(where: { relative.hasPrefix($0.folder + "/") }) else { return nil }
+            // Escondido é envio em andamento (`.quietdeck-partial/`, `.<nome>.XXXXXX` do rsync): virava atalho
+            // apontando para um arquivo pela metade.
+            guard !relative.split(separator: "/").contains(where: { $0.hasPrefix(".") }),
+                  let system = systems.first(where: { relative.hasPrefix($0.folder + "/") }) else { return nil }
             // Jogo em pasta: o nome é o da pasta, e só o arquivo de entrada conta.
             if let entry = system.entry {
                 let folder = (relative as NSString).deletingLastPathComponent
