@@ -59,6 +59,7 @@ PT = {
 "Installing the PS3 package": "Instalando o pacote do PS3",
 "%@ isn't a PS3 package.": "%@ não é um pacote do PS3.",
 "PS3UPDAT.PUP": "PS3UPDAT.PUP",
+"Waiting for the Deck": "Esperando o Deck",
 "nsz finished without creating a game from %@.": "O nsz terminou sem gerar um jogo a partir de %@.",
 "SMB": "SMB",
 "NFS": "NFS",

@@ -35,6 +35,25 @@ import Testing
         #expect(q.jobs[0].state == .succeeded)
     }
 
+    @Test func lostDeckPausesAndResumes() async {
+        let attempts = Order()
+        let q = JobQueue(storeURL: nil) { job, _ in
+            await attempts.add(job.title)
+            if job.title == "a", await attempts.items.count == 1 {
+                throw DeckError.commandFailed(command: "rsync", result: CommandResult(stderr: "rsync(314): error: unexpected end of file", exitCode: 255))
+            }
+        }
+        q.enqueue(job("a")); q.enqueue(job("b"))
+        await q.waitUntilIdle()
+        // Pausou no primeiro: nada falhou e o segundo não rodou com o Deck fora do ar.
+        #expect(q.jobs.map(\.state) == [.queued, .queued])
+        #expect(q.jobs[0].detail == "Waiting for the Deck")
+        q.resume(deckID: deck)
+        await q.waitUntilIdle()
+        #expect(q.jobs.map(\.state) == [.succeeded, .succeeded])
+        #expect(await attempts.items == ["a", "a", "b"])
+    }
+
     @Test func cancelStopsRunningJob() async {
         let q = JobQueue(storeURL: nil) { _, _ in try await Task.sleep(for: .seconds(30)) }
         let id = q.enqueue(job("a"))

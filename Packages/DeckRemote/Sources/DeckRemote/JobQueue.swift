@@ -197,7 +197,8 @@ public final class JobQueue {
     private func startWorker(_ deckID: UUID) {
         guard workers[deckID] == nil else { return }
         workers[deckID] = Task { [weak self] in
-            while let self, let next = self.nextJob(deckID) { await self.execute(next) }
+            // Conexão perdida pausa o Deck: o job volta à fila e `resume` recomeça quando ele aparecer.
+            while let self, let next = self.nextJob(deckID), await self.execute(next) {}
             self?.workers[deckID] = nil
         }
     }
@@ -206,7 +207,20 @@ public final class JobQueue {
         jobs.first { $0.deckID == deckID && $0.state == .queued }
     }
 
-    private func execute(_ job: Job) async {
+    /// Deck que sumiu (suspensão, Wi-Fi): não é falha do job, é espera. O rsync retoma do parcial.
+    static func isConnectionLoss(_ error: Error) -> Bool {
+        switch error as? DeckError {
+        case .unreachable: return true
+        case let .commandFailed(_, r):
+            let e = r.stderr.lowercased()
+            return r.exitCode == 255 || ["unexpected end of file", "connection unexpectedly closed", "broken pipe", "connection reset", "connection timed out"].contains { e.contains($0) }
+        default: return false
+        }
+    }
+
+    /// Devolve se o Deck pode seguir para o próximo job.
+    @discardableResult
+    private func execute(_ job: Job) async -> Bool {
         update(job.id) { $0.state = .running }
         let executor = self.executor
         let task = Task.detached {
@@ -224,6 +238,7 @@ public final class JobQueue {
         let outcome = await task.result
         running[job.id] = nil
         defer { if let finished = jobs.first(where: { $0.id == job.id }) { onFinish?(finished) } }
+        var keepGoing = true
         update(job.id) {
             switch outcome {
             case .success:
@@ -231,10 +246,15 @@ public final class JobQueue {
                 $0.percent = 100
             case .failure(is CancellationError):
                 $0.state = .cancelled
+            case let .failure(error) where !task.isCancelled && Self.isConnectionLoss(error):
+                $0.state = .queued
+                $0.detail = "Waiting for the Deck"
+                keepGoing = false
             case let .failure(error):
                 $0.state = task.isCancelled ? .cancelled : .failed(self.describe(error))
             }
         }
+        return keepGoing
     }
 
     private func update(_ id: UUID, persist: Bool = true, _ change: (inout Job) -> Void) {
