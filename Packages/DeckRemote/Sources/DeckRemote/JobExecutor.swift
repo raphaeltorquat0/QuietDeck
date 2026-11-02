@@ -109,6 +109,11 @@ public enum JobExecutor {
             case .removeQuietGlass:
                 try await QuietTheme.removeGlass(r, password: c.requirePassword())
                 progress(100, "Quiet Glass removed")
+            case let .installSwitchMod(local):
+                _ = try await Flatpaks.install(SwitchMods.flatpak, runner: r)
+                _ = try await SwitchMods.install(URL(fileURLWithPath: local), config: c.config, runner: r,
+                                                 work: c.workRoot.appendingPathComponent("mod"), progress: progress)
+                progress(100, "Translation installed")
             case let .installSwitchFirmware(local):
                 _ = try await Flatpaks.install(SwitchFirmware.flatpak, runner: r)
                 _ = try await SwitchFirmware.install(URL(fileURLWithPath: local), config: c.config, runner: r,

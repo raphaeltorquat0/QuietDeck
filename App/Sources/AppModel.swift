@@ -255,6 +255,13 @@ final class AppModel {
         }
     }
 
+    func installSwitchMods(_ paths: [String]) {
+        for path in paths {
+            let name = (path as NSString).lastPathComponent
+            enqueue(String(localized: "Install \(name)"), .installSwitchMod(localPath: path))
+        }
+    }
+
     func installSwitchFirmware(_ paths: [String]) {
         for path in paths {
             enqueue(String(localized: "Install Switch firmware"), .installSwitchFirmware(localPath: path))

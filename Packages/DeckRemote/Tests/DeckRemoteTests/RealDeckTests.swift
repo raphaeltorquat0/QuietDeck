@@ -74,6 +74,20 @@ enum Real {
         try await r.check("rm -rf \(base)/registered")
     }
 
+    /// Mod falso para um Title ID que não existe, pelo caminho real, apagado no fim.
+    @Test(.enabled(if: Real.step("mod-fake"))) func modInstall() async throws {
+        let r = Real.runner
+        let pack = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("QuietDeck Teste PT-BR")
+        let romfs = pack.appendingPathComponent("atmosphere/contents/01000000000FFFF0/romfs/text")
+        try FileManager.default.createDirectory(at: romfs, withIntermediateDirectories: true)
+        try Data("ola".utf8).write(to: romfs.appendingPathComponent("msg.bin"))
+        let work = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        #expect(try await SwitchMods.install(pack, config: Real.config, runner: r, work: work) { _, _ in } == ["01000000000FFFF0"])
+        let dir = "~/" + SwitchMods.deckDirectory + "/01000000000FFFF0"
+        #expect(try await r.check("cat \(dir)/'QuietDeck Teste PT-BR'/romfs/text/msg.bin").stdout == "ola")
+        try await r.check("rm -rf \(dir)")
+    }
+
     @Test(.enabled(if: Real.step("switch-clean"))) func switchClean() async throws {
         let r = Real.runner
         let paths = try await Emulation.paths(r, sdMount: nil)

@@ -91,6 +91,16 @@
     }
    }
   },
+  "%@ has no romfs or exefs folder under a Switch title ID.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não tem pasta romfs ou exefs dentro de um Title ID do Switch."
+     }
+    }
+   }
+  },
   "%@ is damaged or isn't a patch QuietDeck can apply.": {
    "localizations": {
     "pt-BR": {
@@ -3987,6 +3997,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Token"
+     }
+    }
+   }
+  },
+  "Translation installed": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Tradução instalada"
      }
     }
    }
