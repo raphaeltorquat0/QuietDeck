@@ -280,6 +280,9 @@ import Testing
         #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.backend") == "GamepadSDL2")
         #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.id") == "0-00000003-28de-0000-ff11-000001000000")
         #expect(ConfigPatcher.jsonValue(input, path: "res_scale") == "1")
+        // Como no Dolphin: cada botão faz o que a letra impressa no Deck diz.
+        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.right_joycon.button_a") == "A")
+        #expect(ConfigPatcher.jsonValue(input, path: "input_config.0.right_joycon.button_x") == "X")
         #expect(EmulatorSetup.patched(profiles[0], current: input) == nil)
         let screen = try #require(EmulatorSetup.patched(profiles[1], current: input))
         #expect(ConfigPatcher.jsonValue(screen, path: "start_fullscreen") == "true")
