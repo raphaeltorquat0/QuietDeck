@@ -462,7 +462,8 @@ public struct RomImporter: Sendable {
 
 public enum Library {
     public static func listing(paths: EmulationPaths) -> String {
-        "cd \(Shell.quote(paths.roms)) 2>/dev/null && find . -mindepth 2 -maxdepth 3 -type f -printf '%s\\t%P\\n'"
+        // Pasta ainda inexistente (nada enviado para aquele destino) é biblioteca vazia, não erro.
+        "if [ -d \(Shell.quote(paths.roms)) ]; then cd \(Shell.quote(paths.roms)) && find . -mindepth 2 -maxdepth 3 -type f -printf '%s\\t%P\\n'; fi"
     }
 
     public struct Game: Equatable, Identifiable, Sendable {

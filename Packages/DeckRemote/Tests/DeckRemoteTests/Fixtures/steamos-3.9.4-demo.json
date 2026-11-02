@@ -61,7 +61,7 @@
       "stdout" : ""
     },
     {
-      "command" : "cd '/home/deck/Emulation/roms' 2>/dev/null && find . -mindepth 2 -maxdepth 3 -type f -printf '%s\\t%P\\n'",
+      "command" : "if [ -d '/home/deck/Emulation/roms' ]; then cd '/home/deck/Emulation/roms' && find . -mindepth 2 -maxdepth 3 -type f -printf '%s\\t%P\\n'; fi",
       "exitCode" : 0,
       "stderr" : "",
       "stdout" : "41943040\tgba/Golden Sun.gba\n524288000\tpsx/Chrono Cross (Disc 1).chd\n519045120\tpsx/Chrono Cross (Disc 2).chd\n48\tpsx/Chrono Cross.m3u\n2147483648\tps2/Okami.chd\n1459978240\tgc/Wind Waker.rvz\n4294967\tsnes/Super Metroid.sfc\n"

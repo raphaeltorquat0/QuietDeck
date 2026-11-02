@@ -12,6 +12,7 @@ struct LibraryView: View {
     @State private var filter: String?
     @State private var candidates: [Candidate] = []
     @State private var unrecognized: [String] = []
+    @State private var frames = Frames()
     @State private var targetSD = false
     @State private var addToSteam = true
     @State private var dropping = false
@@ -29,11 +30,14 @@ struct LibraryView: View {
         var patch: String?
         /// Pasta de PS4: chega ao Deck com o título do `param.sfo`.
         var deckName: String?
-        var frame = CGRect.zero
         var name: String { (path as NSString).lastPathComponent }
         /// O nome com que o jogo chega ao Deck: traduzido ganha o nome do patch.
         var title: String { ROMPlan.displayName(deckName ?? patch.map { ROMPatch.patchedName(rom: path, patch: $0) } ?? name) }
     }
+
+    /// Posição das capas para a animação de envio, fora da observação: rolar não redesenha a tela, e uma
+    /// capa que já saiu da lista não escreve num índice que não existe mais (o crash de 02/11).
+    private final class Frames { var byID: [String: CGRect] = [:] }
 
     /// Discos do mesmo jogo aparecem como uma capa só.
     private var titles: [Library.Game] {
@@ -137,14 +141,11 @@ struct LibraryView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach($candidates) { $item in
+                        let id = item.id
                         VStack(spacing: 6) {
                             CoverView(title: item.title, symbol: item.systemID.flatMap { model.catalog.system($0)?.symbol } ?? "questionmark")
                                 .frame(width: 104)
-                                .background(GeometryReader { geo in
-                                    Color.clear
-                                        .onAppear { item.frame = geo.frame(in: .named("root")) }
-                                        .onChange(of: geo.frame(in: .named("root"))) { _, f in item.frame = f }
-                                })
+                                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("root")) } action: { frames.byID[id] = $0 }
                             Picker("System", selection: $item.systemID) {
                                 Text("Choose…").tag(String?.none)
                                 ForEach(item.options, id: \.self) { Text(verbatim: model.catalog.system($0)?.name ?? $0).tag(String?.some($0)) }
@@ -257,7 +258,7 @@ struct LibraryView: View {
         var refs: [GameRef] = []
         for item in candidates {
             guard let id = item.systemID else { continue }
-            model.launch(title: item.title, from: item.frame)
+            model.launch(title: item.title, from: frames.byID[item.id] ?? .zero)
             let name = item.name
             model.enqueue(String(localized: "Send \(name)"), .importROM(localPath: item.path, systemID: id, sdMount: sd, patch: item.patch))
             refs.append(GameRef(systemID: id, title: item.title))
