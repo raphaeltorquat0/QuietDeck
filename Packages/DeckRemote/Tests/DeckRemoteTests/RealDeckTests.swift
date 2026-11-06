@@ -199,9 +199,8 @@ enum Real {
         print(names)
     }
     /// Lichii de verdade, da release mais nova no GitHub, só em `~/.local/share/quietdeck/emulators/lichii`.
-    /// Abre fora da tela (`offscreen`) por alguns segundos para conferir, com o runtime real do AppImage,
-    /// a detecção de aberto e que o Lichii lê o perfil sem regravar e sem tocar nas pastas do Eden.
-    /// Não cria atalho nem reinicia o Steam. Desfaça com `lichii-remove`.
+    /// Não abre o Lichii: o AppImage só traz os plugins Qt `xcb` e `wayland`, então `offscreen` fecha na hora,
+    /// e abrir de verdade põe uma janela na tela do Deck. Não cria atalho nem reinicia o Steam. Desfaça com `lichii-remove`.
     @Test(.enabled(if: Real.step("lichii-install"))) func lichiiInstall() async throws {
         let r = Real.runner
         #expect(try await !Real.steam.gameOpen(), "Feche o jogo antes")
@@ -217,18 +216,6 @@ enum Real {
         let before = try await r.check("cat \(Shell.quote(ini))").stdout
         #expect(before.contains("check_for_updates=false"))
         let eden = "for d in ~/.local/share/eden ~/.config/eden ~/.cache/eden; do if [ -e $d ]; then echo $d; fi; done"
-        #expect(try await r.check(eden).trimmed.isEmpty)
-
-        try await r.check("cd / && (QT_QPA_PLATFORM=offscreen setsid \(Shell.quote(root + "/run.sh")) > /tmp/qd-lichii.log 2>&1 &) && sleep 8")
-        let open = try await AppImages.isOpen(lichii, runner: r)
-        let pids = try await r.check(AppImages.runningScript(root: root)).trimmed.split(whereSeparator: \.isNewline).joined(separator: " ")
-        if !pids.isEmpty { try await r.check("kill \(pids) && sleep 3") }
-        print(try await r.check("tail -5 /tmp/qd-lichii.log; rm -f /tmp/qd-lichii.log").stdout)
-        #expect(open)
-        #expect(try await !AppImages.isOpen(lichii, runner: r))
-        let after = try await r.check("cat \(Shell.quote(ini))").stdout
-        #expect(after.contains("check_for_updates=false"))
-        #expect(after.contains("player_0_button_a=\"engine:sdl,port:0,guid:03000000de280000ff11000001000000,button:0\""))
         #expect(try await r.check(eden).trimmed.isEmpty)
     }
 

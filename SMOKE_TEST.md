@@ -216,7 +216,8 @@ Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your
 
 - [x] AppImage `build-88` downloaded on the Deck: sha256 matches the release `digest`, FUSE mounts it, `ldd` finds every library, and `eden-cli -v` runs. LCD Deck, SteamOS 3.9.5, glibc 2.43, Mesa 26.2.0-devel RADV (VANGOGH), 2026-11-06, by hand in a temporary folder that was then deleted.
 - [x] With `./user` in the working folder, config and log go there and no `~/.local/share/eden`, `~/.config/eden` or `~/.cache/eden` appears. Same run.
-- [ ] `lichii-install` step: install through `AppImages.install`, Lichii detected as open by `APPIMAGE`, and `check_for_updates=false` plus the controller profile still in `qt-config.ini` after it closes. Not run: the Deck dropped off the network before the step.
+- [x] `lichii-install` step: `build-93` installed through `AppImages.install` (`current`, `run.sh`, `user/`), `qt-config.ini` created with `check_for_updates=false` and the controller profile, no Eden folder created. 2026-11-06.
+- [ ] Lichii detected as open by `APPIMAGE` while it runs, and the profile still in `qt-config.ini` after it closes. Needs it opened on screen: the AppImage only bundles the `xcb` and `wayland` Qt plugins, so an off-screen run exits at once ("no Qt platform plugin could be initialized").
 - [ ] Install, update, **Use <previous>** and both remove buttons from the app, checking `current` and `previous` under `~/.local/share/quietdeck/emulators/lichii`.
 - [ ] Send a game dropped from a folder named `switch2`, then **Add to Steam**. The shortcut runs `run.sh` with `-f -g "<rom>"` and opens in Game Mode with no update dialog.
 - [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
