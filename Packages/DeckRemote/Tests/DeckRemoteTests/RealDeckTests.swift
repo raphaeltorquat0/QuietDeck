@@ -223,4 +223,29 @@ enum Real {
         let lichii = try #require(try Catalog.load().emulator("lichii"))
         #expect(try await AppImages.remove(lichii, keepData: false, runner: Real.runner) == .done)
     }
+    /// Arquivo vazio em `roms/switch2`, só para percorrer o Add to Steam real até o Steam reiniciado.
+    /// Desfaça com `lichii-clean`.
+    @Test(.enabled(if: Real.step("lichii-shortcut"))) func lichiiShortcut() async throws {
+        let r = Real.runner
+        let paths = try await Emulation.paths(r, sdMount: nil)
+        try await r.check("mkdir -p \(Shell.quote(paths.roms + "/switch2")) && : > \(Shell.quote(paths.roms + "/switch2/QuietDeck Lichii Teste.xci"))")
+        let action = JobAction.addToSteam(user: try await Real.user(), games: [GameRef(systemID: "switch2", title: "QuietDeck Lichii Teste")], sdMount: nil)
+        let context = JobContext(runner: r, config: Real.config, catalog: try Catalog.load(), password: nil, workRoot: FileManager.default.temporaryDirectory) {}
+        try await JobExecutor.run(Job(deckID: UUID(), title: "Teste", action: action), context: context) { _, detail in if let detail { print(detail) } }
+        let path = try await SteamControl(runner: r).configDirectory(user: try await Real.user()) + "/shortcuts.vdf"
+        let all = ShortcutsFile.existing(in: try VDF.parse(try #require(try await RemoteFiles(runner: r).read(path))))
+        let s = try #require(all.first { $0.name == "QuietDeck Lichii Teste" })
+        print(s.exe, s.launchOptions)
+        #expect(s.exe.hasSuffix("/.local/share/quietdeck/emulators/lichii/run.sh\""))
+        #expect(s.launchOptions == "-f -g \"\(paths.roms)/switch2/QuietDeck Lichii Teste.xci\"")
+        #expect(s.isEmulatorGame)
+    }
+
+    @Test(.enabled(if: Real.step("lichii-clean"))) func lichiiClean() async throws {
+        let r = Real.runner
+        let paths = try await Emulation.paths(r, sdMount: nil)
+        #expect(try await SteamControl(runner: r).removeShortcuts(names: ["QuietDeck Lichii Teste"], user: try await Real.user()))
+        try await r.check("rm -f \(Shell.quote(paths.roms + "/switch2/QuietDeck Lichii Teste.xci"))")
+        #expect(try await !Real.names().contains("QuietDeck Lichii Teste"))
+    }
 }

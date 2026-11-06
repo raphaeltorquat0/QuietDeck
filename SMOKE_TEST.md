@@ -219,7 +219,8 @@ Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your
 - [x] `lichii-install` step: `build-93` installed through `AppImages.install` (`current`, `run.sh`, `user/`), `qt-config.ini` created with `check_for_updates=false` and the controller profile, no Eden folder created. 2026-11-06.
 - [x] Lichii opened on screen in Game Mode with no game (`DISPLAY=:0` from Steam): detected as open through `APPIMAGE=<root>/versions/build-93/…`, closed with SIGTERM. On exit it rewrote `qt-config.ini` in full (1,582 lines) and kept `check_for_updates=false` and the controller profile. No Eden folder created. 2026-11-06.
 - [ ] Install, update, **Use <previous>** and both remove buttons from the app, checking `current` and `previous` under `~/.local/share/quietdeck/emulators/lichii`.
-- [ ] Send a game dropped from a folder named `switch2`, then **Add to Steam**. The shortcut runs `run.sh` with `-f -g "<rom>"` and opens in Game Mode with no update dialog.
+- [x] `lichii-shortcut` step: Add to Steam with an empty `roms/switch2/QuietDeck Lichii Teste.xci` wrote a shortcut to `run.sh` with `-f -g "<rom>"` and restarted Steam in Game Mode. Opened from Steam (`steam://rungameid`), the reaper ran the shortcut's appid and Lichii started from its own folder with the arguments intact, then refused the empty file (`Failed to load ROM (Error 27)`), with no update dialog. Closed with SIGTERM, and Steam left the game state. 2026-11-06. Undo with `lichii-clean`.
+- [ ] Same with a real Switch 2 game: it boots in Game Mode.
 - [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
 - [ ] Suspend and resume with a game open. Audio in Game Mode.
 - [ ] Update to a newer build with a shortcut already created: the shortcut still opens, and the save is still there.
