@@ -153,3 +153,36 @@ import Testing
         #expect(ROMPlan.coverTitle("Resident Evil 0 (Russian Voice+Text mod.)") == "Resident Evil 0 (Russian Voice+Text mod.)")
     }
 }
+
+@Suite struct Switch2DetectionTests {
+    let catalog = try! Catalog.load()
+    func detect(_ path: String) -> ROMDetection { ROMDetector(systems: catalog.systems).detect(path: path, prefix: Data(), size: 0) }
+
+    /// O Switch 2 usa as extensões do Switch: só a pasta o identifica, e o `.nsp` comum não vira ambíguo.
+    @Test func onlyTheFolderMeansSwitch2() {
+        #expect(detect("/x/Game [0100000000010000][v0].nsp") == .system("switch"))
+        #expect(detect("/x/Game.xci") == .system("switch"))
+        #expect(detect("/roms/switch2/Game.xci") == .system("switch2"))
+        #expect(detect("/Users/me/Switch 2/Game.nsz") == .system("switch2"))
+        #expect(detect("/roms/ns2/Game.nsp") == .system("switch2"))
+    }
+
+    /// O Lichii lê `.nsz` e `.xcz`; o `nsz` do Mac só converte Switch 1.
+    @Test func switch2KeepsCompressedFiles() throws {
+        let s2 = try #require(catalog.system("switch2"))
+        let s1 = try #require(catalog.system("switch"))
+        #expect(!ROMPlan.mustDecompress(system: s2, fileExtension: "nsz"))
+        #expect(ROMPlan.mustDecompress(system: s1, fileExtension: "NSZ"))
+        #expect(catalog.emulator(s2.emulator)?.appImage?.asset == "lichii-linux-x86_64.AppImage")
+        #expect(catalog.emulator("lichii")?.flatpak == nil)
+    }
+
+    @Test func runShShortcutCountsAsQuietDeckGame() {
+        var s = ShortcutsFile.Existing(name: "Game", exe: "\"/home/deck/.local/share/quietdeck/emulators/lichii/run.sh\"")
+        s.launchOptions = "-f -g \"/home/deck/Emulation/roms/switch2/Game.xci\""
+        #expect(s.isEmulatorGame)
+        #expect(s.romPath == "/home/deck/Emulation/roms/switch2/Game.xci")
+        s.exe = "\"/home/deck/Applications/run.sh\""
+        #expect(!s.isEmulatorGame)
+    }
+}

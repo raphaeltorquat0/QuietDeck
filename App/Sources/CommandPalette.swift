@@ -28,11 +28,12 @@ struct CommandPalette: View {
         if let deck = model.current {
             all.append(Item(id: "refresh", title: String(localized: "Refresh"), symbol: "arrow.clockwise") { Task { await deck.refresh() } })
             all += model.catalog.emulators.filter(\.isAvailable).map { e in
-                let installed = deck.flatpaks.contains { $0.appID == e.flatpak }
+                let installed = e.flatpak.map { id in deck.flatpaks.contains { $0.appID == id } } ?? (deck.appImages[e.id]?.isInstalled == true)
                 return Item(id: "emu-" + e.id, title: installed ? String(localized: "Open \(e.name) in Emulators") : String(localized: "Install \(e.name)"), symbol: "gamecontroller") {
-                    if installed { model.section = .emulators } else {
-                        model.enqueue(String(localized: "Install \(e.name)"), .installEmulator(appID: e.flatpak))
-                    }
+                    // AppImage: a versão é escolhida na tela de emuladores, que lê as releases.
+                    if let flatpak = e.flatpak, !installed {
+                        model.enqueue(String(localized: "Install \(e.name)"), .installEmulator(appID: flatpak))
+                    } else { model.section = .emulators }
                 }
             }
             all += deck.games.map { g in

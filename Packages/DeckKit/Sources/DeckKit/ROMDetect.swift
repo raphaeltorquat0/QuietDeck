@@ -18,7 +18,7 @@ public struct ROMDetector: Sendable {
     public func detect(path: String, prefix: Data, size: Int64) -> ROMDetection {
         let url = URL(fileURLWithPath: path)
         let ext = url.pathExtension.lowercased()
-        let accepting = systems.filter { $0.extensions.contains(ext) }
+        let accepting = systems.filter { $0.extensions.contains(ext) && $0.folderOnly != true }
 
         for folder in url.deletingLastPathComponent().pathComponents.reversed().prefix(3) {
             let name = folder.lowercased()
@@ -102,8 +102,9 @@ public enum ROMPlan {
     }
 
     /// Ryubing e Eden só abrem `.nsp` e `.xci`: o compactado do Switch nunca vai como está.
-    public static func mustDecompress(fileExtension: String) -> Bool {
-        ["nsz", "xcz"].contains(fileExtension.lowercased())
+    /// O Lichii (Switch 2) lê `.nsz` e `.xcz` (`loader.cpp`), e o `nsz` não conhece as chaves do Switch 2.
+    public static func mustDecompress(system: GameSystem, fileExtension: String) -> Bool {
+        system.id == "switch" && ["nsz", "xcz"].contains(fileExtension.lowercased())
     }
 
     /// Arquivos citados por um `.cue` ou `.gdi`: viajam junto e não contam como jogos separados.

@@ -39,6 +39,11 @@ public enum JobAction: Codable, Hashable, Sendable {
     case installEmulator(appID: String)
     case updateEmulator(appID: String)
     case removeEmulator(appID: String)
+    /// Emulador em AppImage do GitHub (Lichii). Atualizar é instalar uma tag mais nova; a anterior fica para voltar.
+    case installAppImage(emulatorID: String, tag: String, asset: GitHubAsset)
+    case rollbackAppImage(emulatorID: String)
+    /// `keepData: false` apaga também config, saves e chaves daquele emulador.
+    case removeAppImage(emulatorID: String, keepData: Bool)
     case prepareEmulation(sdMount: String?)
     case configureEmulator(id: String, overwrite: Bool, sdMount: String?)
     case addToSteam(user: String, games: [GameRef], sdMount: String?)

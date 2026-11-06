@@ -46,7 +46,7 @@ public struct ShelfInstaller: Sendable {
     static func canGoDirect(_ item: ShelfItem, system: GameSystem) -> Bool {
         let ext = (item.entry as NSString).pathExtension
         return item.members.isEmpty && !ROMPlan.mustExtract(system: system, fileExtension: ext)
-            && !ROMPlan.mustDecompress(fileExtension: ext)
+            && !ROMPlan.mustDecompress(system: system, fileExtension: ext)
             && ROMPlan.conversion(for: system, fileExtension: ext, size: item.size) == nil
     }
 

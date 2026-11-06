@@ -44,7 +44,7 @@ import Testing
 
     @Test func shortcutForRetroArchPointsAtCoreAndRom() throws {
         let catalog = try Catalog.load()
-        let s = try #require(Library.shortcut(name: "Golden Sun", romPath: "/r/Golden Sun.gba", system: catalog.system("gba")!, catalog: catalog, corePath: "/c/mgba_libretro.so"))
+        let s = try #require(Library.shortcut(name: "Golden Sun", romPath: "/r/Golden Sun.gba", system: catalog.system("gba")!, catalog: catalog, corePath: "/c/mgba_libretro.so", home: nil))
         #expect(s.exe == "\"/usr/bin/flatpak\"")
         #expect(s.launchOptions == "run org.libretro.RetroArch -f -L \"/c/mgba_libretro.so\" \"/r/Golden Sun.gba\"")
     }
@@ -326,7 +326,7 @@ import Testing
         #expect(games == [Library.Game(systemID: "ps4", name: "Bloodborne [CUSA00900]", path: "/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin", size: 10)])
         let game0 = try #require(Library.pick(GameRef(systemID: "ps4", title: "Bloodborne"), in: games))
         let ps4 = try #require(catalog.system("ps4"))
-        let s = try #require(Library.shortcut(name: "Bloodborne", romPath: game0.path, system: ps4, catalog: catalog, corePath: nil))
+        let s = try #require(Library.shortcut(name: "Bloodborne", romPath: game0.path, system: ps4, catalog: catalog, corePath: nil, home: nil))
         #expect(s.launchOptions == "run --command=shadps4 net.shadps4.shadPS4 -f true -g \"/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin\"")
     }
 
@@ -350,7 +350,7 @@ import Testing
         let switchSystem = try #require(catalog.system("switch"))
         #expect(switchSystem.emulator(for: "Super Mario Galaxy [010099C022B96000][v0] (3.30 GB).nsp") == "eden")
         #expect(switchSystem.emulator(for: "Resident Evil 0 [010097000BC10000][v0].nsp") == "ryubing")
-        let s = try #require(Library.shortcut(name: "Super Mario Galaxy", romPath: "/r/Super Mario Galaxy [010099C022B96000][v0].nsp", system: switchSystem, catalog: catalog, corePath: nil))
+        let s = try #require(Library.shortcut(name: "Super Mario Galaxy", romPath: "/r/Super Mario Galaxy [010099C022B96000][v0].nsp", system: switchSystem, catalog: catalog, corePath: nil, home: nil))
         #expect(s.launchOptions == "run dev.eden_emu.eden -f -g \"/r/Super Mario Galaxy [010099C022B96000][v0].nsp\"")
         let eden = try #require(catalog.emulator("eden")?.profiles)
         let factory = "[Controls]\nplayer_0_button_a\\default=false\nplayer_0_button_a=\"engine:keyboard,code:67,toggle:0\"\n[System]\nuse_docked_mode\\default=true\nuse_docked_mode=1\n"
@@ -380,9 +380,9 @@ import Testing
         let games = Library.parse(listing, systems: catalog.systems, paths: paths)
         #expect(games.map(\.name) == ["God of War [BCES00791]", "Demon.iso"])
         let ps3 = try #require(catalog.system("ps3"))
-        let s = try #require(Library.shortcut(name: "God of War", romPath: games[0].path, system: ps3, catalog: catalog, corePath: nil))
+        let s = try #require(Library.shortcut(name: "God of War", romPath: games[0].path, system: ps3, catalog: catalog, corePath: nil, home: nil))
         #expect(s.launchOptions.hasSuffix("\"/home/deck/Emulation/roms/ps3/God of War [BCES00791]/PS3_GAME/USRDIR/EBOOT.BIN\""))
-        #expect(try #require(Library.shortcut(name: "Demon", romPath: games[1].path, system: ps3, catalog: catalog, corePath: nil)).launchOptions.hasSuffix("\"/home/deck/Emulation/roms/ps3/Demon.iso\""))
+        #expect(try #require(Library.shortcut(name: "Demon", romPath: games[1].path, system: ps3, catalog: catalog, corePath: nil, home: nil)).launchOptions.hasSuffix("\"/home/deck/Emulation/roms/ps3/Demon.iso\""))
         var header = Data([0x7F, 0x50, 0x4B, 0x47]) + Data(count: 0x2C)
         header += Data("EP9000-BCES00791_00-GOWHDCLSHIP02222".utf8) + Data(count: 0x30)
         let pkg = root.appendingPathComponent("header.pkg")

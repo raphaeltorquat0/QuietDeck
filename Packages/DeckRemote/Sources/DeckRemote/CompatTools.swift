@@ -4,6 +4,16 @@ import DeckKit
 public struct GitHubAsset: Codable, Hashable, Sendable {
     public var name: String
     public var browser_download_url: String
+    /// `sha256:<hex>`, calculado pelo GitHub no upload. Opcional: a fila gravada antes não tem.
+    public var digest: String?
+    public var size: Int64?
+
+    public init(name: String, browser_download_url: String, digest: String? = nil, size: Int64? = nil) {
+        self.name = name
+        self.browser_download_url = browser_download_url
+        self.digest = digest
+        self.size = size
+    }
 }
 
 public struct GitHubRelease: Codable, Equatable, Identifiable, Sendable {

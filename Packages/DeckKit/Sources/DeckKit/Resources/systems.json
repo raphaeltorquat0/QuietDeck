@@ -227,6 +227,29 @@
   }
  },
  {
+  "id": "switch2",
+  "name": "Nintendo Switch 2",
+  "folder": "switch2",
+  "aliases": [
+   "ns2",
+   "nx2",
+   "switch 2"
+  ],
+  "extensions": [
+   "nca",
+   "nro",
+   "nso",
+   "nsp",
+   "nsz",
+   "xci",
+   "xcz"
+  ],
+  "readsArchives": false,
+  "chd": null,
+  "emulator": "lichii",
+  "folderOnly": true
+ },
+ {
   "id": "psx",
   "name": "PlayStation",
   "folder": "psx",

@@ -91,6 +91,16 @@
     }
    }
   },
+  "%@ has no published checksum, so it wasn't installed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "%@ não tem checksum publicado, então não foi instalado."
+     }
+    }
+   }
+  },
   "%@ has no romfs or exefs folder under a Switch title ID.": {
    "localizations": {
     "pt-BR": {
@@ -971,6 +981,16 @@
     }
    }
   },
+  "Close %@ first.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Feche o %@ antes."
+     }
+    }
+   }
+  },
   "Close %@ first: it rewrites its settings when it exits.": {
    "localizations": {
     "pt-BR": {
@@ -1291,6 +1311,16 @@
     }
    }
   },
+  "Delete Saves Too": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Apagar os saves também"
+     }
+    }
+   }
+  },
   "Desktop Mode": {
    "localizations": {
     "pt-BR": {
@@ -1497,6 +1527,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Digite a senha do usuário deck. Ela fica no seu Keychain."
+     }
+    }
+   }
+  },
+  "Experimental Switch 2 emulator. Many games don't boot yet.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Emulador experimental de Switch 2. Muitos jogos ainda não abrem."
      }
     }
    }
@@ -1841,6 +1881,16 @@
     }
    }
   },
+  "Install %@ in Emulators first.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Instale o %@ em Emuladores antes."
+     }
+    }
+   }
+  },
   "Install Decky": {
    "localizations": {
     "pt-BR": {
@@ -1941,6 +1991,16 @@
     }
    }
   },
+  "Installing %@ finished, but the active version didn't change.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A instalação do %@ terminou, mas a versão ativa não mudou."
+     }
+    }
+   }
+  },
   "Installing PS3 firmware": {
    "localizations": {
     "pt-BR": {
@@ -2027,6 +2087,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Ele desliga seus outros temas do CSS Loader. Restaurar os devolve exatamente como estavam."
+     }
+    }
+   }
+  },
+  "Its settings, saves and keys live in its own folder, apart from Eden. Remove keeps them; Remove with Data deletes them.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Configurações, saves e chaves ficam numa pasta própria, separada do Eden. Remover mantém tudo; Remover com os dados apaga."
      }
     }
    }
@@ -2257,6 +2327,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Nenhuma fonte com este jogo está online."
+     }
+    }
+   }
+  },
+  "No verifiable %@ release was found.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Nenhuma versão do %@ com checksum publicado foi encontrada."
      }
     }
    }
@@ -2691,6 +2771,16 @@
     }
    }
   },
+  "Previous version restored": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Versão anterior restaurada"
+     }
+    }
+   }
+  },
   "Programmer and dumper software and firmware.": {
    "localizations": {
     "pt-BR": {
@@ -2911,6 +3001,16 @@
     }
    }
   },
+  "Remove %@ and its data": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover o %@ e os dados"
+     }
+    }
+   }
+  },
   "Remove Quiet Glass": {
    "localizations": {
     "pt-BR": {
@@ -2931,12 +3031,32 @@
     }
    }
   },
+  "Remove with Data": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Remover com os dados"
+     }
+    }
+   }
+  },
   "Removed from Flathub (end of life). PlayStation games use the SwanStation core in RetroArch.": {
    "localizations": {
     "pt-BR": {
      "stringUnit": {
       "state": "translated",
       "value": "Removido do Flathub (fim de vida). Jogos de PlayStation usam o core SwanStation no RetroArch."
+     }
+    }
+   }
+  },
+  "Removing %@ finished, but it's still installed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A remoção do %@ terminou, mas ele continua instalado."
      }
     }
    }
@@ -3057,6 +3177,26 @@
      "stringUnit": {
       "state": "translated",
       "value": "Retrode"
+     }
+    }
+   }
+  },
+  "Roll back %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Voltar o %@ à versão anterior"
+     }
+    }
+   }
+  },
+  "Rolling back %@ finished, but the active version didn't change.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "A volta do %@ à versão anterior terminou, mas a versão ativa não mudou."
      }
     }
    }
@@ -3981,6 +4121,16 @@
     }
    }
   },
+  "The download of %@ didn't match its published checksum. Nothing was changed.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "O download de %@ não confere com o checksum publicado. Nada foi alterado."
+     }
+    }
+   }
+  },
   "The file on the Deck has %@ bytes instead of %@. Try again.": {
    "localizations": {
     "pt-BR": {
@@ -4081,6 +4231,16 @@
     }
    }
   },
+  "There's no previous version of %@ on the Deck.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Não há versão anterior do %@ no Deck."
+     }
+    }
+   }
+  },
   "These actions close the running game, so each one asks first.": {
    "localizations": {
     "pt-BR": {
@@ -4127,6 +4287,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "Este patch é aplicado antes do envio. Seus arquivos originais não mudam."
+     }
+    }
+   }
+  },
+  "This release can't be installed: %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Esta versão não pode ser instalada: %@"
      }
     }
    }
@@ -4351,6 +4521,16 @@
     }
    }
   },
+  "Use %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Usar %@"
+     }
+    }
+   }
+  },
   "Use one folder per system, like snes/ or psx/. QuietDeck also reads file headers and extensions.": {
    "localizations": {
     "pt-BR": {
@@ -4517,6 +4697,16 @@
      "stringUnit": {
       "state": "translated",
       "value": "O nsz terminou sem gerar um jogo a partir de %@."
+     }
+    }
+   }
+  },
+  "previous %@": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "anterior %@"
      }
     }
    }

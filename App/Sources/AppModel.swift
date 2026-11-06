@@ -344,6 +344,10 @@ final class LiveDeck: Identifiable {
     var status = DeviceStatus()
     var flatpaks: [InstalledFlatpak] = []
     var updates: [String: String] = [:]
+    /// Versão ativa e anterior de cada emulador em AppImage.
+    var appImages: [String: AppImages.Status] = [:]
+    /// Pasta pessoal no Deck: o atalho de um AppImage tem o caminho completo.
+    var home: String?
     var paths: EmulationPaths?
     var bios: [String: BIOSStatus] = [:]
     var games: [Library.Game] = []
@@ -394,6 +398,10 @@ final class LiveDeck: Identifiable {
         }
         let r = runner
         flatpaks = (try? await Flatpaks.installed(r)) ?? flatpaks
+        home = (try? await RemoteFiles(runner: r).home()) ?? home
+        for e in catalog.emulators where e.appImage != nil {
+            if let s = try? await AppImages.status(e, runner: r) { appImages[e.id] = s }
+        }
         updates = Flatpaks.parseUpdates((try? await r.run(Flatpaks.updates).stdout) ?? "")
         steamUsers = (try? await SteamControl(runner: r).users()) ?? steamUsers
         if let p = try? await Emulation.paths(r) {

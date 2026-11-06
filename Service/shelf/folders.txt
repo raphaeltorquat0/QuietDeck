@@ -27,6 +27,8 @@ neogeo
 nes
 ngc
 ns
+ns2
+nx2
 pcengine
 playstation
 playstation2
@@ -46,6 +48,8 @@ sms
 snes
 snesna
 switch
+switch 2
+switch2
 tg16
 wii
 wiiu

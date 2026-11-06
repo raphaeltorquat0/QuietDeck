@@ -382,7 +382,7 @@ struct GameDetail: View {
 
     private func apply() {
         guard let user = deck.steamUsers.first, let system,
-              let appID = Library.shortcut(name: title, romPath: game.path, system: system, catalog: model.catalog, corePath: nil)?.appID else { return }
+              let appID = Library.shortcut(name: title, romPath: game.path, system: system, catalog: model.catalog, corePath: nil, home: deck.home)?.appID else { return }
         for (kind, image) in picked {
             model.enqueue(String(localized: "Artwork: \(title)"), .applyArt(user: user, appID: appID, kind: kind, url: image.url))
         }

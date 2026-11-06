@@ -315,13 +315,16 @@ public enum EmulatorSetup {
 
     /// O Steam aponta `MESA_SHADER_CACHE_DIR` para `steamapps/shadercache/<appid>`, que o flatpak só vê
     /// para leitura: o Mesa desliga o cache e o jogo recompila tudo a cada abertura. Libera só essa pasta.
+    /// AppImage roda fora do sandbox e já grava ali.
     public static func allowShaderCache(_ emulator: Emulator, runner: any CommandRunner) async throws {
-        try await runner.check("flatpak override --user --filesystem=\"$HOME/.local/share/Steam/steamapps/shadercache\" \(Shell.quote(emulator.flatpak))")
+        guard let flatpak = emulator.flatpak else { return }
+        try await runner.check("flatpak override --user --filesystem=\"$HOME/.local/share/Steam/steamapps/shadercache\" \(Shell.quote(flatpak))")
     }
 
     public static func isOpen(_ emulator: Emulator, runner: any CommandRunner) async throws -> Bool {
-        try await runner.check("flatpak ps --columns=application").stdout.split(whereSeparator: \.isNewline)
-            .contains { $0.trimmingCharacters(in: .whitespaces) == emulator.flatpak }
+        guard let flatpak = emulator.flatpak else { return try await AppImages.isOpen(emulator, runner: runner) }
+        return try await runner.check("flatpak ps --columns=application").stdout.split(whereSeparator: \.isNewline)
+            .contains { $0.trimmingCharacters(in: .whitespaces) == flatpak }
     }
 
     static func patched(_ config: EmulatorConfig, current: String?) -> String? {

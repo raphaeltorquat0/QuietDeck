@@ -8,6 +8,9 @@ struct EmulatorsView: View {
     var deck: LiveDeck
     @State private var overwrite: Emulator?
     @State private var choosingBIOS = false
+    /// Versão mais nova de cada AppImage, lida do GitHub ao abrir a tela.
+    @State private var latest: [String: (tag: String, asset: GitHubAsset)] = [:]
+    @State private var releaseFailure: String?
 
     var body: some View {
         Page {
@@ -32,13 +35,73 @@ struct EmulatorsView: View {
                 InlineNote(text: "QuietDeck never downloads BIOS files. A file you import is checked against a table of known hashes before it's copied.")
             }
         }
+        .task {
+            for e in model.catalog.emulators where latest[e.id] == nil {
+                guard let source = e.appImage else { continue }
+                do {
+                    if let found = AppImages.latest(try await AppImages.releases(source), source: source) { latest[e.id] = found }
+                    else { releaseFailure = String(localized: "No verifiable \(e.name) release was found.") }
+                } catch { releaseFailure = model.describe(error) }
+            }
+        }
         .fileImporter(isPresented: $choosingBIOS, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in
             model.importBIOS(((try? result.get()) ?? []).map(\.path))
         }
     }
 
-    private func row(_ e: Emulator) -> some View {
-        let installed = deck.flatpaks.first { $0.appID == e.flatpak }
+    @ViewBuilder private func row(_ e: Emulator) -> some View {
+        if e.appImage != nil { appImageRow(e) } else { flatpakRow(e) }
+    }
+
+    /// AppImage do GitHub: versão ativa, a anterior para voltar e os dados em pasta própria.
+    private func appImageRow(_ e: Emulator) -> some View {
+        let status = deck.appImages[e.id] ?? .init()
+        let newest = latest[e.id]
+        let tagPrefix = e.appImage?.tagPrefix ?? ""
+        func number(_ tag: String?) -> Int { tag.flatMap { Int($0.dropFirst(tagPrefix.count)) } ?? 0 }
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: e.name)
+                    if let current = status.current {
+                        let previous = status.previous.map { String(localized: "previous \($0)") }
+                        Text(verbatim: previous.map { "\(current) · \($0)" } ?? current)
+                            .font(.caption.monospaced()).foregroundStyle(.secondary)
+                    }
+                    if let note = e.note { Text(LocalizedStringKey(note)).font(.caption).foregroundStyle(.secondary) }
+                }
+                Spacer()
+                if !status.isInstalled {
+                    if let newest {
+                        Button("Install \(newest.tag)") { model.enqueue(String(localized: "Install \(e.name)"), .installAppImage(emulatorID: e.id, tag: newest.tag, asset: newest.asset)) }
+                    } else if releaseFailure == nil { ProgressView().controlSize(.small) }
+                } else {
+                    if let newest, number(newest.tag) > number(status.current) {
+                        Button("Update to \(newest.tag)") { model.enqueue(String(localized: "Update \(e.name)"), .installAppImage(emulatorID: e.id, tag: newest.tag, asset: newest.asset)) }
+                    }
+                    if let previous = status.previous {
+                        Button("Use \(previous)") { model.enqueue(String(localized: "Roll back \(e.name)"), .rollbackAppImage(emulatorID: e.id)) }
+                    }
+                    ConfirmButton(title: "Remove", confirm: "Confirm") {
+                        model.enqueue(String(localized: "Remove \(e.name)"), .removeAppImage(emulatorID: e.id, keepData: true))
+                    }
+                }
+            }
+            if status.isInstalled {
+                HStack {
+                    InlineNote(text: "Its settings, saves and keys live in its own folder, apart from Eden. Remove keeps them; Remove with Data deletes them.", symbol: "externaldrive")
+                    ConfirmButton(title: "Remove with Data", confirm: "Delete Saves Too") {
+                        model.enqueue(String(localized: "Remove \(e.name) and its data"), .removeAppImage(emulatorID: e.id, keepData: false))
+                    }
+                }
+            }
+            if let releaseFailure { Text(verbatim: releaseFailure).font(.callout).foregroundStyle(.orange) }
+        }
+    }
+
+    private func flatpakRow(_ e: Emulator) -> some View {
+        let flatpak = e.flatpak ?? ""
+        let installed = deck.flatpaks.first { $0.appID == flatpak }
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -46,20 +109,20 @@ struct EmulatorsView: View {
                     if let note = e.note { Text(LocalizedStringKey(note)).font(.caption).foregroundStyle(.secondary) }
                     else if let installed {
                         Text(verbatim: "\(installed.version) · \(installed.installation)").font(.caption).foregroundStyle(.secondary)
-                    } else { Text(verbatim: e.flatpak).font(.caption.monospaced()).foregroundStyle(.secondary) }
+                    } else { Text(verbatim: flatpak).font(.caption.monospaced()).foregroundStyle(.secondary) }
                 }
                 Spacer()
                 if !e.isAvailable {
                     Text("Unavailable").foregroundStyle(.secondary)
                 } else if installed == nil {
-                    Button("Install") { model.enqueue(String(localized: "Install \(e.name)"), .installEmulator(appID: e.flatpak)) }
+                    Button("Install") { model.enqueue(String(localized: "Install \(e.name)"), .installEmulator(appID: flatpak)) }
                 } else {
-                    if deck.updates[e.flatpak] != nil {
-                        Button("Update") { model.enqueue(String(localized: "Update \(e.name)"), .updateEmulator(appID: e.flatpak)) }
+                    if deck.updates[flatpak] != nil {
+                        Button("Update") { model.enqueue(String(localized: "Update \(e.name)"), .updateEmulator(appID: flatpak)) }
                     }
                     if e.config != nil { Button("Set Paths") { setPaths(e) } }
                     ConfirmButton(title: "Remove", confirm: "Confirm") {
-                        model.enqueue(String(localized: "Remove \(e.name)"), .removeEmulator(appID: e.flatpak))
+                        model.enqueue(String(localized: "Remove \(e.name)"), .removeEmulator(appID: flatpak))
                     }
                 }
             }

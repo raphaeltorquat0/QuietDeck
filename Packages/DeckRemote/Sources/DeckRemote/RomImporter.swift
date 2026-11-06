@@ -88,6 +88,20 @@ public enum SwitchKeys {
         """
         try await runner.check(RemoteCommand(script, timeout: 300))
     }
+
+    /// Só as chaves, copiadas do Ryubing no próprio Deck para `user/keys` do Lichii. Chave diferente que já
+    /// estava lá fica em `.quietdeck-backup`. Firmware não: a limpeza que o Eden faz apagaria um firmware
+    /// de Switch 2 instalado pelo próprio Lichii.
+    public static func prepareLichii(runner: any CommandRunner) async throws {
+        let ryu = ".var/app/io.github.ryubing.Ryujinx/config/Ryujinx/system"
+        let keys = AppImages.base + "/lichii/user/keys"
+        try await runner.check("""
+        cd ~ && mkdir -p \(keys) && chmod 700 \(keys) && \
+        for k in prod.keys title.keys; do if [ -f \(ryu)/$k ] && { [ ! -f \(keys)/$k ] || [ "$(sha256sum < \(ryu)/$k)" != "$(sha256sum < \(keys)/$k)" ]; }; then \
+          if [ -f \(keys)/$k ]; then cp -n \(keys)/$k \(keys)/$k.quietdeck-backup; fi; \
+          cp \(ryu)/$k \(keys)/$k && chmod 600 \(keys)/$k; fi; done
+        """)
+    }
 }
 
 /// Patch `.pkg` e firmware `PS3UPDAT.PUP` do PS3 entram pelo próprio RPCS3, sem janela
@@ -514,7 +528,7 @@ public struct RomImporter: Sendable {
         var outputs: [URL] = []
         for entry in entries {
             let size = (try? FileManager.default.attributesOfItem(atPath: entry.path)[.size] as? Int64) ?? 0
-            if ROMPlan.mustDecompress(fileExtension: entry.pathExtension) {
+            if ROMPlan.mustDecompress(system: system, fileExtension: entry.pathExtension) {
                 progress(nil, "Decompressing")
                 outputs.append(try await Self.decompress(entry, work: work))
             } else if let mode = ROMPlan.conversion(for: system, fileExtension: entry.pathExtension, size: size) {
@@ -636,7 +650,8 @@ public enum Library {
     }
 
     /// Exe, diretório e argumentos do atalho. Steam interpreta aspas duplas em `LaunchOptions`.
-    public static func shortcut(name: String, romPath: String, system: GameSystem, catalog: Catalog, corePath: String?) -> Shortcut? {
+    /// AppImage abre pelo `run.sh` da pasta dele, que não muda entre versões; `home` é a do Deck e só ele precisa.
+    public static func shortcut(name: String, romPath: String, system: GameSystem, catalog: Catalog, corePath: String?, home: String?) -> Shortcut? {
         guard let emulator = catalog.emulator(system.emulator(for: (romPath as NSString).lastPathComponent)), emulator.isAvailable,
               let template = emulator.launch else { return nil }
         func q(_ s: String) -> String { "\"\(s)\"" }
@@ -646,6 +661,11 @@ public enum Library {
             romPath = String(romPath.dropLast(entry.count)) + boot
         }
         let options = template.replacingOccurrences(of: "{rom}", with: q(romPath)).replacingOccurrences(of: "{core}", with: q(corePath ?? ""))
+        if emulator.appImage != nil {
+            guard let home else { return nil }
+            return Shortcut(name: name, exe: AppImages.launcher(home: home, id: emulator.id), startDir: AppImages.root(home: home, id: emulator.id),
+                            launchOptions: options, tags: [system.name])
+        }
         return Shortcut(name: name, exe: "/usr/bin/flatpak", startDir: "/usr/bin", launchOptions: options, tags: [system.name])
     }
 }

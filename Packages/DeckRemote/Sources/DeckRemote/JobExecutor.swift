@@ -49,6 +49,25 @@ public enum JobExecutor {
             case let .installEmulator(id): try note(await Flatpaks.install(id, runner: r, onOutput: live), progress)
             case let .updateEmulator(id): try note(await Flatpaks.update(id, runner: r, onOutput: live), progress)
             case let .removeEmulator(id): try note(await Flatpaks.remove(id, runner: r), progress)
+            case let .installAppImage(id, tag, asset):
+                guard let emulator = c.catalog.emulator(id) else { return }
+                if try await AppImages.install(emulator, tag: tag, asset: asset, runner: r, onOutput: live) == .alreadyInstalled {
+                    progress(100, "Already installed")
+                }
+                // Aberto, ele regrava a configuração ao sair: o perfil fica para a manutenção da próxima abertura.
+                if try await !Emulation.paths(r).isEmuDeck, try await !EmulatorSetup.isOpen(emulator, runner: r) {
+                    _ = try await EmulatorSetup.applyProfiles(emulator, runner: r)
+                }
+            case let .rollbackAppImage(id):
+                guard let emulator = c.catalog.emulator(id) else { return }
+                switch try await AppImages.rollback(emulator, runner: r) {
+                case .nothingToRollBack: throw DeckError.unexpectedState("There's no previous version of %@ on the Deck.", emulator.name)
+                case .notInstalled: progress(100, "Not installed")
+                default: progress(100, "Previous version restored")
+                }
+            case let .removeAppImage(id, keepData):
+                guard let emulator = c.catalog.emulator(id) else { return }
+                if try await AppImages.remove(emulator, keepData: keepData, runner: r) == .notInstalled { progress(100, "Not installed") }
             case let .prepareEmulation(sd):
                 let paths = try await Emulation.paths(r, sdMount: sd)
                 let created = try await Emulation.prepare(r, paths: paths, systems: c.catalog.systems)
@@ -117,8 +136,8 @@ public enum JobExecutor {
                 // surgido depois do atalho (o Ryubing cria o Config.json na primeira abertura).
                 let paths = try await Emulation.paths(r)
                 if !paths.isEmuDeck {
-                    let installed = Set(try await Flatpaks.installed(r).map(\.appID))
-                    for emulator in c.catalog.emulators where installed.contains(emulator.flatpak) {
+                    let installed = try await installedEmulators(c.catalog, runner: r)
+                    for emulator in installed {
                         try await EmulatorSetup.allowShaderCache(emulator, runner: r)
                         if emulator.profiles == nil { continue }
                         if try await EmulatorSetup.isOpen(emulator, runner: r) { continue }
@@ -154,9 +173,8 @@ public enum JobExecutor {
                 try await SwitchKeys.send(config: c.config, runner: r)
                 progress(100, "Firmware installed")
             case let .applyAchievements(signedIn):
-                let installed = Set(try await Flatpaks.installed(r).map(\.appID))
                 let account = signedIn ? c.achievements : nil
-                for emulator in c.catalog.emulators where installed.contains(emulator.flatpak) {
+                for emulator in try await installedEmulators(c.catalog, runner: r) {
                     _ = try await EmulatorSetup.applyAchievements(emulator, account: account, runner: r)
                 }
                 progress(100, signedIn ? "Achievements on" : "Achievements off")
@@ -174,6 +192,17 @@ public enum JobExecutor {
             await c.onSudoRejected()
             throw DeckError.sudoRejected
         }
+    }
+
+    /// Flatpaks `--user` instalados e AppImages com versão ativa.
+    static func installedEmulators(_ catalog: Catalog, runner r: any CommandRunner) async throws -> [Emulator] {
+        let flatpaks = Set(try await Flatpaks.installed(r).map(\.appID))
+        var result: [Emulator] = []
+        for emulator in catalog.emulators {
+            if let id = emulator.flatpak { if flatpaks.contains(id) { result.append(emulator) } }
+            else if emulator.appImage != nil, try await AppImages.status(emulator, runner: r).isInstalled { result.append(emulator) }
+        }
+        return result
     }
 
     private static func installer(_ c: JobContext) -> ShelfInstaller {
@@ -252,26 +281,33 @@ public enum JobExecutor {
         var shortcuts: [Shortcut] = []
         var art: [ArtItem] = []
         var emulators: [Emulator] = []
+        let home = try await RemoteFiles(runner: r).home()
         for ref in refs {
             guard let game = Library.pick(ref, in: games), let system = c.catalog.system(ref.systemID),
                   let emulator = c.catalog.emulator(system.emulator(for: game.name)) else { continue }
             if !emulators.contains(emulator) { emulators.append(emulator) }
             progress(nil, "Preparing the emulator")
-            _ = try await Flatpaks.install(emulator.flatpak, runner: r)
+            if let flatpak = emulator.flatpak {
+                _ = try await Flatpaks.install(flatpak, runner: r)
+            } else if try await !AppImages.status(emulator, runner: r).isInstalled {
+                // Experimental, fora do Flathub: a instalação é pedida na tela de emuladores, não aqui.
+                throw DeckError.unexpectedState("Install %@ in Emulators first.", emulator.name)
+            }
             if !paths.isEmuDeck { _ = try await EmulatorSetup.applyProfiles(emulator, runner: r) }
             try await EmulatorSetup.allowShaderCache(emulator, runner: r)
-            if system.id == "switch" { try await SwitchKeys.send(config: c.config, runner: r) }
+            if ["switch", "switch2"].contains(system.id) { try await SwitchKeys.send(config: c.config, runner: r) }
             if emulator.id == "eden" { try await SwitchKeys.prepareEden(runner: r) }
+            if emulator.id == "lichii" { try await SwitchKeys.prepareLichii(runner: r) }
             // O flatpak só enxerga a pasta pessoal: no microSD o jogo não abriria. O Eden nem a pessoal.
-            if paths.roms.hasPrefix("/run/media/") || emulator.romAccess == true {
-                try await r.check("flatpak override --user --filesystem=\(Shell.quote(paths.roms)):ro \(Shell.quote(emulator.flatpak))")
+            if let flatpak = emulator.flatpak, paths.roms.hasPrefix("/run/media/") || emulator.romAccess == true {
+                try await r.check("flatpak override --user --filesystem=\(Shell.quote(paths.roms)):ro \(Shell.quote(flatpak))")
             }
             var core: String?
             if let name = system.core { core = try await EmulatorSetup.ensureCore(name, runner: r) }
             // Nome limpo na home; duas versões do mesmo jogo ficam com o nome longo para não se confundirem.
             let clean = ROMPlan.shortcutName(ref.title)
             let collides = games.contains { $0.systemID == ref.systemID && ROMPlan.displayName($0.name) != ref.title && ROMPlan.shortcutName(ROMPlan.displayName($0.name)) == clean }
-            if let s = Library.shortcut(name: collides ? ref.title : clean, romPath: game.path, system: system, catalog: c.catalog, corePath: core) {
+            if let s = Library.shortcut(name: collides ? ref.title : clean, romPath: game.path, system: system, catalog: c.catalog, corePath: core, home: home) {
                 shortcuts.append(s)
                 for (kind, file) in ref.art ?? [:] { art.append(ArtItem(appID: s.appID, names: [s.name, ref.title], kind: kind, file: file)) }
             }

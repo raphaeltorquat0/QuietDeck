@@ -18,6 +18,8 @@ public struct GameSystem: Codable, Hashable, Identifiable, Sendable {
     public var boot: String?
     /// Emulador por jogo, pelo Title ID no nome do arquivo: quando o padrão não roda aquele jogo.
     public var emulatorFor: [String: String]?
+    /// Só a pasta de origem identifica o sistema: a extensão é a de outro (Switch 2 usa `.nsp`/`.xci` do Switch).
+    public var folderOnly: Bool?
 
     /// Emulador deste arquivo: o do jogo, se houver, senão o do sistema.
     public func emulator(for fileName: String) -> String {
@@ -57,10 +59,21 @@ public struct EmulatorConfig: Codable, Hashable, Sendable {
     }
 }
 
+/// Emulador fora do Flathub: AppImage das releases do GitHub, instalado em `~/.local/share/quietdeck/emulators/<id>`.
+public struct AppImageSource: Codable, Hashable, Sendable {
+    public var repo: String
+    /// Nome exato do asset na release (`lichii-linux-x86_64.AppImage`).
+    public var asset: String
+    /// Tags `<prefixo><número>`; a maior é a mais nova.
+    public var tagPrefix: String
+}
+
 public struct Emulator: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
-    public var flatpak: String
+    /// `nil` quando o emulador vem de `appImage`.
+    public var flatpak: String?
+    public var appImage: AppImageSource?
     public var systems: [String]
     public var available: Bool?
     public var note: String?

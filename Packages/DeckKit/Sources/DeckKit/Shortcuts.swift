@@ -64,8 +64,11 @@ public enum ShortcutsFile {
         public var lastPlayed: Int64 = 0
         public var launchOptions = ""
 
-        /// Atalho criado pelo QuietDeck: `flatpak run` com uma ROM em `roms/`.
-        public var isEmulatorGame: Bool { exe == "\"/usr/bin/flatpak\"" && launchOptions.contains("/roms/") }
+        /// Atalho criado pelo QuietDeck: `flatpak run` ou o `run.sh` de um AppImage do QuietDeck, com uma ROM em `roms/`.
+        public var isEmulatorGame: Bool {
+            let launcher = exe == "\"/usr/bin/flatpak\"" || (exe.contains("/.local/share/quietdeck/emulators/") && exe.hasSuffix("/run.sh\""))
+            return launcher && launchOptions.contains("/roms/")
+        }
 
         /// Último argumento entre aspas, que é a ROM no comando que o QuietDeck monta.
         public var romPath: String? {
