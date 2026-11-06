@@ -209,3 +209,17 @@ Status: done, see `docs/perf/quiet-glass.md`. The idle home passed. No game lost
 
 Without a controller on the Deck the games stay on their title screens. The menu is opened through Steam's own API and checked with `GetOpenSideMenu()` and gamescope's input focus, since screenshots don't show it. Look at the Deck once during a run to confirm the menu is on screen.
 
+
+## Lichii (Switch 2)
+
+Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your own Switch 2 game, keys and firmware: none of them ever come from QuietDeck. `RealDeck` steps: `lichii-install` (installs the newest release, opens it off-screen for a few seconds, no shortcut and no Steam restart) and `lichii-remove`.
+
+- [x] AppImage `build-88` downloaded on the Deck: sha256 matches the release `digest`, FUSE mounts it, `ldd` finds every library, and `eden-cli -v` runs. LCD Deck, SteamOS 3.9.5, glibc 2.43, Mesa 26.2.0-devel RADV (VANGOGH), 2026-11-06, by hand in a temporary folder that was then deleted.
+- [x] With `./user` in the working folder, config and log go there and no `~/.local/share/eden`, `~/.config/eden` or `~/.cache/eden` appears. Same run.
+- [ ] `lichii-install` step: install through `AppImages.install`, Lichii detected as open by `APPIMAGE`, and `check_for_updates=false` plus the controller profile still in `qt-config.ini` after it closes. Not run: the Deck dropped off the network before the step.
+- [ ] Install, update, **Use <previous>** and both remove buttons from the app, checking `current` and `previous` under `~/.local/share/quietdeck/emulators/lichii`.
+- [ ] Send a game dropped from a folder named `switch2`, then **Add to Steam**. The shortcut runs `run.sh` with `-f -g "<rom>"` and opens in Game Mode with no update dialog.
+- [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
+- [ ] Suspend and resume with a game open. Audio in Game Mode.
+- [ ] Update to a newer build with a shortcut already created: the shortcut still opens, and the save is still there.
+- [ ] FPS, frametime (P50, P95, P99, 1% lows), APU power and memory per game, with the `docs/perf` protocol, comparing the upstream build with and without PGO. No measurement exists yet.

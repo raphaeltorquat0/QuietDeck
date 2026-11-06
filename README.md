@@ -23,7 +23,7 @@ QuietDeck is a native Swift/SwiftUI app that talks to your Deck with the Mac's o
 ## Features
 
 - **Overview:** SteamOS version, battery, internal and microSD storage, temperature, and Game or Desktop Mode, plus quick actions
-- **Emulators:** install, update and remove RetroArch, Dolphin, PCSX2, PPSSPP, Cemu, xemu, PrimeHack and more as user Flatpaks
+- **Emulators:** install, update and remove RetroArch, Dolphin, PCSX2, PPSSPP, Cemu, xemu, PrimeHack and more as user Flatpaks. The experimental Switch 2 emulator [Lichii](https://github.com/zortos293/Lichii) (GPL-3.0) is installed from its official AppImage releases, checked against the published SHA-256, with the previous version kept for rollback and its saves in a folder of their own. Games go in a folder named `switch2`
 - **Folders:** creates `~/Emulation` in the EmuDeck/ES-DE layout, and follows EmuDeck when it's already installed
 - **BIOS:** status per system, with imports checked against known hashes
 - **Library:** drop your own ROMs. QuietDeck detects the system, extracts archives, decompresses Switch `.nsz` and `.xcz` with your own `prod.keys`, installs your own Switch firmware dropped as a folder or `.zip`, installs Switch translations and mods in LayeredFS format, applies translation patches (`.ips`, `.ups`, `.bps`, `.xdelta`) dropped with the ROM, sends extracted PS4 game folders for shadPS4, signs RetroArch and Dolphin in to RetroAchievements with your account, converts disc images to CHD, creates `.m3u` playlists, skips duplicates by hash and resumes interrupted transfers
