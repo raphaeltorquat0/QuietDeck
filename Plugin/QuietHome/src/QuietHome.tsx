@@ -1,10 +1,10 @@
 import { Focusable, GamepadButton, Navigation } from '@decky/ui'
 import { useEffect, useRef, useState } from 'react'
-import { achievements, downloadPercent, Game, hue, loadTabs, openStore, play, playedLine, Tab, watchDetails } from './steam'
+import { achievements, downloadPercent, Game, hue, loadTabs, openStore, play, playedLine, storeHero, Tab, watchDetails } from './steam'
 
 const styles = `
 .qh { position: absolute; inset: 0; background: #0b0d10; color: #fff; overflow: hidden; overflow: clip; display: flex; flex-direction: column; }
-.qh-art { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.qh-art { position: absolute; top: 0; left: 0; right: 0; aspect-ratio: 1920 / 620; background-size: cover; background-position: center top; -webkit-mask-image: linear-gradient(#000 60%, transparent); }
 .qh-scrim { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,.86) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.3) 100%), linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.45) 55%, rgba(0,0,0,.45) 100%); }
 .qh-body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 56px 28px 44px; min-height: 0; min-width: 0; overflow: hidden; }
 .qh-info { flex: 1; min-height: 0; }
@@ -15,16 +15,15 @@ const styles = `
 .qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; }
 .qh-row::-webkit-scrollbar { display: none; }
 .qh-row::after { content: ''; flex: none; width: 16px; }
-.qh-tile { flex: none; width: 86px; height: 129px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
+.qh-tile { box-sizing: border-box; flex: none; width: 112px; height: 168px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
 .qh-tile.gpfocus, .qh-tile:focus { transform: scale(1.1); transform-origin: bottom center; outline: 3px solid #fff; box-shadow: 0 0 0 5px rgba(0,0,0,.85); z-index: 2; }
 .qh-tabs { display: flex; gap: 20px; margin-top: 6px; align-items: baseline; padding: 6px 14px; border-radius: 12px; background: rgba(14,16,20,.55); backdrop-filter: blur(18px) saturate(140%); }
-.qh-hints { margin-left: auto; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.72); }
 .qh-tab { font-size: 16px; font-weight: 500; color: rgba(255,255,255,.72); padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .qh-tab.on { color: #fff; font-weight: 600; border-bottom-color: #fff; }
-.qh-download { position: absolute; top: 9px; right: 300px; font-size: 14px; font-weight: 600; background: rgba(14,16,20,.55); backdrop-filter: blur(18px) saturate(140%); border-radius: 6px; padding: 3px 9px; }
-.qh-tile.qh-gen { align-items: flex-end; justify-content: flex-start; text-align: left; padding: 8px; font-size: 13px; font-weight: 700; line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,.5); overflow: hidden; }
-@supports not (backdrop-filter: blur(1px)) { .qh-tabs, .qh-download { background: #0e1014; } }
-@media (prefers-reduced-transparency: reduce) { .qh-tabs, .qh-download { background: #0e1014; backdrop-filter: none; } }
+.qh-download { margin-left: auto; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.72); }
+.qh-tile.qh-gen { align-items: flex-end; justify-content: flex-start; text-align: left; padding: 8px; font-size: 13px; font-weight: 700; line-height: 1.15; text-shadow: 0 1px 3px rgba(0,0,0,.5); overflow: hidden; overflow-wrap: anywhere; }
+@supports not (backdrop-filter: blur(1px)) { .qh-tabs { background: #0e1014; } }
+@media (prefers-reduced-transparency: reduce) { .qh-tabs { background: #0e1014; backdrop-filter: none; } }
 @media (prefers-reduced-motion: reduce) { .qh-tile { transition: none; } }
 `
 
@@ -125,18 +124,17 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
   return (
     <div className="qh" ref={root}>
       <style>{styles}</style>
-      {focused && focused.heroes.length > 0 && <div className="qh-art" style={{ backgroundImage: focused.heroes.map((u) => `url("${u}")`).join(', ') }} />}
-      {focused && focused.heroes.length === 0 && <div className="qh-art" style={{ background: gradient(focused.name) }} />}
+      {/* Camada que não carrega fica transparente; o gradiente no fundo cobre a falta de todas. */}
+      {focused && <div className="qh-art" style={{ backgroundImage: [...focused.heroes, storeHero(focused.appid)].filter(Boolean).map((u) => `url("${u}")`).concat(gradient(focused.name)).join(', ') }} />}
       <div className="qh-scrim" />
-      {download !== null && <div className="qh-download">↓ {download}%</div>}
-      <Focusable className="qh-body" onButtonDown={onButtonDown}>
+      <Focusable className="qh-body" onButtonDown={onButtonDown} actionDescriptionMap={{ [GamepadButton.BUMPER_LEFT]: 'Aba anterior', [GamepadButton.BUMPER_RIGHT]: 'Próxima aba' }}>
         <div className="qh-info">
           {focused && (
             <>
               <div className="qh-title">{focused.name}</div>
               <div className="qh-meta">{playedLine(focused)}</div>
               {ach && <div className="qh-meta">{ach}</div>}
-              <Focusable className="qh-play" onActivate={() => play(focused.appid)}>▶ Jogar</Focusable>
+              <Focusable className="qh-play" noFocusRing onActivate={() => play(focused.appid)}>▶ Jogar</Focusable>
             </>
           )}
         </div>
@@ -146,6 +144,7 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
               key={g.appid}
               navRef={i === 0 ? firstTile : undefined}
               focusable
+              noFocusRing
               className={g.portraits.length ? 'qh-tile' : 'qh-tile qh-gen'}
               // Camada que não carrega fica transparente; o gradiente por baixo cobre a falta de todas.
               style={{ backgroundImage: [...g.portraits.map((u) => `url("${u}")`), gradient(g.name)].join(', ') }}
@@ -156,11 +155,11 @@ export function QuietHome({ tabs: initial }: { tabs: Tab[] }) {
               {g.portraits.length ? null : g.name}
             </Focusable>
           ))}
-          <Focusable className="qh-tile" onActivate={openStore} onOKActionDescription="Abrir a Loja">Loja</Focusable>
+          <Focusable className="qh-tile" noFocusRing onActivate={openStore} onOKActionDescription="Abrir a Loja">Loja</Focusable>
         </Focusable>
         <div className="qh-tabs">
-          {tabs.map((t, i) => <div key={t.id} className={`qh-tab ${i === tabIndex ? 'on' : ''}`}>{t.title}</div>)}
-          <div className="qh-hints">L1 R1 Abas   ···  Menu rápido</div>
+          {tabs.map((t, i) => <div key={t.id} className={`qh-tab ${i === tabIndex ? 'on' : ''}`} onClick={() => change(i - tabIndex)}>{t.title}</div>)}
+          {download !== null && <div className="qh-download">↓ {download}%</div>}
         </div>
       </Focusable>
     </div>

@@ -111,6 +111,17 @@ export function achievements(appid: number): string | null {
 
 /** Os detalhes só chegam enquanto há registro, e as conquistas vêm depois deles: pedir uma vez só,
  *  cedo demais, perde a resposta. Repete até chegar, enquanto o jogo estiver em foco. */
+/** Hero da loja pelo nome com hash, que os jogos novos exigem: a URL sem hash dá erro. Os detalhes chegam pelo `watchDetails`. */
+export function storeHero(appid: number): string | null {
+  try {
+    const f = appDetailsStore.GetAppData?.(appid)?.details?.libraryAssets?.strHeroImage
+    return f ? `https://shared.steamstatic.com/store_item_assets/steam/apps/${appid}/${f}` : null
+  } catch (e) {
+    console.error('[Quiet Home] hero', appid, e)
+    return null
+  }
+}
+
 export function watchDetails(appid: number, changed: () => void): () => void {
   try {
     const registration = appDetailsStore.RegisterForAppData(appid, changed)
