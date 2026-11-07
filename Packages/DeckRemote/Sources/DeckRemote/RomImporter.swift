@@ -215,7 +215,7 @@ public enum ROMScanner {
         var folders: [ROMCandidate] = []
         func folderGame(_ url: URL) -> Bool {
             guard let system = GameFolder.system(url) else { return false }
-            folders.append(ROMCandidate(path: url.path, size: folderSize(url), detection: .system(system)))
+            folders.append(ROMCandidate(path: url.path, size: folderSize(GameFolder.content(url)), detection: .system(system)))
             // Patch `.pkg` que veio junto na raiz da pasta do disco também vale.
             let loose = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
             files += loose.filter { $0.pathExtension.lowercased() == "pkg" }
@@ -572,7 +572,8 @@ public struct RomImporter: Sendable {
         }
         let files = RemoteFiles(runner: runner)
         let home = try await files.home()
-        let entry = source.appendingPathComponent(entryName)
+        let content = GameFolder.content(source)
+        let entry = content.appendingPathComponent(entryName)
         progress(nil, "Checking for duplicates")
         let hash = try await LocalHash.compute(entry.path, algorithm: 256)
         if let existing = try await duplicate(of: hash, files: files, home: home) {
@@ -581,8 +582,8 @@ public struct RomImporter: Sendable {
         }
         let name = GameFolder.folderName(source)
         let directory = "\(paths.roms)/\(system.folder)"
-        try await files.ensureSpace(ROMScanner.folderSize(source), in: directory)
-        try await Transfer.upload(source, to: directory, named: name, config: config) { p in progress(p.percent, "Sending") }
+        try await files.ensureSpace(ROMScanner.folderSize(content), in: directory)
+        try await Transfer.upload(content, to: directory, named: name, config: config) { p in progress(p.percent, "Sending") }
         let remoteEntry = "\(directory)/\(name)/\(entryName)"
         let size = (try? FileManager.default.attributesOfItem(atPath: entry.path)[.size] as? Int64) ?? 0
         let verified = try await runner.run("stat -c %s \(Shell.quote(remoteEntry))").trimmed

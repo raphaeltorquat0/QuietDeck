@@ -247,7 +247,8 @@
   "readsArchives": false,
   "chd": null,
   "emulator": "lichii",
-  "folderOnly": true
+  "folderOnly": true,
+  "entry": "exefs/main"
  },
  {
   "id": "psx",

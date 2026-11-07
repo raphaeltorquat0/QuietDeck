@@ -51,4 +51,37 @@ import Testing
         #expect(ps4.entry == "eboot.bin" && ps4.folder == "ps4")
         #expect(catalog.emulator(ps4.emulator)?.launch == "run --command=shadps4 net.shadps4.shadPS4 -f true -g {rom}")
     }
+    /// `npdm` mínimo: `META`, ACID em 0x80 e a marca depois de 0x200 (Switch 1) ou 0x300 (Switch 2).
+    static func npdm(signature: Int) -> Data {
+        var d = [UInt8](repeating: 0, count: 0x80 + signature + 4)
+        d.replaceSubrange(0..<4, with: Array("META".utf8))
+        d[0x78] = 0x80
+        d.replaceSubrange((0x80 + signature)..<(0x84 + signature), with: Array("ACID".utf8))
+        return Data(d)
+    }
+
+    @Test func switch2DumpSendsNewestCompleteVersion() throws {
+        let fm = FileManager.default
+        let dump = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("Pokemon_Pokopia [0400A3A01EE4C000]")
+        func part(_ path: String, romfs: Bool, signature: Int = 0x300) throws {
+            let dir = dump.appendingPathComponent(path)
+            try fm.createDirectory(at: dir.appendingPathComponent("exefs"), withIntermediateDirectories: true)
+            if romfs { try fm.createDirectory(at: dir.appendingPathComponent("romfs"), withIntermediateDirectories: true) }
+            try Data().write(to: dir.appendingPathComponent("exefs/main"))
+            try Self.npdm(signature: signature).write(to: dir.appendingPathComponent("exefs/main.npdm"))
+        }
+        // Base só com o executável, como a do Pokopia.
+        try part("base", romfs: false)
+        #expect(GameFolder.system(dump) == nil)
+        try part("updates/65536", romfs: true)
+        try part("updates/327680", romfs: true)
+        try part("updates/999999_old", romfs: true)
+        #expect(GameFolder.system(dump) == "switch2")
+        #expect(GameFolder.content(dump).path.hasSuffix("/updates/327680"))
+        #expect(ROMPlan.displayName(GameFolder.folderName(dump)) == "Pokemon Pokopia")
+        // Dump do Switch 1 no mesmo formato não vira Switch 2.
+        try part("updates/327680", romfs: true, signature: 0x200)
+        #expect(GameFolder.content(dump).path.hasSuffix("/updates/65536"))
+        #expect(try Catalog.load().system("switch2")?.entry == "exefs/main")
+    }
 }
