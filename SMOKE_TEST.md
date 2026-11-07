@@ -225,7 +225,8 @@ Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your
 - [ ] A real Switch 2 game played past the title screen, with the physical controls.
 - [x] Battery, Pokopia idle on the language menu, 60 s per run: Lichii defaults 25.8 W from the battery (APU 15.1 W, at the 15 W cap); QuietDeck profile (#125) 11.1 W (APU 6.0 W), 30.0 frames/s. Same background speed at 30 and 60 frames/s. `lichii-profiles` step wrote the 6 keys from factory defaults and a second run wrote none. 2026-11-07.
 - [x] Battery in gameplay, first cave, played through a uinput clone of Steam's virtual pad: 15.7 W standing, 17.5 W walking, 30.0 frames/s. TDP 8 W through QuietTune drew 1.3 W more than 15 W in the same scene (twice each); QuietTune restored to defaults. 2026-11-07.
-- [ ] Battery outside the cave, and time to empty.
+- [x] Time to empty, Pokopia played nonstop by the uinput pad in the first area, screen at 65%: 80% to 15% in 66 minutes, about 18.4 W on average, 30.0 frames/s throughout. About 1% per minute, so about 1 h 40 min from full to empty. The energy used (about 20 Wh for 65%) says this battery holds about 31 Wh of its 40 Wh. Then the game was closed, the physical controls given back and the Deck suspended through `SteamClient.System.SuspendPC`. 2026-11-07.
+- [ ] Battery outside the first area.
 - [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
 - [ ] Suspend and resume with a game open. Audio in Game Mode.
 - [ ] Update to a newer build with a shortcut already created: the shortcut still opens, and the save is still there.
