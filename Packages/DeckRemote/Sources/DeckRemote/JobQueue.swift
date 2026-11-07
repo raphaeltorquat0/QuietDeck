@@ -25,12 +25,15 @@ public struct ArtItem: Codable, Hashable, Sendable {
     public var names: [String]
     public var kind: ArtKind
     public var file: String
+    /// SHA-256 das capas antigas que o próprio app desenhou para este jogo, sem a atual: só essas são trocadas no Deck.
+    public var replaces: [String]?
 
-    public init(appID: UInt32? = nil, names: [String] = [], kind: ArtKind, file: String) {
+    public init(appID: UInt32? = nil, names: [String] = [], kind: ArtKind, file: String, replaces: [String]? = nil) {
         self.appID = appID
         self.names = names
         self.kind = kind
         self.file = file
+        self.replaces = replaces
     }
 }
 

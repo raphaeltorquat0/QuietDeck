@@ -248,7 +248,7 @@ public enum JobExecutor {
     }
 
     /// Antes do reinício do Steam, para a capa já aparecer. Arte que o usuário escolheu (qualquer extensão)
-    /// não é trocada: só entra o que falta.
+    /// não é trocada: só entra o que falta, ou o que substitui uma capa que o próprio app desenhou.
     @discardableResult
     static func writeArt(_ art: [ArtItem], user: String, runner r: any CommandRunner) async throws -> Int {
         let dir = try await SteamControl(runner: r).configDirectory(user: user) + "/grid"
@@ -260,13 +260,23 @@ public enum JobExecutor {
             let path = try await SteamControl(runner: r).configDirectory(user: user) + "/shortcuts.vdf"
             for s in ShortcutsFile.existing(in: try ShortcutsFile.parse(try await files.read(path) ?? Data())) { ids[s.name] = s.appID }
         }
+        var remote: [String: String] = [:]
+        if art.contains(where: { $0.replaces != nil }) {
+            // `find` não falha sem PNG; o glob do `sha256sum *.png` falharia.
+            for line in try await r.check("find \(Shell.quote(dir)) -maxdepth 1 -name '*.png' -exec sha256sum {} +").stdout.split(whereSeparator: \.isNewline) {
+                let p = line.split(separator: " ", maxSplits: 1)
+                if p.count == 2 { remote[(String(p[1]) as NSString).lastPathComponent] = String(p[0]) }
+            }
+        }
         var written = 0
         for item in art {
             // Atalho que já existe manda: o id dele está no arquivo, e o calculado seria de um atalho novo.
             guard let appID = item.names.lazy.compactMap({ ids[$0] }).first ?? item.appID else { continue }
             let name = item.kind.fileName(appID: appID)
-            guard !existing.contains((name as NSString).deletingPathExtension) else { continue }
             let data = try Data(contentsOf: URL(fileURLWithPath: item.file))
+            if existing.contains((name as NSString).deletingPathExtension) {
+                guard let hash = remote[name], item.replaces?.contains(hash) == true else { continue }
+            }
             try await files.write(data, to: dir + "/" + name)
             written += 1
         }

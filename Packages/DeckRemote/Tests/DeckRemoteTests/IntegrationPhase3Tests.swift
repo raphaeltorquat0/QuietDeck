@@ -217,4 +217,20 @@ extension IntegrationTests {
         try await Sim.cycleSteam(r)
         #expect(try await Sim.shortcutNames(r).contains("Queue Game"))
     }
+
+    /// Capa antiga desenhada pelo app é trocada; arte do usuário, PNG ou não, fica.
+    @Test func artReplacesOnlyOurOldCovers() async throws {
+        let r = try await Sim.runner()
+        let grid = "/home/deck/.local/share/Steam/userdata/778/config/grid"
+        try await r.check("mkdir -p \(grid) && printf old > \(grid)/1p.png && printf user > \(grid)/2p.png && printf user > \(grid)/3p.jpg")
+        let old = String(try await r.check("printf old | sha256sum").stdout.prefix(64))
+        let new = try Sim.tempFile("new.png", bytes: 64)
+        let items = [1, 2, 3, 4].map { ArtItem(appID: UInt32($0), kind: .portrait, file: new.path, replaces: [old]) }
+        #expect(try await JobExecutor.writeArt(items, user: "778", runner: r) == 2)
+        let sums = try await r.check("cd \(grid) && sha256sum 1p.png 2p.png 3p.jpg 4p.png").stdout
+        let newSum = String(try await r.check("sha256sum \(grid)/4p.png").stdout.prefix(64))
+        #expect(sums.contains("\(newSum)  1p.png"))
+        #expect(!sums.contains("\(newSum)  2p.png") && !sums.contains("\(newSum)  3p.jpg"))
+        try await r.check("rm -rf /home/deck/.local/share/Steam/userdata/778")
+    }
 }

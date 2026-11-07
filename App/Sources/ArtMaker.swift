@@ -35,6 +35,17 @@ enum ArtMaker {
         return art
     }
 
+    /// Versão do desenho da capa. Mudou o desenho, mude aqui: a anterior entra em `previous` e é trocada no Deck.
+    static let generated = "generated-3"
+    static let previous = ["generated", "generated-2"]
+
+    /// SHA-256 das capas desenhadas por versões anteriores, que ainda estão no cache: só elas podem ser trocadas.
+    static func previousHashes(titles: [String], kind: ArtKind) -> [String] {
+        titles.flatMap { t in previous.map { folder.appending(path: name(t, kind, $0)) } }
+            .compactMap { try? Data(contentsOf: $0) }
+            .map { SHA256.hash(data: $0).map { String(format: "%02x", $0) }.joined() }
+    }
+
     static var folder: URL {
         let dir = Paths.covers.appending(path: "steam")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -63,55 +74,56 @@ enum ArtMaker {
         let renderer = ImageRenderer(content: GeneratedArt(title: title, system: system, kind: kind).frame(width: size.width, height: size.height))
         renderer.scale = 1
         guard let png = pngData(renderer.nsImage) else { return nil }
-        let file = folder.appending(path: name(title, kind, "generated-2"))
+        let file = folder.appending(path: name(title, kind, generated))
         return (try? png.write(to: file)) != nil ? file : nil
     }
 }
 
-/// Capa desenhada: cor da família do console, símbolo grande ao fundo e o título em destaque.
+/// Capa desenhada: faixa com o console, como a caixa do jogo, e o título grande, legível no tile da home.
+/// Cada título desloca um pouco a cor da família, para a fileira não virar blocos iguais.
 /// O hero não leva texto, porque o Steam escreve o nome por cima.
 struct GeneratedArt: View {
     var title: String
     var system: GameSystem
     var kind: ArtKind
 
-    private var palette: (Color, Color) {
+    private var hue: Double {
         let id = system.id
-        if ["nes", "snes", "n64", "gb", "gbc", "gba", "nds", "n3ds", "gc", "wii", "wiiu", "switch"].contains(id) {
-            return (Color(red: 0.86, green: 0.16, blue: 0.22), Color(red: 0.32, green: 0.05, blue: 0.16))
-        }
-        if id.hasPrefix("ps") { return (Color(red: 0.10, green: 0.36, blue: 0.85), Color(red: 0.04, green: 0.10, blue: 0.32)) }
-        if ["genesis", "mastersystem", "gamegear", "sega32x", "segacd", "saturn", "dreamcast"].contains(id) {
-            return (Color(red: 0.05, green: 0.55, blue: 0.75), Color(red: 0.02, green: 0.16, blue: 0.30))
-        }
-        if id == "xbox" { return (Color(red: 0.25, green: 0.65, blue: 0.20), Color(red: 0.05, green: 0.20, blue: 0.08)) }
-        return (Color(red: 0.95, green: 0.55, blue: 0.15), Color(red: 0.35, green: 0.12, blue: 0.05))
+        let base: Double = if ["nes", "snes", "n64", "gb", "gbc", "gba", "nds", "n3ds", "gc", "wii", "wiiu", "switch", "switch2"].contains(id) { 0.98 }
+            else if id.hasPrefix("ps") { 0.61 }
+            else if ["genesis", "mastersystem", "gamegear", "sega32x", "segacd", "saturn", "dreamcast"].contains(id) { 0.54 }
+            else if id == "xbox" { 0.33 } else { 0.08 }
+        let shift = Double(Array(SHA256.hash(data: Data(title.lowercased().utf8)))[0]) / 255 - 0.5
+        return (base + shift * 0.16 + 1).truncatingRemainder(dividingBy: 1)
     }
 
     var body: some View {
-        let (light, dark) = palette
+        let accent = Color(hue: hue, saturation: 0.78, brightness: 0.86)
         let tall = kind == .portrait
-        ZStack(alignment: tall ? .topLeading : .leading) {
-            LinearGradient(colors: [light, dark], startPoint: .topLeading, endPoint: .bottomTrailing)
-            RadialGradient(colors: [.white.opacity(0.18), .clear], center: .topLeading, startRadius: 0, endRadius: tall ? 700 : 900)
+        ZStack(alignment: .topLeading) {
+            LinearGradient(colors: [Color(hue: hue, saturation: 0.7, brightness: 0.36), Color(hue: hue, saturation: 0.6, brightness: 0.1)],
+                           startPoint: .top, endPoint: .bottom)
             Image(systemName: system.symbol)
                 .resizable().scaledToFit()
-                .foregroundStyle(.white.opacity(0.12))
-                .frame(width: tall ? 460 : 520)
-                .rotationEffect(.degrees(-12))
+                .foregroundStyle(accent.opacity(0.22))
+                .frame(width: tall ? 520 : 560)
+                .rotationEffect(.degrees(-14))
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .offset(x: tall ? 90 : 60, y: tall ? 80 : 120)
+                .offset(x: tall ? 150 : 120, y: tall ? 130 : 200)
             if kind != .hero {
-                VStack(alignment: .leading, spacing: tall ? 18 : 10) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(verbatim: system.name.uppercased())
-                        .font(.system(size: tall ? 26 : 22, weight: .semibold)).tracking(3)
-                        .foregroundStyle(.white.opacity(0.75))
+                        .font(.system(size: tall ? 34 : 28, weight: .black)).tracking(2)
+                        .foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.6)
+                        .padding(.horizontal, tall ? 40 : 36).frame(maxWidth: .infinity, minHeight: tall ? 84 : 64, alignment: .leading)
+                        .background(accent)
                     Text(verbatim: ROMPlan.shortcutName(title))
-                        .font(.system(size: tall ? 64 : 52, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white).lineLimit(tall ? 5 : 2).minimumScaleFactor(0.5)
-                        .shadow(color: .black.opacity(0.35), radius: 8, y: 4)
+                        .font(.system(size: tall ? 104 : 72, weight: .heavy))
+                        .foregroundStyle(.white).lineLimit(tall ? 5 : 3).minimumScaleFactor(0.4)
+                        .shadow(color: .black.opacity(0.5), radius: 10, y: 4)
+                        .padding(tall ? 40 : 36)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: tall ? .topLeading : .leading)
                 }
-                .padding(tall ? 48 : 44)
             }
         }
         .environment(\.colorScheme, .dark)

@@ -253,7 +253,8 @@ final class AppModel {
             var items: [ArtItem] = []
             for (title, system) in games {
                 for (kind, file) in await ArtMaker.prepare(title: title, system: system) {
-                    items.append(ArtItem(names: [ROMPlan.shortcutName(title), title], kind: kind, file: file))
+                    let names = [ROMPlan.shortcutName(title), title]
+                    items.append(ArtItem(names: names, kind: kind, file: file, replaces: ArtMaker.previousHashes(titles: names, kind: kind)))
                 }
             }
             // Arte antes da limpeza: se a limpeza reiniciar o Steam, as capas já aparecem.
