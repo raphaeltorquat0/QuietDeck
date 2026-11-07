@@ -35,15 +35,17 @@ enum ArtMaker {
         return art
     }
 
-    /// Versão do desenho da capa. Mudou o desenho, mude aqui: a anterior entra em `previous` e é trocada no Deck.
+    /// Versão do desenho da capa. Mudou o desenho, mude aqui e guarde a anterior em `drawn`.
     static let generated = "generated-3"
-    static let previous = ["generated", "generated-2"]
+    static let drawn = ["generated", "generated-2", generated]
 
-    /// SHA-256 das capas desenhadas por versões anteriores, que ainda estão no cache: só elas podem ser trocadas.
-    static func previousHashes(titles: [String], kind: ArtKind) -> [String] {
-        titles.flatMap { t in previous.map { folder.appending(path: name(t, kind, $0)) } }
-            .compactMap { try? Data(contentsOf: $0) }
-            .map { SHA256.hash(data: $0).map { String(format: "%02x", $0) }.joined() }
+    /// SHA-256 das capas que o app desenhou para este jogo, em qualquer versão, menos a que vai agora:
+    /// só essas são trocadas no Deck, pela capa nova ou pela foto do SteamGridDB.
+    static func drawnHashes(titles: [String], kind: ArtKind, except file: String) -> [String] {
+        let hash = { (d: Data) in SHA256.hash(data: d).map { String(format: "%02x", $0) }.joined() }
+        let current = (try? Data(contentsOf: URL(fileURLWithPath: file))).map(hash)
+        return titles.flatMap { t in drawn.map { folder.appending(path: name(t, kind, $0)) } }
+            .compactMap { try? Data(contentsOf: $0) }.map(hash).filter { $0 != current }
     }
 
     static var folder: URL {
