@@ -12,7 +12,8 @@ const styles = `
 .qh-meta { font-size: 16px; font-weight: 500; line-height: 1.35; }
 .qh-play { display: inline-flex; margin-top: 12px; background: #fff; color: #0b0d10; border-radius: 8px; padding: 7px 20px; font-size: 16px; font-weight: 600; }
 .qh-play.gpfocus, .qh-play:focus { outline: 3px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 7px rgba(0,0,0,.85); }
-.qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; }
+.qh-row { display: flex; gap: 10px; align-items: flex-end; padding: 22px 14px 10px; margin: 0 -14px; overflow-x: auto; overflow-y: hidden; flex: none; scroll-padding-inline: 20px; }
+/* O tile em foco cresce 10%: sem margem na rolagem, o da ponta encostava na borda e era cortado. */
 .qh-row::-webkit-scrollbar { display: none; }
 .qh-row::after { content: ''; flex: none; width: 16px; }
 .qh-tile { box-sizing: border-box; flex: none; width: 112px; height: 168px; border-radius: 6px; background: #20242b center/cover; transition: transform 120ms ease-out; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 500; }
