@@ -230,6 +230,7 @@ Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your
 - [x] New drawn covers (#126): opening the app with the Deck online wrote cover, banner and background for Pokemon Pokopia and NintendoSwitch2 WelcomeTour (they had none) and replaced the old drawn covers of Wind Waker and Links Awakening; user art untouched. 2026-11-07.
 - [ ] The new covers on screen after a Steam restart. Steam only rereads `grid/` for an existing shortcut when it restarts, and the restart was not run.
 - [ ] Eden and RetroArch profiles (#128) written by Add to Steam, and the Eden close dialog and RetroArch L3+R3 menu checked on screen.
+- [x] More Lichii A/B, language menu with the profile, 60 s, two alternating rounds, 2026-11-07: `cpu_accuracy` Unsafe and `fast_gpu_time` Normal made no difference (12.2 to 12.4 W against 12.4 W); a GPU clock cap of 800 or 600 MHz through QuietTune saved about 0.3 W (10.3 W against 10.6 W), within noise. All at 30.0 frames/s. Keys and QuietTune back to defaults.
 - [ ] Battery outside the first area.
 - [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
 - [ ] Suspend and resume with a game open. Audio in Game Mode.
