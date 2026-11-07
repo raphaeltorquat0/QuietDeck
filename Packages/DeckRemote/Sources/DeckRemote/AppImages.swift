@@ -89,15 +89,17 @@ public enum AppImages {
         return !(try await runner.check(runningScript(root: root(home: home, id: emulator.id))).trimmed.isEmpty)
     }
 
-    static func launcherScript(asset: String) -> String {
-        """
+    /// Abre o AppImage que estiver em `current`, sem fixar o nome: a versão anterior pode ter outro asset
+    /// (a troca para o build com PGO), e voltar para ela não pode quebrar o atalho.
+    static let launcherScript = """
         #!/bin/sh
         # QuietDeck: abre o emulador com a pasta portátil ./user. Regravado a cada instalação.
         cd "$(dirname "$0")" || exit 1
-        exec ./current/\(asset) "$@"
+        for f in ./current/*.AppImage; do exec "$f" "$@"; done
+        echo "QuietDeck: nenhum AppImage em current" >&2
+        exit 1
 
         """
-    }
 
     /// Baixa em `versions/.<tag>.partial` (retoma depois de queda), confere o sha256 e só então renomeia
     /// para `versions/<tag>`. A troca de `current` é um `mv -T` de symlink, atômica; o anterior vira `previous`.
@@ -149,7 +151,7 @@ public enum AppImages {
         let r = try await runner.run(RemoteCommand(installScript(root: dir, tag: tag, asset: asset, sha256: sha), timeout: 3600), onOutput: onOutput)
         if r.exitCode == 41 { throw DeckError.unexpectedState("The download of %@ didn't match its published checksum. Nothing was changed.", tag) }
         guard r.ok else { throw DeckError.commandFailed(command: "install \(emulator.id) \(tag)", result: r) }
-        try await files.write(Data(launcherScript(asset: source.asset).utf8), to: dir + "/run.sh")
+        try await files.write(Data(launcherScript.utf8), to: dir + "/run.sh")
         try await runner.check("chmod 755 \(Shell.quote(dir + "/run.sh"))")
         guard try await status(emulator, runner: runner).current == tag else {
             throw DeckError.unexpectedState("Installing %@ finished, but the active version didn't change.", emulator.name)

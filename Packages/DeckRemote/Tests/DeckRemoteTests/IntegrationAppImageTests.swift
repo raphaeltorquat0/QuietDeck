@@ -4,7 +4,7 @@ import DeckKit
 @testable import DeckRemote
 
 extension IntegrationTests {
-    static let appImageName = "lichii-linux-x86_64.AppImage"
+    static let appImageName = "lichii-linux-x86_64-pgo.AppImage"
     static let appImageRoot = "/home/deck/.local/share/quietdeck/emulators/lichii"
 
     /// AppImage falso servido por `file://`: como o runtime de verdade, põe `APPIMAGE=<caminho real>` no
@@ -23,6 +23,24 @@ extension IntegrationTests {
         let sha = try await r.check("sha256sum \(file) | cut -d' ' -f1").trimmed
         let size = try #require(Int64(try await r.check("stat -c %s \(file)").trimmed))
         return GitHubAsset(name: Self.appImageName, browser_download_url: "file://" + file, digest: "sha256:" + sha, size: size)
+    }
+
+    /// Instalação anterior com o asset sem PGO: atualizar para o PGO e voltar mantém o atalho abrindo.
+    @Test func appImageRollbackAcrossAssetNames() async throws {
+        let r = try await Sim.runner()
+        let lichii = try #require(try Catalog.load().emulator("lichii"))
+        let root = Self.appImageRoot
+        let old = "\(root)/versions/build-0/lichii-linux-x86_64.AppImage"
+        try await r.check("rm -rf \(root) /tmp/li ~/.cache/qd-lichii-args && mkdir -p ~/.cache \(root)/versions/build-0 \(root)/user")
+        try await r.check(RemoteCommand("cat > \(old) && chmod 755 \(old) && ln -s versions/build-0 \(root)/current",
+                                        stdin: Data("#!/bin/sh\necho old > \"$HOME/.cache/qd-lichii-args\"\n".utf8), timeout: 30))
+        #expect(try await AppImages.install(lichii, tag: "build-1", asset: try await fakeAppImage(1, runner: r), runner: r) == .done)
+        try await r.check("\(root)/run.sh -f")
+        #expect(try await r.check("head -1 ~/.cache/qd-lichii-args").trimmed == root)
+        #expect(try await AppImages.rollback(lichii, runner: r) == .done)
+        try await r.check("\(root)/run.sh -f")
+        #expect(try await r.check("cat ~/.cache/qd-lichii-args").trimmed == "old")
+        try await r.check("rm -rf \(root) /tmp/li ~/.cache/qd-lichii-args")
     }
 
     @Test func appImageInstallUpdateRollbackAndRemove() async throws {

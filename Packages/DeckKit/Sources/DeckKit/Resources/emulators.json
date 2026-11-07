@@ -727,7 +727,7 @@
   "name": "Lichii",
   "appImage": {
    "repo": "zortos293/Lichii",
-   "asset": "lichii-linux-x86_64.AppImage",
+   "asset": "lichii-linux-x86_64-pgo.AppImage",
    "tagPrefix": "build-"
   },
   "systems": [

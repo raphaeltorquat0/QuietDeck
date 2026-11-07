@@ -173,7 +173,7 @@ import Testing
         let s1 = try #require(catalog.system("switch"))
         #expect(!ROMPlan.mustDecompress(system: s2, fileExtension: "nsz"))
         #expect(ROMPlan.mustDecompress(system: s1, fileExtension: "NSZ"))
-        #expect(catalog.emulator(s2.emulator)?.appImage?.asset == "lichii-linux-x86_64.AppImage")
+        #expect(catalog.emulator(s2.emulator)?.appImage?.asset == "lichii-linux-x86_64-pgo.AppImage")
         #expect(catalog.emulator("lichii")?.flatpak == nil)
     }
 

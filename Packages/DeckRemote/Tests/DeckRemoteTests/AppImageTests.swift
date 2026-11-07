@@ -9,7 +9,7 @@ import DeckKit
     let digest = "sha256:" + String(repeating: "ab", count: 32)
 
     func release(_ tag: String, _ assets: [GitHubAsset]) -> GitHubRelease { GitHubRelease(tag_name: tag, prerelease: true, assets: assets) }
-    func asset(_ name: String = "lichii-linux-x86_64.AppImage", digest: String? = nil) -> GitHubAsset {
+    func asset(_ name: String = "lichii-linux-x86_64-pgo.AppImage", digest: String? = nil) -> GitHubAsset {
         GitHubAsset(name: name, browser_download_url: "https://example.invalid/\(name)", digest: digest, size: 10)
     }
 
@@ -19,7 +19,7 @@ import DeckKit
         let releases = [
             release("build-88", [asset(digest: digest)]),
             release("build-100", [asset(digest: nil)]),
-            release("build-90", [asset("lichii-linux-x86_64-pgo.AppImage", digest: digest)]),
+            release("build-90", [asset("lichii-linux-x86_64.AppImage", digest: digest)]),
             release("nightly", [asset(digest: digest)]),
             release("build-9", [asset(digest: digest)]),
         ]
@@ -73,8 +73,8 @@ import DeckKit
     }
 
     @Test func launcherEntersItsFolder() {
-        let script = AppImages.launcherScript(asset: "lichii-linux-x86_64.AppImage")
+        let script = AppImages.launcherScript
         #expect(script.hasPrefix("#!/bin/sh\n"))
-        #expect(script.contains("cd \"$(dirname \"$0\")\" || exit 1\nexec ./current/lichii-linux-x86_64.AppImage \"$@\""))
+        #expect(script.contains("cd \"$(dirname \"$0\")\" || exit 1\nfor f in ./current/*.AppImage; do exec \"$f\" \"$@\"; done"))
     }
 }
