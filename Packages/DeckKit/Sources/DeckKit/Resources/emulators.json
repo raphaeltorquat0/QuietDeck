@@ -885,6 +885,108 @@
       "value": "false"
      }
     ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "confirmStop\\default=true",
+    "entries": [
+     {
+      "section": "UI",
+      "key": "confirmStop\\default",
+      "value": "false"
+     },
+     {
+      "section": "UI",
+      "key": "confirmStop",
+      "value": "2"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "resolution_setup\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "resolution_setup\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "resolution_setup",
+      "value": "2"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "scaling_filter\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "scaling_filter\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "scaling_filter",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "anti_aliasing\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "anti_aliasing\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "anti_aliasing",
+      "value": "0"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "gpu_accuracy\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "gpu_accuracy\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "gpu_accuracy",
+      "value": "0"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "frame_pacing_mode\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "frame_pacing_mode\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "frame_pacing_mode",
+      "value": "1"
+     }
+    ]
    }
   ],
   "saves": [

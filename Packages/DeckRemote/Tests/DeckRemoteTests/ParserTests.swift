@@ -293,6 +293,22 @@ import Testing
         #expect(EmulatorSetup.patched(profiles[0], current: nil) == nil)
     }
 
+    /// Bateria no Lichii (#125): cada chave só muda enquanto está no padrão de fábrica do Lichii.
+    @Test func lichiiBatteryProfileKeepsUserChoice() throws {
+        let profiles = try #require(try Catalog.load().emulator("lichii")?.profiles).filter { $0.untouched?.hasSuffix("\\default=true") == true }
+        #expect(profiles.count == 6)
+        let factory = "[UI]\nconfirmStop\\default=true\nconfirmStop=0\n[Renderer]\ngpu_accuracy\\default=true\ngpu_accuracy=1\nframe_pacing_mode\\default=false\nframe_pacing_mode=4\n"
+        var current = factory
+        for profile in profiles { current = EmulatorSetup.patched(profile, current: current) ?? current }
+        #expect(current.contains("confirmStop\\default=false\nconfirmStop=2"))
+        #expect(current.contains("gpu_accuracy\\default=false\ngpu_accuracy=0"))
+        // 120 escolhido pelo usuário fica.
+        #expect(current.contains("frame_pacing_mode=4") && !current.contains("frame_pacing_mode=1"))
+        // Chave ausente espera o Lichii criar o arquivo completo; aplicado, não reaplica.
+        #expect(!current.contains("resolution_setup"))
+        for profile in profiles { #expect(EmulatorSetup.patched(profile, current: current) == nil) }
+    }
+
     @Test func videoProfileOnlyFillsMissingKeys() throws {
         let profiles = try #require(try Catalog.load().emulator("dolphin")?.profiles)
         let gfx = try #require(profiles.first { $0.path.hasSuffix("GFX.ini") })
