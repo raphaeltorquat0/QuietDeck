@@ -244,8 +244,9 @@ public enum QuietTheme {
                       "\(overrides)/movies/deck_startup.webm", "\(overrides)/movies/oled_startup.webm"]
         try await runner.check("cd ~ && rm -rf " + remove.map(Shell.quote).joined(separator: " "))
         // O Steam gera uma miniatura ao lado do vídeo; sem o vídeo, ela e as pastas vazias não têm dono.
-        let leftovers = ["\(overrides)/movies", "\(overrides)/screensavers"].map(Shell.quote).joined(separator: " ")
-        try await runner.check("cd ~ && rm -f \(overrides)/movies/deck_startup.jpg \(overrides)/movies/oled_startup.jpg && for d in \(leftovers); do if [ -d \"$d\" ]; then rmdir -p --ignore-fail-on-non-empty \"$d\"; fi; done")
+        // Sem `rmdir -p`: ele sobe até `.steam/root`, que é link simbólico, e falha com "Not a directory".
+        let leftovers = ["\(overrides)/movies", "\(overrides)/screensavers", overrides].map(Shell.quote).joined(separator: " ")
+        try await runner.check("cd ~ && rm -f \(overrides)/movies/deck_startup.jpg \(overrides)/movies/oled_startup.jpg && for d in \(leftovers); do if [ -d \"$d\" ]; then rmdir --ignore-fail-on-non-empty \"$d\"; fi; done")
         try await runner.check("cd ~ && if [ -e \(tabMaster).quietdeck-backup ]; then mv -f \(tabMaster).quietdeck-backup \(tabMaster); fi")
         _ = try await SteamControl(runner: runner).removeShortcuts(names: [storeTitle], user: user)
         try await runner.check("rm -f ~/\(snapshot)")
