@@ -262,9 +262,11 @@ public enum ROMScanner {
 extension ROMScanner {
     static func folderSize(_ url: URL) -> Int64 {
         var total: Int64 = 0
-        let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey])
+        let walker = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey])
         while let item = walker?.nextObject() as? URL {
-            total += Int64((try? item.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+            // Só arquivos: no Linux a pasta também tem tamanho (4096).
+            guard let values = try? item.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey]), values.isRegularFile == true else { continue }
+            total += Int64(values.fileSize ?? 0)
         }
         return total
     }

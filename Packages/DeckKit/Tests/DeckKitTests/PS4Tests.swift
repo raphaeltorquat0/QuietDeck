@@ -21,7 +21,13 @@ import Testing
         let count = entries.count + (number == nil ? 0 : 1)
         while keys.count % 4 != 0 { keys.append(0) }
         let keyStart = 20 + count * 16
-        return Data([0, 0x50, 0x53, 0x46] + le(0x101, 4) + le(keyStart, 4) + le(keyStart + keys.count, 4) + le(count, 4) + index + keys + values)
+        // Em partes: o Swift 6.1 do CI (Linux) desiste de inferir a soma inteira.
+        var header: [UInt8] = [0, 0x50, 0x53, 0x46]
+        header += le(0x101, 4)
+        header += le(keyStart, 4)
+        header += le(keyStart + keys.count, 4)
+        header += le(count, 4)
+        return Data(header + index + keys + values)
     }
 
     @Test func readsTitleAndID() {

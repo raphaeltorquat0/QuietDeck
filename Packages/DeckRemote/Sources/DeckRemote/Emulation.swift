@@ -222,8 +222,8 @@ public enum ConfigPatcher {
         // No macOS número e booleano chegam como NSNumber; só o tipo CF separa `true` de `1`.
         if let n = node as? NSNumber { return CFGetTypeID(n) == CFBooleanGetTypeID() ? (n.boolValue ? "true" : "false") : n.stringValue }
         #else
-        if let b = node as? Bool { return b ? "true" : "false" }
-        if let n = node as? NSNumber { return n.stringValue }
+        // No Linux `as? Bool` aceita o número 1; o booleano do JSON é o NSNumber de tipo `c`.
+        if let n = node as? NSNumber { return String(cString: n.objCType) == "c" ? (n.boolValue ? "true" : "false") : n.stringValue }
         #endif
         return nil
     }
