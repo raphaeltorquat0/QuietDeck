@@ -133,6 +133,8 @@ public struct SteamControl: Sendable {
         let files = RemoteFiles(runner: runner)
         let path = try await configDirectory(user: user) + "/shortcuts.vdf"
         guard try change(try ShortcutsFile.parse(try await files.read(path) ?? Data())) != nil else { return nil }
+        // Gravar exige reiniciar o Steam, o que fecharia o jogo: quem pode esperar (Add to Steam) espera antes.
+        if try await gameOpen() { throw DeckError.unexpectedState("A game is open on the Deck. Close it and try again.") }
 
         let mode = try await sessionMode()
         let wasRunning = try await running()

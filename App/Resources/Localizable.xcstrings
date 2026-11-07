@@ -301,6 +301,16 @@
     }
    }
   },
+  "A game is open on the Deck. Close it and try again.": {
+   "localizations": {
+    "pt-BR": {
+     "stringUnit": {
+      "state": "translated",
+      "value": "Há um jogo aberto no Deck. Feche-o e tente de novo."
+     }
+    }
+   }
+  },
   "A pairing request from this Mac is on the Deck's screen. Choose **Approve**.": {
    "localizations": {
     "pt-BR": {

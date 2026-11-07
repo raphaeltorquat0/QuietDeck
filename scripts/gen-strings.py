@@ -442,6 +442,7 @@ PT = {
 "%@ isn't there anymore. Check that the network share is mounted.": "%@ não está mais lá. Confira se o compartilhamento de rede está montado.",
 "No game found inside %@.": "Nenhum jogo encontrado em %@.",
 "The file on the Deck has %@ bytes instead of %@. Try again.": "O arquivo no Deck tem %@ bytes em vez de %@. Tente de novo.",
+"A game is open on the Deck. Close it and try again.": "Há um jogo aberto no Deck. Feche-o e tente de novo.",
 "Steam didn't stop, so shortcuts.vdf was left untouched.": "O Steam não parou, então shortcuts.vdf ficou intacto.",
 "Steam came back before the write, so shortcuts.vdf was left untouched.": "O Steam voltou antes da gravação, então shortcuts.vdf ficou intacto.",
 "shortcuts.vdf on the Deck doesn't match what was written.": "O shortcuts.vdf no Deck não confere com o que foi gravado.",

@@ -76,6 +76,17 @@ import DeckKit
         #expect(!r.executed.contains { $0.contains("systemctl") || $0.contains("pkill") })
     }
 
+    /// Remover reinicia o Steam: com jogo aberto, recusa antes de parar qualquer coisa.
+    @Test func removingWithGameOpenNeverStopsSteam() async throws {
+        let root = try ShortcutsFile.merge([Shortcut(name: "G", exe: "/x", startDir: "/")], into: ShortcutsFile.emptyFile).root
+        let r = ReplayRunner(["printf %s \"$HOME\"": CommandResult(stdout: "/home/deck"),
+                              Self.read(Self.shortcuts): CommandResult(stdout: VDF.serialize(root).base64EncodedString()),
+                              SteamControl.isGameOpen: CommandResult(stdout: "")])
+        let error = await #expect(throws: DeckError.self) { try await SteamControl(runner: r).removeShortcuts(names: ["G"], user: "1") }
+        #expect(error == .unexpectedState("A game is open on the Deck. Close it and try again."))
+        #expect(!r.executed.contains { $0.contains("systemctl") || $0.contains("pkill") })
+    }
+
     static let shortcuts = "/home/deck/.local/share/Steam/userdata/1/config/shortcuts.vdf"
     static func read(_ path: String) -> String { "if [ -e '\(path)' ]; then base64 -w0 '\(path)'; else exit 3; fi" }
 
