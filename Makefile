@@ -52,8 +52,8 @@ romm-server: shelf-harness ## Sobe um RomM real, com MariaDB, sobre o acervo de 
 	Harness/romm/seed.sh
 
 shelf-mount: ## Monta o compartilhamento SMB do servidor de acervo em /tmp/qd-smb
-	mkdir -p /tmp/qd-smb
 	-umount /tmp/qd-smb 2>/dev/null
+	mkdir -p /tmp/qd-smb
 	@for i in $$(seq 1 20); do mount_smbfs '//acervo:acervo-password@127.0.0.1:4445/acervo' /tmp/qd-smb && exit 0; sleep 0.5; done; exit 1
 
 integration: harness source-servers romm-server shelf-mount ## Roda os testes de integração contra o Deck simulado
