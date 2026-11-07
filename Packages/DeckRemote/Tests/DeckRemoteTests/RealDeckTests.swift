@@ -241,6 +241,41 @@ enum Real {
         #expect(s.isEmulatorGame)
     }
 
+    /// Dumps de Switch 2 extraídos (`QUIETDECK_REAL_DUMPS`, separados por `|`) pelo caminho do botão Enviar:
+    /// varredura, envio e atalho. Não apaga nada; o jogo fica para o usuário.
+    @Test(.enabled(if: Real.step("switch2-dump"))) func switch2Dump() async throws {
+        let r = Real.runner
+        let catalog = try Catalog.load()
+        let urls = (Real.env["QUIETDECK_REAL_DUMPS"] ?? "").split(separator: "|").map { URL(fileURLWithPath: String($0)) }
+        let found = ROMScanner.scan(urls, catalog: catalog)
+        #expect(found.count == urls.count && found.allSatisfy { $0.detection == .system("switch2") })
+        let context = JobContext(runner: r, config: Real.config, catalog: catalog, password: nil, workRoot: FileManager.default.temporaryDirectory) {}
+        var refs: [GameRef] = []
+        for c in found {
+            let url = URL(fileURLWithPath: c.path)
+            try await JobExecutor.run(Job(deckID: UUID(), title: "Enviar", action: .importROM(localPath: c.path, systemID: "switch2", sdMount: nil)), context: context) { p, detail in
+                if let detail { print(url.lastPathComponent, p.map(String.init) ?? "", detail) }
+            }
+            refs.append(GameRef(systemID: "switch2", title: ROMPlan.displayName(GameFolder.folderName(url))))
+        }
+        try await JobExecutor.run(Job(deckID: UUID(), title: "Atalho", action: .addToSteam(user: try await Real.user(), games: refs, sdMount: nil)), context: context) { _, detail in if let detail { print(detail) } }
+        let names = try await Real.names()
+        for ref in refs { #expect(names.contains(ROMPlan.shortcutName(ref.title)), "\(ref.title)") }
+    }
+
+    /// Perfis do Lichii (controle, bateria) pelo mesmo código do atalho. Não mexe em emulador aberto.
+    @Test(.enabled(if: Real.step("lichii-profiles"))) func lichiiProfiles() async throws {
+        let r = Real.runner
+        let lichii = try #require(try Catalog.load().emulator("lichii"))
+        #expect(try await !EmulatorSetup.isOpen(lichii, runner: r), "Feche o jogo antes")
+        print("perfis gravados:", try await EmulatorSetup.applyProfiles(lichii, runner: r))
+        let ini = try await r.check("cat \(AppImages.root(home: try await RemoteFiles(runner: r).home(), id: "lichii"))/user/config/qt-config.ini").stdout
+        for line in ["confirmStop=2", "resolution_setup=2", "scaling_filter=1", "anti_aliasing=0", "gpu_accuracy=0", "frame_pacing_mode=1"] {
+            #expect(ini.contains("\n" + line + "\n"), "\(line)")
+        }
+        #expect(try await EmulatorSetup.applyProfiles(lichii, runner: r) == 0)
+    }
+
     @Test(.enabled(if: Real.step("lichii-clean"))) func lichiiClean() async throws {
         let r = Real.runner
         let paths = try await Emulation.paths(r, sdMount: nil)
