@@ -32,6 +32,19 @@
   "saves": [
    ".var/app/org.libretro.RetroArch/config/retroarch/saves",
    ".var/app/org.libretro.RetroArch/config/retroarch/states"
+  ],
+  "profiles": [
+   {
+    "path": ".var/app/org.libretro.RetroArch/config/retroarch/retroarch.cfg",
+    "format": "cfg",
+    "untouched": "input_menu_toggle_gamepad_combo = \"0\"",
+    "entries": [
+     {
+      "key": "input_menu_toggle_gamepad_combo",
+      "value": "2"
+     }
+    ]
+   }
   ]
  },
  {
@@ -655,6 +668,57 @@
       "value": "0"
      }
     ]
+   },
+   {
+    "path": ".var/app/dev.eden_emu.eden/config/eden/qt-config.ini",
+    "format": "qt",
+    "untouched": "confirmStop\\default=true",
+    "entries": [
+     {
+      "section": "UI",
+      "key": "confirmStop\\default",
+      "value": "false"
+     },
+     {
+      "section": "UI",
+      "key": "confirmStop",
+      "value": "2"
+     }
+    ]
+   },
+   {
+    "path": ".var/app/dev.eden_emu.eden/config/eden/qt-config.ini",
+    "format": "qt",
+    "untouched": "check_for_updates\\default=true",
+    "entries": [
+     {
+      "section": "UI",
+      "key": "check_for_updates\\default",
+      "value": "false"
+     },
+     {
+      "section": "UI",
+      "key": "check_for_updates",
+      "value": "false"
+     }
+    ]
+   },
+   {
+    "path": ".var/app/dev.eden_emu.eden/config/eden/qt-config.ini",
+    "format": "qt",
+    "untouched": "theme=colorful\n",
+    "entries": [
+     {
+      "section": "UI",
+      "key": "theme\\default",
+      "value": "false"
+     },
+     {
+      "section": "UI",
+      "key": "theme",
+      "value": "colorful_dark"
+     }
+    ]
    }
   ]
  },
@@ -985,6 +1049,23 @@
       "section": "Renderer",
       "key": "frame_pacing_mode",
       "value": "1"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "theme=colorful\n",
+    "entries": [
+     {
+      "section": "UI",
+      "key": "theme\\default",
+      "value": "false"
+     },
+     {
+      "section": "UI",
+      "key": "theme",
+      "value": "colorful_dark"
      }
     ]
    }

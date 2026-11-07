@@ -309,6 +309,23 @@ import Testing
         for profile in profiles { #expect(EmulatorSetup.patched(profile, current: current) == nil) }
     }
 
+    /// Sem mouse no Game Mode: Eden fecha sem perguntar e não busca atualização; tema escuro só sobre o claro de fábrica.
+    @Test func edenAndRetroArchProfilesForGameMode() throws {
+        let catalog = try Catalog.load()
+        let eden = try #require(catalog.emulator("eden")?.profiles).filter { $0.path.hasSuffix("qt-config.ini") && $0.entries.allSatisfy { $0.section == "UI" } }
+        let factory = "[UI]\nconfirmStop\\default=true\nconfirmStop=0\ncheck_for_updates\\default=true\ncheck_for_updates=true\ntheme\\default=false\ntheme=colorful\n"
+        var current = factory
+        for profile in eden { current = EmulatorSetup.patched(profile, current: current) ?? current }
+        #expect(current.contains("confirmStop=2") && current.contains("check_for_updates=false") && current.contains("theme=colorful_dark"))
+        for profile in eden { #expect(EmulatorSetup.patched(profile, current: current) == nil) }
+        // Tema escolhido pelo usuário fica.
+        let theme = try #require(eden.first { $0.entries.contains { $0.key == "theme" } })
+        #expect(EmulatorSetup.patched(theme, current: "[UI]\ntheme\\default=false\ntheme=default\n") == nil)
+        let retroarch = try #require(catalog.emulator("retroarch")?.profiles?.first { $0.entries.contains { $0.key == "input_menu_toggle_gamepad_combo" } })
+        #expect(try #require(EmulatorSetup.patched(retroarch, current: "input_menu_toggle_gamepad_combo = \"0\"\n")).contains("input_menu_toggle_gamepad_combo = \"2\""))
+        #expect(EmulatorSetup.patched(retroarch, current: "input_menu_toggle_gamepad_combo = \"4\"\n") == nil)
+    }
+
     @Test func videoProfileOnlyFillsMissingKeys() throws {
         let profiles = try #require(try Catalog.load().emulator("dolphin")?.profiles)
         let gfx = try #require(profiles.first { $0.path.hasSuffix("GFX.ini") })
