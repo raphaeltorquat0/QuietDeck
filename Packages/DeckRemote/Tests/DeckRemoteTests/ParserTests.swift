@@ -363,6 +363,15 @@ import Testing
         #expect(s.launchOptions == "run --command=shadps4 net.shadps4.shadPS4 -f true -g \"/home/deck/Emulation/roms/ps4/Bloodborne [CUSA00900]/eboot.bin\"")
     }
 
+    /// `.nup` é um arquivo só, com base e updates: fica solto em `switch2/`, ao lado dos dumps em pasta.
+    @Test func nupIsASwitch2Game() throws {
+        let catalog = try Catalog.load()
+        let listing = "26\tswitch2/Zelda OoT [0400486024DEC000][v131072].nup\n5\tswitch2/Pokopia/exefs/main\n3\tswitch2/Pokopia/romfs/a.bin\n"
+        let games = Library.parse(listing, systems: catalog.systems, paths: EmulationPaths(root: "/home/deck/Emulation"))
+        #expect(games.map(\.name) == ["Zelda OoT [0400486024DEC000][v131072].nup", "Pokopia"])
+        #expect(ROMPlan.displayName(games[0].name) == "Zelda OoT")
+    }
+
     @Test func partialUploadsAreNotGames() throws {
         let catalog = try Catalog.load()
         let listing = "10\tswitch/.quietdeck-partial/RE0.nsp\n10\tswitch/.RE0.nsp.kaKvW8\n10\tswitch/RE0.nsp\n"

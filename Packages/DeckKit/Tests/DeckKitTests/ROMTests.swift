@@ -42,6 +42,7 @@ import Testing
 
     @Test func headers() {
         #expect(ROMDetector.header(Data([0x4E, 0x45, 0x53, 0x1A]), size: 16) == "nes")
+        #expect(ROMDetector.header(Data([0x4E, 0x55, 0x50, 0x01, 0, 0, 0, 0]), size: 16) == "switch2")
         #expect(ROMDetector.header(Data([0x80, 0x37, 0x12, 0x40]), size: 16) == "n64")
         #expect(ROMDetector.header(blank(0x200, patch: [(4, [0x24, 0xFF, 0xAE, 0x51, 0x69, 0x9A, 0xA2, 0x21])]), size: 0) == "gba")
         #expect(ROMDetector.header(blank(0x200, patch: [(0x104, [0xCE, 0xED, 0x66, 0x66]), (0x143, [0xC0])]), size: 0) == "gbc")
