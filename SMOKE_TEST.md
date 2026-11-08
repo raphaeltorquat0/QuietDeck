@@ -232,6 +232,7 @@ Experimental emulator from GitHub releases, see DECISIONS #116 to #122. Use your
 - [ ] Eden and RetroArch profiles (#128) written by Add to Steam, and the Eden close dialog and RetroArch L3+R3 menu checked on screen.
 - [x] More Lichii A/B, language menu with the profile, 60 s, two alternating rounds, 2026-11-07: `cpu_accuracy` Unsafe and `fast_gpu_time` Normal made no difference (12.2 to 12.4 W against 12.4 W); a GPU clock cap of 800 or 600 MHz through QuietTune saved about 0.3 W (10.3 W against 10.6 W), within noise. All at 30.0 frames/s. Keys and QuietTune back to defaults.
 - [x] PGO build (#129): `lichii-install` installed `build-117` `lichii-linux-x86_64-pgo.AppImage` (sha256 checked), kept `build-93` as previous, wrote the new `run.sh` and the dark theme; the Steam shortcut opened Pokopia to the title screen through it. Title screen, 60 s: 12.0 and 11.9 W with PGO against 12.4 W on `build-93`, Lichii CPU 212% against 220%. 2026-11-07.
+- [x] `.nup` (#130): Ocarina of Time, 25.6 GB, sent by `switch2-dump` and added to Steam; opened from the shortcut to the title menu on the second try (the first hung on the intro video and needed `kill -9`). Title menu: 9.7 frames/s, GPU 99%. 2026-11-07.
 - [ ] Battery outside the first area.
 - [ ] Buttons by physical touch: A, B, X, Y follow the letters printed on the Deck. Sticks and triggers.
 - [ ] Suspend and resume with a game open. Audio in Game Mode.
