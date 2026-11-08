@@ -726,9 +726,9 @@
   "id": "lichii",
   "name": "Lichii",
   "appImage": {
-   "repo": "zortos293/Lichii",
-   "asset": "lichii-linux-x86_64-pgo.AppImage",
-   "tagPrefix": "build-"
+   "repo": "raphaeltorquat0/Lichii",
+   "asset": "lichii-linux-x86_64-deck.AppImage",
+   "tagPrefix": "deck-"
   },
   "systems": [
    "switch2"
@@ -1066,6 +1066,45 @@
       "section": "UI",
       "key": "theme",
       "value": "colorful_dark"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/qt-config.ini",
+    "format": "qt",
+    "untouched": "oot_anti_aliasing\\default=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "oot_anti_aliasing\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "oot_anti_aliasing",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "path": ".local/share/quietdeck/emulators/lichii/user/config/custom/0400486024DEC000.ini",
+    "format": "qt",
+    "untouched": "resolution_setup\\use_global=true",
+    "entries": [
+     {
+      "section": "Renderer",
+      "key": "resolution_setup\\use_global",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "resolution_setup\\default",
+      "value": "false"
+     },
+     {
+      "section": "Renderer",
+      "key": "resolution_setup",
+      "value": "1"
      }
     ]
    }

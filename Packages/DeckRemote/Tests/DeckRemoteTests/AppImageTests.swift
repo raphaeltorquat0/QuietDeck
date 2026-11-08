@@ -9,7 +9,7 @@ import DeckKit
     let digest = "sha256:" + String(repeating: "ab", count: 32)
 
     func release(_ tag: String, _ assets: [GitHubAsset]) -> GitHubRelease { GitHubRelease(tag_name: tag, prerelease: true, assets: assets) }
-    func asset(_ name: String = "lichii-linux-x86_64-pgo.AppImage", digest: String? = nil) -> GitHubAsset {
+    func asset(_ name: String = "lichii-linux-x86_64-deck.AppImage", digest: String? = nil) -> GitHubAsset {
         GitHubAsset(name: name, browser_download_url: "https://example.invalid/\(name)", digest: digest, size: 10)
     }
 
@@ -17,14 +17,14 @@ import DeckKit
     @Test func latestIsHighestVerifiableBuild() throws {
         let source = try #require(lichii.appImage)
         let releases = [
-            release("build-88", [asset(digest: digest)]),
-            release("build-100", [asset(digest: nil)]),
-            release("build-90", [asset("lichii-linux-x86_64.AppImage", digest: digest)]),
+            release("deck-88", [asset(digest: digest)]),
+            release("deck-100", [asset(digest: nil)]),
+            release("deck-90", [asset("lichii-linux-x86_64-pgo.AppImage", digest: digest)]),
             release("nightly", [asset(digest: digest)]),
-            release("build-9", [asset(digest: digest)]),
+            release("deck-9", [asset(digest: digest)]),
         ]
         let picked = try #require(AppImages.latest(releases, source: source))
-        #expect(picked.tag == "build-88")
+        #expect(picked.tag == "deck-88")
         #expect(AppImages.latest([], source: source) == nil)
     }
 

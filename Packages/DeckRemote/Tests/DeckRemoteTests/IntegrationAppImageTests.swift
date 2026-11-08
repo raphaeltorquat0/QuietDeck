@@ -4,7 +4,7 @@ import DeckKit
 @testable import DeckRemote
 
 extension IntegrationTests {
-    static let appImageName = "lichii-linux-x86_64-pgo.AppImage"
+    static let appImageName = "lichii-linux-x86_64-deck.AppImage"
     static let appImageRoot = "/home/deck/.local/share/quietdeck/emulators/lichii"
 
     /// AppImage falso servido por `file://`: como o runtime de verdade, põe `APPIMAGE=<caminho real>` no

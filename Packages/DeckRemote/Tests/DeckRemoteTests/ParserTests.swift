@@ -296,12 +296,14 @@ import Testing
     /// Bateria no Lichii (#125): cada chave só muda enquanto está no padrão de fábrica do Lichii.
     @Test func lichiiBatteryProfileKeepsUserChoice() throws {
         let profiles = try #require(try Catalog.load().emulator("lichii")?.profiles).filter { $0.untouched?.hasSuffix("\\default=true") == true }
-        #expect(profiles.count == 6)
-        let factory = "[UI]\nconfirmStop\\default=true\nconfirmStop=0\n[Renderer]\ngpu_accuracy\\default=true\ngpu_accuracy=1\nframe_pacing_mode\\default=false\nframe_pacing_mode=4\n"
+        #expect(profiles.count == 7)
+        let factory = "[UI]\nconfirmStop\\default=true\nconfirmStop=0\n[Renderer]\ngpu_accuracy\\default=true\ngpu_accuracy=1\nframe_pacing_mode\\default=false\nframe_pacing_mode=4\noot_anti_aliasing\\default=true\noot_anti_aliasing=0\n"
         var current = factory
         for profile in profiles { current = EmulatorSetup.patched(profile, current: current) ?? current }
         #expect(current.contains("confirmStop\\default=false\nconfirmStop=2"))
         #expect(current.contains("gpu_accuracy\\default=false\ngpu_accuracy=0"))
+        // Ocarina: a rede de anti-aliasing do jogo sai (#131); quem a quiser de volta escolhe no Lichii.
+        #expect(current.contains("oot_anti_aliasing\\default=false\noot_anti_aliasing=1"))
         // 120 escolhido pelo usuário fica.
         #expect(current.contains("frame_pacing_mode=4") && !current.contains("frame_pacing_mode=1"))
         // Chave ausente espera o Lichii criar o arquivo completo; aplicado, não reaplica.
@@ -324,6 +326,20 @@ import Testing
         let retroarch = try #require(catalog.emulator("retroarch")?.profiles?.first { $0.entries.contains { $0.key == "input_menu_toggle_gamepad_combo" } })
         #expect(try #require(EmulatorSetup.patched(retroarch, current: "input_menu_toggle_gamepad_combo = \"0\"\n")).contains("input_menu_toggle_gamepad_combo = \"2\""))
         #expect(EmulatorSetup.patched(retroarch, current: "input_menu_toggle_gamepad_combo = \"4\"\n") == nil)
+    }
+
+    /// Ocarina of Time (0400486024DEC000) rende mais a 1/2 da resolução, e só ele: o perfil vai no ini por jogo do
+    /// Lichii, criado se não existir, e respeita quem já escolheu um valor por jogo (`use_global=false`).
+    @Test func ocarinaGetsHalfResolutionOnlyForItself() throws {
+        let profiles = try #require(try Catalog.load().emulator("lichii")?.profiles)
+        let oot = try #require(profiles.first { $0.path.hasSuffix("custom/0400486024DEC000.ini") })
+        let fresh = try #require(EmulatorSetup.patched(oot, current: nil))
+        #expect(fresh.contains("[Renderer]\nresolution_setup\\use_global=false\nresolution_setup\\default=false\nresolution_setup=1"))
+        let lichii = "[Renderer]\nresolution_setup\\use_global=true\nuse_vsync\\use_global=true\n"
+        let patched = try #require(EmulatorSetup.patched(oot, current: lichii))
+        #expect(patched.contains("resolution_setup\\use_global=false") && patched.contains("resolution_setup=1") && patched.contains("use_vsync\\use_global=true"))
+        #expect(EmulatorSetup.patched(oot, current: "[Renderer]\nresolution_setup\\use_global=false\nresolution_setup\\default=false\nresolution_setup=3\n") == nil)
+        #expect(EmulatorSetup.patched(oot, current: patched) == nil)
     }
 
     @Test func videoProfileOnlyFillsMissingKeys() throws {

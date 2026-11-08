@@ -62,7 +62,7 @@ public struct EmulatorConfig: Codable, Hashable, Sendable {
 /// Emulador fora do Flathub: AppImage das releases do GitHub, instalado em `~/.local/share/quietdeck/emulators/<id>`.
 public struct AppImageSource: Codable, Hashable, Sendable {
     public var repo: String
-    /// Nome exato do asset na release (`lichii-linux-x86_64-pgo.AppImage`).
+    /// Nome exato do asset na release (`lichii-linux-x86_64-deck.AppImage`).
     public var asset: String
     /// Tags `<prefixo><número>`; a maior é a mais nova.
     public var tagPrefix: String
