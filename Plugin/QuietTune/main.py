@@ -38,6 +38,7 @@ class Plugin:
                 "supported": True,
                 "limits": performance.LIMITS[board],
                 "state": performance.read_state(),
+                "charge_limit": performance.read_charge_limit(),
                 "custom": os.path.exists(self._settings()),
             }
 
@@ -45,6 +46,9 @@ class Plugin:
 
     async def set_profile(self, profile):
         return self._run(lambda: performance.set_profile(self._settings(), profile))
+
+    async def set_charge_limit(self, level):
+        return self._run(lambda: performance.set_charge_limit(level))
 
     async def reapply(self):
         return self._run(lambda: performance.reapply(self._settings()))

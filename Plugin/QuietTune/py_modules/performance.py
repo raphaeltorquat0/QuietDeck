@@ -1,5 +1,6 @@
-"""Desempenho do QuietTune: TDP e clock de GPU por sysfs, só nos limites de fábrica.
-Sem overclock e sem voltagem: `apply` só escreve `power*_cap`, o nível e as linhas `s 0`, `s 1` e `c`.
+"""Desempenho do QuietTune: TDP, clock de GPU e limite de carga da bateria por sysfs, só nos limites de fábrica.
+Sem overclock e sem voltagem: `apply` só escreve `power*_cap`, o nível e as linhas `s 0`, `s 1` e `c`;
+`set_charge_limit` só escreve `max_battery_charge_level`.
 Roda como root pelo Decky. O app chama `uninstall` direto, porque apagar a pasta não dispara `_uninstall`."""
 import glob
 import json
@@ -47,6 +48,33 @@ def _device(root):
 
 def _caps(root):
     return [c for name in ("power1_cap", "power2_cap") for c in _one(root, f"sys/class/drm/card?/device/hwmon/hwmon*/{name}")[:1]]
+
+
+def _hwmon(root):
+    """O hwmon da placa (`steamdeck_hwmon`), onde fica o limite de carga da bateria."""
+    for name in _one(root, "sys/class/hwmon/hwmon*/name"):
+        if _read(name) == "steamdeck_hwmon":
+            return name.rsplit("/", 1)[0]
+    raise PerformanceError("não achei steamdeck_hwmon")
+
+
+def read_charge_limit(root="/"):
+    """0 é sem limite; senão, o percentual em que a bateria para de carregar."""
+    return int(_read(f"{_hwmon(root)}/max_battery_charge_level"))
+
+
+def set_charge_limit(level, root="/"):
+    """Para medir na tomada: um limite abaixo da carga atual segura a bateria onde está.
+    Não persiste: reiniciar o Deck volta a carregar. 0 tira o limite; o piso de 20 evita um Deck preso descarregado."""
+    if type(level) is not int or not (level == 0 or 20 <= level <= 100):
+        raise ValueError(f"limite de carga fora da faixa 0, 20 a 100: {level!r}")
+    if model(root) is None:
+        raise PerformanceError("aparelho sem suporte")
+    _write(f"{_hwmon(root)}/max_battery_charge_level", level)
+    state = read_charge_limit(root)
+    if state != level:
+        raise PerformanceError(f"o sysfs não aceitou o limite de carga: {state}")
+    return state
 
 
 def model(root="/"):
@@ -211,6 +239,13 @@ def reapply(settings, root="/"):
 
 
 def uninstall(settings, root="/"):
+    # O limite de carga não fica no arquivo de perfil: qualquer valor que não seja 0 num Deck com o plugin é nosso.
+    if model(root) is not None:
+        try:
+            if read_charge_limit(root) != 0:
+                set_charge_limit(0, root)
+        except (OSError, PerformanceError) as error:
+            log.error("limite de carga não restaurado: %s", error)
     if not os.path.exists(settings):
         return
     if model(root) is not None:

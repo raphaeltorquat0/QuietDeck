@@ -27,6 +27,9 @@ class FakeDeck:
         self.put("sys/class/drm/card0/device/pp_od_clk_voltage", OD.format(low, high))
         for cap in ("power1_cap", "power2_cap"):
             self.put(f"sys/class/drm/card0/device/hwmon/hwmon6/{cap}", tdp * 1_000_000)
+        os.makedirs(os.path.join(self.root, "sys/class/hwmon/hwmon3"))
+        self.put("sys/class/hwmon/hwmon3/name", "steamdeck_hwmon")
+        self.put("sys/class/hwmon/hwmon3/max_battery_charge_level", 0)
 
     def put(self, relative, value):
         with open(os.path.join(self.root, relative), "w") as f:
@@ -222,6 +225,44 @@ def test_reapply_resets_broken_profile():
     assert with_kernel(deck, lambda: p.reapply(deck.settings, deck.root)) is False
     assert not os.path.exists(deck.settings) and p.read_state(deck.root)["gpu"] == "auto"
     deck.close()
+
+
+def test_charge_limit_writes_one_file_within_range():
+    deck = FakeDeck()
+    limit = "sys/class/hwmon/hwmon3/max_battery_charge_level"
+    before = deck.writes()
+    assert p.set_charge_limit(50, deck.root) == 50 and deck.get(limit) == "50"
+    assert p.set_charge_limit(0, deck.root) == 0 and deck.get(limit) == "0"
+    for bad in (10, 101, -1, "50", 50.0, True, None):
+        try:
+            p.set_charge_limit(bad, deck.root)
+            assert False, bad
+        except ValueError:
+            pass
+    assert deck.get(limit) == "0" and deck.writes() == before
+    # O sysfs que não muda o valor é falha, não sucesso silencioso.
+    original = p._write
+    p._write = lambda path, value: None
+    try:
+        p.set_charge_limit(80, deck.root)
+        assert False
+    except p.PerformanceError:
+        pass
+    finally:
+        p._write = original
+    # Desinstalar tira o limite mesmo sem perfil de TDP gravado.
+    p.set_charge_limit(50, deck.root)
+    p.uninstall(deck.settings, deck.root)
+    assert deck.get(limit) == "0"
+    deck.close()
+    other = FakeDeck(vendor="Acme")
+    try:
+        p.set_charge_limit(50, other.root)
+        assert False
+    except p.PerformanceError:
+        pass
+    assert other.get(limit) == "0"
+    other.close()
 
 
 def test_uninstall_restores_only_if_we_changed_something():
